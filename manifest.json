@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "Canvas Wallpaper",
+  "version": "1.0.0",
+  "description": "A drawable wallpaper for your New Tab page. Toggle drawing mode on to sketch, toggle it off to keep it as your background.",
+  "permissions": ["storage"],
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  }
+}
