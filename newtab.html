@@ -1,51 +1,135 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>New Tab</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <canvas id="wallpaper"></canvas>
+<head>
+  <meta charset="UTF-8">
+  <title>New Tab</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="wallpaper"></canvas>
 
-    <button id="toggleBtn" title="Toggle drawing mode">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="lucide lucide-pencil-line-icon lucide-pencil-line">
-        <path d="M13 21h8" />
-        <path d="m15 5 4 4" />
-        <path
-          d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" />
-      </svg>
+  <button id="toggleBtn" title="Start drawing">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/>
+    </svg>
+  </button>
+
+  <!-- Phase 1: 7 draw tools only. No Selection, no Eraser yet (Phase 2). -->
+  <div id="toolSelector" class="hidden">
+    <button class="toolsel active" data-tool="selection" title="Select (V)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l7 16 2-7 7-2-16-7z"/></svg>
     </button>
+    <button class="toolsel" data-tool="rectangle" title="Rectangle (R)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="6" width="16" height="12" rx="1"/></svg>
+    </button>
+    <button class="toolsel" data-tool="diamond" title="Diamond (D)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3 21 12 12 21 3 12Z"/></svg>
+    </button>
+    <button class="toolsel" data-tool="ellipse" title="Ellipse (O)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="12" rx="9" ry="7"/></svg>
+    </button>
+    <button class="toolsel" data-tool="arrow" title="Arrow (A)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19 19 5"/><path d="M9 5h10v10"/></svg>
+    </button>
+    <button class="toolsel" data-tool="line" title="Line (L)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20 20 4"/></svg>
+    </button>
+    <button class="toolsel" data-tool="freedraw" title="Draw (P)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+    </button>
+    <button class="toolsel" data-tool="text" title="Text (T)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M12 6v14"/><path d="M9 20h6"/></svg>
+    </button>
+    <button class="toolsel" data-tool="eraser" title="Eraser (E)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H8.5L3 14.5a1.5 1.5 0 0 1 0-2.12l8.38-8.38a1.5 1.5 0 0 1 2.12 0l6 6a1.5 1.5 0 0 1 0 2.12L13 19"/><path d="M14 20H8.5"/></svg>
+    </button>
+    <div class="divider"></div>
+    <button class="iconbtn" id="doneBtn" title="Exit drawing mode">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
+    </button>
+  </div>
 
-    <div id="toolbar" class="hidden">
-      <label
-        >Color
-        <input type="color" id="colorPicker" value="#f2f2f7" />
-      </label>
-      <label
-        >Size
-        <input type="range" id="sizePicker" min="1" max="40" value="4" />
-      </label>
-      <label
-        >Background
-        <input type="color" id="bgPicker" value="#14141a" />
-      </label>
-      <button class="toolbtn" id="eraserBtn">Eraser</button>
-      <button class="toolbtn" id="undoBtn">Undo</button>
-      <button class="toolbtn" id="clearBtn">Clear</button>
-      <button class="toolbtn" id="doneBtn">Done</button>
+  <!-- Phase 1 style panel: stroke, fill, width, opacity, wallpaper background. No fill-style/stroke-style/roughness pickers (deferred). -->
+  <div id="stylePanel" class="hidden">
+
+    <div class="panelSection">
+      <div class="panelLabel">Stroke</div>
+      <div class="group">
+        <button class="swatch preset stroke active" data-color="#1e1e1e" style="background:#1e1e1e"></button>
+        <button class="swatch preset stroke" data-color="#e03131" style="background:#e03131"></button>
+        <button class="swatch preset stroke" data-color="#2f9e44" style="background:#2f9e44"></button>
+        <button class="swatch preset stroke" data-color="#1971c2" style="background:#1971c2"></button>
+        <button class="swatch preset stroke" data-color="#f08c00" style="background:#f08c00"></button>
+        <label class="swatch custom" title="Custom stroke color">
+          <input type="color" id="colorPicker" value="#1e1e1e">
+        </label>
+      </div>
     </div>
 
-    <script src="newtab.js"></script>
-  </body>
+    <div class="panelSection">
+      <div class="panelLabel">Fill</div>
+      <div class="group">
+        <button class="swatch preset fill transparent active" data-color="transparent" title="Transparent"></button>
+        <button class="swatch preset fill" data-color="#ffc9c9" style="background:#ffc9c9"></button>
+        <button class="swatch preset fill" data-color="#b2f2bb" style="background:#b2f2bb"></button>
+        <button class="swatch preset fill" data-color="#a5d8ff" style="background:#a5d8ff"></button>
+        <button class="swatch preset fill" data-color="#ffec99" style="background:#ffec99"></button>
+        <label class="swatch custom" title="Custom fill color">
+          <input type="color" id="fillPicker" value="#ffc9c9">
+        </label>
+      </div>
+    </div>
+
+    <div class="panelSection">
+      <div class="panelLabel">Stroke width</div>
+      <div class="group">
+        <button class="sizebtn active" data-size="1.5" title="Thin"><span class="dot" style="width:6px;height:6px"></span></button>
+        <button class="sizebtn" data-size="3" title="Bold"><span class="dot" style="width:10px;height:10px"></span></button>
+        <button class="sizebtn" data-size="5.5" title="Extra bold"><span class="dot" style="width:16px;height:16px"></span></button>
+      </div>
+    </div>
+
+    <div class="panelSection">
+      <div class="panelLabel">Opacity</div>
+      <input type="range" id="opacityPicker" min="10" max="100" value="100">
+    </div>
+
+    <div class="panelSection">
+      <div class="panelLabel">Selected</div>
+      <div class="group">
+        <button class="iconbtn" id="duplicateBtn" title="Duplicate selected">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="1"/><path d="M5 15V5a1 1 0 0 1 1-1h10"/></svg>
+        </button>
+        <button class="iconbtn" id="deleteBtn" title="Delete selected">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="panelSection">
+      <div class="panelLabel">Wallpaper background</div>
+      <div class="group">
+        <button class="swatch preset bg active" data-color="#14141a" style="background:#14141a"></button>
+        <button class="swatch preset bg" data-color="#f5f5f5" style="background:#f5f5f5"></button>
+        <button class="swatch preset bg" data-color="#0b3d91" style="background:#0b3d91"></button>
+        <button class="swatch preset bg" data-color="#2d6a4f" style="background:#2d6a4f"></button>
+        <label class="swatch custom" title="Custom wallpaper background">
+          <input type="color" id="bgPicker" value="#14141a">
+        </label>
+      </div>
+    </div>
+
+    <div class="panelSection">
+      <button class="iconbtn wide" id="clearBtn" title="Clear all">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        Clear all
+      </button>
+    </div>
+
+  </div>
+
+  <!-- rough.js: local bundle, hand-drawn sketchy rendering for shapes -->
+  <script src="rough.js"></script>
+  <script src="newtab.js"></script>
+</body>
 </html>
