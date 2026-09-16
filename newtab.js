@@ -1,17 +1,26 @@
-// PHASE 4 — multi-select: marquee-drag, shift-click, and extending Phase 3's
-// resize/rotate math from a single element to a shared selection.
-// Still no group/lock (Phase 5) or undo/redo (Phase 6).
-//
-// Design note: resize/rotate are now written ONCE, generically, operating on
-// a "selection frame" (a bbox + angle + center) rather than a single element.
-// A single selected element is just a frame with angle = that element's own
-// angle — so Phase 3's exact behavior falls out of this as a special case
-// rather than being duplicated code.
-//
-// Simplification worth knowing: when more than one element is selected, the
-// shared frame is always an axis-aligned bounding box (angle 0), even if the
-// individual members are rotated — it doesn't try to compute one "group tilt."
-// Each member still keeps its own angle and rotates/orbits correctly.
+// PHASE 7 — polish pass. No new visible capability, mostly fixing sharp edges:
+//   1. Layer order: Send Backward / Send Forward.
+//   2. Keyboard audit: Escape to deselect, Ctrl/Cmd+D duplicate, Ctrl/Cmd+A
+//      select-all, Ctrl/Cmd+[ / Ctrl/Cmd+] for layer order.
+//   3. Two real latent bugs, found by re-checking the interaction state
+//      machine against every exit path:
+//        - Selection-tool drags (move/resize/rotate/marquee) never captured
+//          the pointer, so releasing the mouse outside the canvas could
+//          leave drag state permanently stuck. Fixed with setPointerCapture.
+//        - Switching tools or exiting drawing mode mid-drag (e.g. pressing a
+//          shortcut key while the mouse button is still held) left
+//          dragOrigin/resizeState/rotateState non-null forever, silently
+//          breaking all future selection interaction. Fixed with a single
+//          clearInteractionState() called on every tool/mode change.
+//      Also: a small guard so dragging the rotate handle very close to the
+//      shape's own center (where angle-from-center math is numerically
+//      unstable) freezes the angle instead of jumping erratically.
+//   4. Performance: rough.js regenerates a shape's sketchy geometry from
+//      scratch on every single draw call by default. With a busy canvas,
+//      redrawing everything on every pointermove made that cost add up.
+//      Rectangle/diamond/ellipse (the ones with expensive fill patterns) now
+//      cache their generated rough.js "drawable" and only regenerate it when
+//      that element's own geometry or style actually changed.
 
 const canvas = document.getElementById('wallpaper');
 const ctx = canvas.getContext('2d');
@@ -21,6 +30,8 @@ const toggleBtn = document.getElementById('toggleBtn');
 const toolSelector = document.getElementById('toolSelector');
 const stylePanel = document.getElementById('stylePanel');
 const doneBtn = document.getElementById('doneBtn');
+const undoBtn = document.getElementById('undoBtn');
+const redoBtn = document.getElementById('redoBtn');
 
 const colorPicker = document.getElementById('colorPicker');
 const fillPicker = document.getElementById('fillPicker');
@@ -29,6 +40,11 @@ const opacityPicker = document.getElementById('opacityPicker');
 const clearBtn = document.getElementById('clearBtn');
 const duplicateBtn = document.getElementById('duplicateBtn');
 const deleteBtn = document.getElementById('deleteBtn');
+const lockBtn = document.getElementById('lockBtn');
+const groupBtn = document.getElementById('groupBtn');
+const ungroupBtn = document.getElementById('ungroupBtn');
+const sendBackwardBtn = document.getElementById('sendBackwardBtn');
+const sendForwardBtn = document.getElementById('sendForwardBtn');
 
 const strokeSwatches = Array.from(document.querySelectorAll('.swatch.preset.stroke'));
 const fillSwatches = Array.from(document.querySelectorAll('.swatch.preset.fill'));
@@ -39,19 +55,26 @@ const FONT_SIZE_MAP = { 1.5: 16, 3: 20, 5.5: 28 };
 const DEFAULT_ROUGHNESS = 1.4;
 const HANDLE_HIT_RADIUS = 9;
 const ROTATE_HANDLE_OFFSET = 28;
+const HISTORY_LIMIT = 50;
+const ROTATE_DEAD_ZONE = 5; // px from center where angle math gets unstable
 
 // --- State ---
 let elements = [];
 let draft = null;
-let dragOrigin = null;    // { pos, snapshots: [{id, snapshot}] } while moving the selection
-let resizeState = null;   // active resize drag (single or group)
-let rotateState = null;   // active rotate drag (single or group)
-let marqueeState = null;  // { start, current } while marquee-selecting
+let dragOrigin = null;
+let resizeState = null;
+let rotateState = null;
+let marqueeState = null;
 let selectedIds = new Set();
 let currentTool = 'selection';
 let erasing = false;
+let eraserHistoryPushed = false;
+let styleHistoryPending = false;
 let drawingMode = false;
 let backgroundColor = '#14141a';
+
+let history = [];
+let future = [];
 
 let currentStrokeColor = '#1e1e1e';
 let currentFillColor = 'transparent';
@@ -64,6 +87,57 @@ let resizeTimeout = null;
 function newId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 8); }
 function randomSeed() { return Math.floor(Math.random() * 2 ** 31); }
 function distance(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+// Cancels any in-progress drag/marquee/draft without committing it. Called on
+// every tool switch and on exiting drawing mode so state can never get stuck.
+function clearInteractionState() {
+  dragOrigin = null;
+  resizeState = null;
+  rotateState = null;
+  marqueeState = null;
+  draft = null;
+}
+
+// --- Undo/redo ---
+function snapshotElements() { return JSON.parse(JSON.stringify(elements)); }
+
+function pushHistory() {
+  history.push(snapshotElements());
+  if (history.length > HISTORY_LIMIT) history.shift();
+  future = [];
+  updateUndoRedoButtons();
+}
+
+function undo() {
+  if (!history.length) return;
+  future.push(snapshotElements());
+  elements = history.pop();
+  selectedIds.clear();
+  redraw();
+  scheduleSave();
+  updateUndoRedoButtons();
+}
+
+function redo() {
+  if (!future.length) return;
+  history.push(snapshotElements());
+  elements = future.pop();
+  selectedIds.clear();
+  redraw();
+  scheduleSave();
+  updateUndoRedoButtons();
+}
+
+function updateUndoRedoButtons() {
+  undoBtn.classList.toggle('disabled', history.length === 0);
+  redoBtn.classList.toggle('disabled', future.length === 0);
+}
+
+function beginStyleChange() {
+  if (selectedIds.size === 0) return;
+  if (!styleHistoryPending) { pushHistory(); styleHistoryPending = true; }
+}
+function endStyleChange() { styleHistoryPending = false; }
 
 // --- Canvas sizing ---
 function resizeCanvas() {
@@ -95,7 +169,6 @@ function diamondPoints(x, y, w, h) {
   return [[x + w / 2, y], [x + w, y + h / 2], [x + w / 2, y + h], [x, y + h / 2]];
 }
 
-// Bounding box in the element's own LOCAL (unrotated) coordinate space.
 function getBBox(el) {
   if (el.type === 'rectangle' || el.type === 'diamond' || el.type === 'ellipse') return normBox(el);
   if (el.type === 'line' || el.type === 'arrow') {
@@ -118,8 +191,6 @@ function getCenter(el) {
   return { x: b.x + b.w / 2, y: b.y + b.h / 2 };
 }
 
-// Axis-aligned box that encloses the element AFTER its own rotation is
-// applied — used for marquee intersection and for the multi-select union box.
 function getScreenBBox(el) {
   const b = getBBox(el);
   if (!el.angle) return b;
@@ -151,6 +222,19 @@ function rectsIntersect(a, b) {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
 
+// --- Grouping helpers ---
+function outermostGroupId(el) {
+  return (el.groupIds && el.groupIds.length) ? el.groupIds[el.groupIds.length - 1] : null;
+}
+
+function expandGroupSelection(id) {
+  const el = elements.find(e => e.id === id);
+  if (!el) return [id];
+  const gid = outermostGroupId(el);
+  if (!gid) return [id];
+  return elements.filter(e => outermostGroupId(e) === gid).map(e => e.id);
+}
+
 // --- Hit testing ---
 function elementContains(el, localPos) {
   if (el.type === 'rectangle' || el.type === 'diamond' || el.type === 'ellipse' || el.type === 'text') {
@@ -178,9 +262,6 @@ function hitTest(pos) {
   return null;
 }
 
-// --- Selection frame: the shared bbox+angle+center that handles attach to.
-// A single selection reuses that element's own (possibly rotated) frame;
-// a multi-selection always uses the axis-aligned union (see note at top). ---
 function computeSelectionFrame() {
   const ids = [...selectedIds];
   if (ids.length === 0) return null;
@@ -197,7 +278,6 @@ function computeSelectionFrame() {
   return { bbox, angle: 0, center: { x: x0 + bbox.w / 2, y: y0 + bbox.h / 2 } };
 }
 
-// 8 resize handles + 1 rotate handle, in absolute screen coordinates.
 function getHandlePositions(frame) {
   const b = frame.bbox;
   const PAD = 8;
@@ -222,6 +302,15 @@ function hitTestHandle(pos, frame) {
   return null;
 }
 
+function selectedMembers() {
+  return [...selectedIds].map(id => elements.find(e => e.id === id)).filter(Boolean);
+}
+
+function selectionIsAllLocked() {
+  const members = selectedMembers();
+  return members.length > 0 && members.every(el => el.locked);
+}
+
 // --- Rendering ---
 function roughOptions(el) {
   return {
@@ -232,6 +321,32 @@ function roughOptions(el) {
     fillStyle: 'solid',
     seed: el.seed
   };
+}
+
+// Rough.js drawable cache — keyed by element id, invalidated when that
+// element's own geometry/style changes. Only used for rectangle/diamond/
+// ellipse, since those carry the expensive fill-pattern generation; line and
+// arrow strokes are cheap enough as-is.
+const roughCache = new Map();
+
+function cacheKey(el) {
+  return [el.x, el.y, el.width, el.height, el.strokeColor, el.fillColor, el.strokeWidth, el.seed].join(',');
+}
+
+function getRoughDrawable(el) {
+  const key = cacheKey(el);
+  const cached = roughCache.get(el.id);
+  if (cached && cached.key === key) return cached.drawable;
+
+  const opts = roughOptions(el);
+  const nb = normBox(el);
+  let drawable;
+  if (el.type === 'rectangle') drawable = rc.generator.rectangle(nb.x, nb.y, nb.w, nb.h, opts);
+  else if (el.type === 'diamond') drawable = rc.generator.polygon(diamondPoints(nb.x, nb.y, nb.w, nb.h), opts);
+  else if (el.type === 'ellipse') drawable = rc.generator.ellipse(nb.x + nb.w / 2, nb.y + nb.h / 2, nb.w, nb.h, opts);
+
+  roughCache.set(el.id, { key, drawable });
+  return drawable;
 }
 
 function drawFreedraw(el) {
@@ -285,9 +400,9 @@ function drawElement(el) {
     ctx.translate(-c.x, -c.y);
   }
   switch (el.type) {
-    case 'rectangle': { const nb = normBox(el); rc.rectangle(nb.x, nb.y, nb.w, nb.h, roughOptions(el)); break; }
-    case 'diamond': { const nb = normBox(el); rc.polygon(diamondPoints(nb.x, nb.y, nb.w, nb.h), roughOptions(el)); break; }
-    case 'ellipse': { const nb = normBox(el); rc.ellipse(nb.x + nb.w / 2, nb.y + nb.h / 2, nb.w, nb.h, roughOptions(el)); break; }
+    case 'rectangle': case 'diamond': case 'ellipse':
+      rc.draw(getRoughDrawable(el));
+      break;
     case 'line': rc.line(el.points[0].x, el.points[0].y, el.points[1].x, el.points[1].y, roughOptions(el)); break;
     case 'arrow': drawArrow(el); break;
     case 'freedraw': drawFreedraw(el); break;
@@ -296,13 +411,26 @@ function drawElement(el) {
   ctx.restore();
 }
 
-// Thin outline per selected member (only shown for multi-select, so it's
-// clear which shapes are included) plus the one shared frame + handles.
+function drawLockBadge(el) {
+  const b = getScreenBBox(el);
+  const x = b.x, y = b.y;
+  ctx.save();
+  ctx.fillStyle = '#9b9ba3';
+  ctx.beginPath();
+  ctx.arc(x, y, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 1.4;
+  ctx.strokeRect(x - 3, y - 1, 6, 5);
+  ctx.beginPath();
+  ctx.arc(x, y - 1, 3, Math.PI, 0);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawSelectionOverlays() {
   if (selectedIds.size > 1) {
-    for (const id of selectedIds) {
-      const el = elements.find(e => e.id === id);
-      if (!el) continue;
+    for (const el of selectedMembers()) {
       const b = getScreenBBox(el);
       ctx.save();
       ctx.strokeStyle = 'rgba(105, 101, 219, 0.5)';
@@ -314,6 +442,7 @@ function drawSelectionOverlays() {
 
   const frame = computeSelectionFrame();
   if (!frame) return;
+  const allLocked = selectionIsAllLocked();
 
   ctx.save();
   ctx.translate(frame.center.x, frame.center.y);
@@ -325,28 +454,30 @@ function drawSelectionOverlays() {
   const x0 = b.x - PAD, y0 = b.y - PAD, x1 = b.x + b.w + PAD, y1 = b.y + b.h + PAD;
   const midX = (x0 + x1) / 2, midY = (y0 + y1) / 2;
 
-  ctx.strokeStyle = '#6965db';
+  ctx.strokeStyle = allLocked ? '#9b9ba3' : '#6965db';
   ctx.lineWidth = 1.5;
   ctx.setLineDash([4, 4]);
   ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
   ctx.setLineDash([]);
 
-  ctx.beginPath();
-  ctx.moveTo(midX, y0);
-  ctx.lineTo(midX, y0 - ROTATE_HANDLE_OFFSET);
-  ctx.stroke();
+  if (!allLocked) {
+    ctx.beginPath();
+    ctx.moveTo(midX, y0);
+    ctx.lineTo(midX, y0 - ROTATE_HANDLE_OFFSET);
+    ctx.stroke();
 
-  const handlePts = [[x0, y0], [midX, y0], [x1, y0], [x1, midY], [x1, y1], [midX, y1], [x0, y1], [x0, midY]];
-  ctx.fillStyle = '#ffffff';
-  for (const [hx, hy] of handlePts) {
-    ctx.fillRect(hx - 4, hy - 4, 8, 8);
-    ctx.strokeRect(hx - 4, hy - 4, 8, 8);
+    const handlePts = [[x0, y0], [midX, y0], [x1, y0], [x1, midY], [x1, y1], [midX, y1], [x0, y1], [x0, midY]];
+    ctx.fillStyle = '#ffffff';
+    for (const [hx, hy] of handlePts) {
+      ctx.fillRect(hx - 4, hy - 4, 8, 8);
+      ctx.strokeRect(hx - 4, hy - 4, 8, 8);
+    }
+
+    ctx.beginPath();
+    ctx.arc(midX, y0 - ROTATE_HANDLE_OFFSET, 5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
   }
-
-  ctx.beginPath();
-  ctx.arc(midX, y0 - ROTATE_HANDLE_OFFSET, 5, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
 
   ctx.restore();
 }
@@ -370,6 +501,7 @@ function redraw() {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
   const all = draft ? [...elements, draft] : elements;
   for (const el of all) drawElement(el);
+  for (const el of elements) if (el.locked) drawLockBadge(el);
   drawSelectionOverlays();
   drawMarquee();
 }
@@ -379,7 +511,7 @@ function pointerPos(e) {
   return { x: e.clientX - rect.left, y: e.clientY - rect.top };
 }
 
-// --- Move (translation only — rotation-agnostic, works per-member) ---
+// --- Move ---
 function moveElement(id, snapshot, dx, dy) {
   const el = elements.find(e => e.id === id);
   if (!el) return;
@@ -388,27 +520,27 @@ function moveElement(id, snapshot, dx, dy) {
 }
 
 function startMove(pos) {
-  dragOrigin = {
-    pos,
-    snapshots: [...selectedIds].map(id => ({ id, snapshot: JSON.parse(JSON.stringify(elements.find(e => e.id === id))) }))
-  };
+  const snaps = selectedMembers().filter(el => !el.locked)
+    .map(el => ({ id: el.id, snapshot: JSON.parse(JSON.stringify(el)) }));
+  dragOrigin = snaps.length ? { pos, snapshots: snaps, historyPushed: false } : null;
 }
 
 function applyMove(pos) {
+  if (!dragOrigin.historyPushed) { pushHistory(); dragOrigin.historyPushed = true; }
   const dx = pos.x - dragOrigin.pos.x, dy = pos.y - dragOrigin.pos.y;
   for (const { id, snapshot } of dragOrigin.snapshots) moveElement(id, snapshot, dx, dy);
 }
 
-// --- Resize: generic over 1..N selected elements, scaled relative to the
-// shared frame's opposite anchor. A single element is just N=1. ---
+// --- Resize ---
 function startResize(frame, handle) {
-  resizeState = {
-    handle, angle: frame.angle, center: frame.center, origBBox: frame.bbox,
-    members: [...selectedIds].map(id => ({ id, snapshot: JSON.parse(JSON.stringify(elements.find(e => e.id === id))) }))
-  };
+  const members = selectedMembers().filter(el => !el.locked)
+    .map(el => ({ id: el.id, snapshot: JSON.parse(JSON.stringify(el)) }));
+  if (members.length === 0) return;
+  resizeState = { handle, angle: frame.angle, center: frame.center, origBBox: frame.bbox, members, historyPushed: false };
 }
 
 function applyResize(pos) {
+  if (!resizeState.historyPushed) { pushHistory(); resizeState.historyPushed = true; }
   const { handle, angle, center, origBBox, members } = resizeState;
   const localPos = rotatePoint(pos, center, -angle);
 
@@ -422,6 +554,9 @@ function applyResize(pos) {
   if (handle.includes('s')) newH = localPos.y - anchorY;
   if (handle.includes('n')) newH = anchorY - localPos.y;
 
+  // Clamp instead of allowing true zero, so a shape can never collapse to
+  // nothing — it can still flip through zero (negative width/height is
+  // valid and handled by normBox), just not vanish.
   if (Math.abs(newW) < 4) newW = 4 * (Math.sign(newW) || 1);
   if (Math.abs(newH) < 4) newH = 4 * (Math.sign(newH) || 1);
 
@@ -445,21 +580,25 @@ function applyResize(pos) {
   }
 }
 
-// --- Rotate: generic over 1..N elements. Each orbits the shared center by
-// the same delta and spins by the same delta — for a single element the
-// orbit distance is zero, so it just spins in place (Phase 3 behavior). ---
+// --- Rotate ---
 function startRotate(frame, pos) {
+  const members = selectedMembers().filter(el => !el.locked).map(el => ({
+    id: el.id, startAngle: el.angle || 0, snapshot: JSON.parse(JSON.stringify(el)), origCenter: getCenter(el)
+  }));
+  if (members.length === 0) return;
   rotateState = {
     center: frame.center,
     startPointerAngle: Math.atan2(pos.y - frame.center.y, pos.x - frame.center.x),
-    members: [...selectedIds].map(id => {
-      const el = elements.find(e => e.id === id);
-      return { id, startAngle: el.angle || 0, snapshot: JSON.parse(JSON.stringify(el)), origCenter: getCenter(el) };
-    })
+    members, historyPushed: false
   };
 }
 
 function applyRotate(pos) {
+  // Too close to the rotation center and the angle math becomes numerically
+  // unstable (tiny mouse moves -> huge angle jumps) — just hold steady.
+  if (distance(pos, rotateState.center) < ROTATE_DEAD_ZONE) return;
+
+  if (!rotateState.historyPushed) { pushHistory(); rotateState.historyPushed = true; }
   const current = Math.atan2(pos.y - rotateState.center.y, pos.x - rotateState.center.x);
   const delta = current - rotateState.startPointerAngle;
   for (const m of rotateState.members) {
@@ -473,13 +612,67 @@ function applyRotate(pos) {
   }
 }
 
+// --- Layer order ---
+function sendBackward() {
+  if (selectedIds.size === 0) return;
+  pushHistory();
+  for (let i = 1; i < elements.length; i++) {
+    if (selectedIds.has(elements[i].id) && !selectedIds.has(elements[i - 1].id)) {
+      [elements[i - 1], elements[i]] = [elements[i], elements[i - 1]];
+    }
+  }
+  redraw(); scheduleSave();
+}
+
+function sendForward() {
+  if (selectedIds.size === 0) return;
+  pushHistory();
+  for (let i = elements.length - 2; i >= 0; i--) {
+    if (selectedIds.has(elements[i].id) && !selectedIds.has(elements[i + 1].id)) {
+      [elements[i], elements[i + 1]] = [elements[i + 1], elements[i]];
+    }
+  }
+  redraw(); scheduleSave();
+}
+
+// --- Duplicate (shared by the toolbar button and Ctrl/Cmd+D) ---
+function duplicateSelected() {
+  if (selectedIds.size === 0) return;
+  pushHistory();
+  const groupIdMap = new Map();
+  const newIds = [];
+  for (const el of selectedMembers()) {
+    if (el.locked) continue;
+    const clone = JSON.parse(JSON.stringify(el));
+    clone.id = newId();
+    if (clone.groupIds && clone.groupIds.length) {
+      clone.groupIds = clone.groupIds.map(gid => {
+        if (!groupIdMap.has(gid)) groupIdMap.set(gid, newId());
+        return groupIdMap.get(gid);
+      });
+    }
+    if (clone.points) clone.points = clone.points.map(p => ({ x: p.x + 12, y: p.y + 12 }));
+    else { clone.x += 12; clone.y += 12; }
+    elements.push(clone);
+    newIds.push(clone.id);
+  }
+  selectedIds = new Set(newIds);
+  redraw(); scheduleSave();
+}
+
 // --- Pointer handlers ---
 canvas.addEventListener('pointerdown', (e) => {
   if (!drawingMode) return;
   const pos = pointerPos(e);
 
   if (currentTool === 'selection') {
-    if (selectedIds.size > 0) {
+    // Captured up front: whichever of resize/rotate/move/marquee this turns
+    // into, pointerup must reliably fire on the canvas even if the cursor
+    // ends up outside it — otherwise the drag state can get stuck (see the
+    // note at the top of this file).
+    canvas.setPointerCapture(e.pointerId);
+
+    if (selectedIds.size > 0 && !selectionIsAllLocked()) {
       const frame = computeSelectionFrame();
       if (frame) {
         const handle = hitTestHandle(pos, frame);
@@ -490,11 +683,12 @@ canvas.addEventListener('pointerdown', (e) => {
 
     const hit = hitTest(pos);
     if (hit) {
+      const groupMembers = expandGroupSelection(hit.id);
       if (e.shiftKey) {
-        if (selectedIds.has(hit.id)) selectedIds.delete(hit.id);
-        else selectedIds.add(hit.id);
+        const allIn = groupMembers.every(id => selectedIds.has(id));
+        groupMembers.forEach(id => allIn ? selectedIds.delete(id) : selectedIds.add(id));
       } else if (!selectedIds.has(hit.id)) {
-        selectedIds = new Set([hit.id]);
+        selectedIds = new Set(groupMembers);
       }
       if (selectedIds.has(hit.id)) startMove(pos);
       syncStylePanelFromSelected();
@@ -508,8 +702,13 @@ canvas.addEventListener('pointerdown', (e) => {
 
   if (currentTool === 'eraser') {
     erasing = true;
+    eraserHistoryPushed = false;
     const hit = hitTest(pos);
-    if (hit) { elements = elements.filter(e2 => e2.id !== hit.id); redraw(); scheduleSave(); }
+    if (hit && !hit.locked) {
+      pushHistory(); eraserHistoryPushed = true;
+      elements = elements.filter(e2 => e2.id !== hit.id);
+      redraw(); scheduleSave();
+    }
     return;
   }
 
@@ -520,7 +719,7 @@ canvas.addEventListener('pointerdown', (e) => {
 
   canvas.setPointerCapture(e.pointerId);
   const base = {
-    id: newId(), type: currentTool, angle: 0,
+    id: newId(), type: currentTool, angle: 0, groupIds: [], locked: false,
     strokeColor: currentStrokeColor, fillColor: currentFillColor,
     strokeWidth: currentStrokeWidth, opacity: currentOpacity, seed: randomSeed()
   };
@@ -536,7 +735,11 @@ canvas.addEventListener('pointermove', (e) => {
 
   if (currentTool === 'eraser' && erasing) {
     const hit = hitTest(pos);
-    if (hit) { elements = elements.filter(e2 => e2.id !== hit.id); redraw(); scheduleSave(); }
+    if (hit && !hit.locked) {
+      if (!eraserHistoryPushed) { pushHistory(); eraserHistoryPushed = true; }
+      elements = elements.filter(e2 => e2.id !== hit.id);
+      redraw(); scheduleSave();
+    }
     return;
   }
 
@@ -550,7 +753,7 @@ canvas.addEventListener('pointermove', (e) => {
         x: Math.min(marqueeState.start.x, pos.x), y: Math.min(marqueeState.start.y, pos.y),
         w: Math.abs(pos.x - marqueeState.start.x), h: Math.abs(pos.y - marqueeState.start.y)
       };
-      selectedIds = new Set(elements.filter(el => rectsIntersect(mRect, getScreenBBox(el))).map(el => el.id));
+      selectedIds = new Set(elements.filter(el => !el.locked && rectsIntersect(mRect, getScreenBBox(el))).map(el => el.id));
       redraw();
     }
     return;
@@ -587,6 +790,7 @@ function handlePointerUp() {
     const nb = normBox(draft);
     draft.x = nb.x; draft.y = nb.y; draft.width = nb.w; draft.height = nb.h;
   }
+  pushHistory();
   elements.push(draft);
   selectedIds = new Set([draft.id]);
   draft = null;
@@ -616,9 +820,10 @@ function openTextEditor(pos) {
   function commit() {
     const text = input.value.trim();
     document.body.removeChild(input);
-    if (text) {
+    if (text) { // empty text is discarded, not saved as a blank element
+      pushHistory();
       const el = {
-        id: newId(), type: 'text', angle: 0, x: pos.x, y: pos.y, text,
+        id: newId(), type: 'text', angle: 0, groupIds: [], locked: false, x: pos.x, y: pos.y, text,
         strokeColor: currentStrokeColor, strokeWidth: currentStrokeWidth,
         opacity: currentOpacity, seed: randomSeed()
       };
@@ -642,12 +847,14 @@ function setDrawingMode(on) {
   toolSelector.classList.toggle('hidden', !on);
   stylePanel.classList.toggle('hidden', !on);
   toggleBtn.classList.toggle('hidden', on);
+  clearInteractionState();
   if (on) setTool('selection');
   else { selectedIds.clear(); redraw(); }
 }
 
 function setTool(tool) {
   currentTool = tool;
+  clearInteractionState();
   document.querySelectorAll('.toolsel').forEach(b => b.classList.toggle('active', b.dataset.tool === tool));
 }
 
@@ -661,6 +868,10 @@ document.querySelectorAll('.toolsel').forEach(btn => {
 
 toggleBtn.addEventListener('click', () => setDrawingMode(true));
 doneBtn.addEventListener('click', () => setDrawingMode(false));
+undoBtn.addEventListener('click', undo);
+redoBtn.addEventListener('click', redo);
+sendBackwardBtn.addEventListener('click', sendBackward);
+sendForwardBtn.addEventListener('click', sendForward);
 
 // --- Style panel sync + wiring ---
 function syncStrokeSwatches() { strokeSwatches.forEach(s => s.classList.toggle('active', s.dataset.color === currentStrokeColor)); }
@@ -673,9 +884,6 @@ function syncAllPanelUI() {
   syncStrokeSwatches(); syncFillSwatches(); syncSizeButtons(); updateDots();
 }
 
-// With multiple elements selected and differing styles, this just shows the
-// FIRST selected element's values (no "mixed" indicator) — a deliberate
-// simplification, not a bug.
 function syncStylePanelFromSelected() {
   if (selectedIds.size === 0) return;
   const el = elements.find(e => e.id === [...selectedIds][0]);
@@ -688,37 +896,48 @@ function syncStylePanelFromSelected() {
 }
 
 function applyToSelected(prop, value) {
-  for (const id of selectedIds) {
-    const el = elements.find(e => e.id === id);
-    if (el) el[prop] = value;
+  for (const el of selectedMembers()) {
+    if (!el.locked) el[prop] = value;
   }
   redraw();
   scheduleSave();
 }
 
 strokeSwatches.forEach(btn => btn.addEventListener('click', () => {
+  beginStyleChange();
   currentStrokeColor = btn.dataset.color; colorPicker.value = currentStrokeColor;
   syncStrokeSwatches(); updateDots(); applyToSelected('strokeColor', currentStrokeColor);
+  endStyleChange();
 }));
 colorPicker.addEventListener('input', () => {
+  beginStyleChange();
   currentStrokeColor = colorPicker.value;
   syncStrokeSwatches(); updateDots(); applyToSelected('strokeColor', currentStrokeColor);
 });
+colorPicker.addEventListener('change', endStyleChange);
 
 fillSwatches.forEach(btn => btn.addEventListener('click', () => {
+  beginStyleChange();
   currentFillColor = btn.dataset.color; syncFillSwatches(); applyToSelected('fillColor', currentFillColor);
+  endStyleChange();
 }));
 fillPicker.addEventListener('input', () => {
+  beginStyleChange();
   currentFillColor = fillPicker.value; syncFillSwatches(); applyToSelected('fillColor', currentFillColor);
 });
+fillPicker.addEventListener('change', endStyleChange);
 
 sizeButtons.forEach(btn => btn.addEventListener('click', () => {
+  beginStyleChange();
   currentStrokeWidth = Number(btn.dataset.size); syncSizeButtons(); applyToSelected('strokeWidth', currentStrokeWidth);
+  endStyleChange();
 }));
 
 opacityPicker.addEventListener('input', () => {
+  beginStyleChange();
   currentOpacity = Number(opacityPicker.value); applyToSelected('opacity', currentOpacity);
 });
+opacityPicker.addEventListener('change', endStyleChange);
 
 bgSwatches.forEach(btn => btn.addEventListener('click', () => {
   setBackground(btn.dataset.color); bgPicker.value = backgroundColor; syncBgSwatches(); scheduleSave();
@@ -727,33 +946,48 @@ bgPicker.addEventListener('input', () => {
   setBackground(bgPicker.value); syncBgSwatches(); scheduleSave();
 });
 
-// --- Selected-element actions (now loop over the whole set) ---
-duplicateBtn.addEventListener('click', () => {
-  if (selectedIds.size === 0) return;
-  const newIds = [];
-  for (const id of selectedIds) {
-    const el = elements.find(e => e.id === id);
-    if (!el) continue;
-    const clone = JSON.parse(JSON.stringify(el));
-    clone.id = newId();
-    if (clone.points) clone.points = clone.points.map(p => ({ x: p.x + 12, y: p.y + 12 }));
-    else { clone.x += 12; clone.y += 12; }
-    elements.push(clone);
-    newIds.push(clone.id);
-  }
-  selectedIds = new Set(newIds);
-  redraw(); scheduleSave();
-});
+// --- Selected-element actions ---
+duplicateBtn.addEventListener('click', duplicateSelected);
 
 deleteBtn.addEventListener('click', () => {
   if (selectedIds.size === 0) return;
-  elements = elements.filter(e => !selectedIds.has(e.id));
-  selectedIds.clear();
+  pushHistory();
+  elements = elements.filter(e => !(selectedIds.has(e.id) && !e.locked));
+  selectedIds = new Set([...selectedIds].filter(id => elements.some(e => e.id === id)));
+  redraw(); scheduleSave();
+});
+
+lockBtn.addEventListener('click', () => {
+  const members = selectedMembers();
+  if (members.length === 0) return;
+  pushHistory();
+  const shouldLock = members.some(el => !el.locked);
+  members.forEach(el => { el.locked = shouldLock; });
+  redraw(); scheduleSave();
+});
+
+groupBtn.addEventListener('click', () => {
+  if (selectedIds.size < 2) return;
+  pushHistory();
+  const gid = newId();
+  for (const el of selectedMembers()) {
+    el.groupIds = el.groupIds || [];
+    el.groupIds.push(gid);
+  }
+  redraw(); scheduleSave();
+});
+
+ungroupBtn.addEventListener('click', () => {
+  pushHistory();
+  for (const el of selectedMembers()) {
+    if (el.groupIds && el.groupIds.length) el.groupIds.pop();
+  }
   redraw(); scheduleSave();
 });
 
 clearBtn.addEventListener('click', () => {
   if (confirm('Clear the whole wallpaper?')) {
+    pushHistory();
     elements = []; selectedIds.clear();
     redraw(); scheduleSave();
   }
@@ -763,8 +997,19 @@ clearBtn.addEventListener('click', () => {
 window.addEventListener('keydown', (e) => {
   if (!drawingMode) return;
   if (document.activeElement && document.activeElement.tagName === 'TEXTAREA') return;
-  const map = { v: 'selection', r: 'rectangle', d: 'diamond', o: 'ellipse', a: 'arrow', l: 'line', p: 'freedraw', t: 'text', e: 'eraser' };
+
   const key = e.key.toLowerCase();
+  const mod = e.metaKey || e.ctrlKey;
+
+  if (mod && key === 'z') { e.preventDefault(); if (e.shiftKey) redo(); else undo(); return; }
+  if (mod && key === 'y') { e.preventDefault(); redo(); return; }
+  if (mod && key === 'd') { e.preventDefault(); duplicateSelected(); return; }
+  if (mod && key === 'a') { e.preventDefault(); selectedIds = new Set(elements.filter(el => !el.locked).map(el => el.id)); redraw(); return; }
+  if (mod && key === ']') { e.preventDefault(); sendForward(); return; }
+  if (mod && key === '[') { e.preventDefault(); sendBackward(); return; }
+  if (e.key === 'Escape') { selectedIds.clear(); clearInteractionState(); redraw(); return; }
+
+  const map = { v: 'selection', r: 'rectangle', d: 'diamond', o: 'ellipse', a: 'arrow', l: 'line', p: 'freedraw', t: 'text', e: 'eraser' };
   if (map[key]) {
     setTool(map[key]);
     if (map[key] !== 'selection') selectedIds.clear();
@@ -772,8 +1017,10 @@ window.addEventListener('keydown', (e) => {
     return;
   }
   if ((e.key === 'Delete' || e.key === 'Backspace') && selectedIds.size > 0) {
-    elements = elements.filter(e2 => !selectedIds.has(e2.id));
-    selectedIds.clear(); redraw(); scheduleSave();
+    pushHistory();
+    elements = elements.filter(e2 => !(selectedIds.has(e2.id) && !e2.locked));
+    selectedIds = new Set([...selectedIds].filter(id => elements.some(e2 => e2.id === id)));
+    redraw(); scheduleSave();
   }
 });
 
@@ -799,6 +1046,7 @@ function load() {
     bgPicker.value = backgroundColor;
     syncBgSwatches();
     syncAllPanelUI();
+    updateUndoRedoButtons();
     resizeCanvas();
   });
 }

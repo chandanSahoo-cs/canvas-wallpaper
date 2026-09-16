@@ -219,6 +219,7 @@ html, body {
 .iconbtn svg { width: 18px; height: 18px; }
 .iconbtn:hover { background: #f1f0ff; }
 .iconbtn.active { background: #e0dfff; color: #6965db; }
+.iconbtn.disabled { opacity: 0.3; pointer-events: none; }
 
 .iconbtn.wide {
   width: 100%;

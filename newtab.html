@@ -44,6 +44,13 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20H8.5L3 14.5a1.5 1.5 0 0 1 0-2.12l8.38-8.38a1.5 1.5 0 0 1 2.12 0l6 6a1.5 1.5 0 0 1 0 2.12L13 19"/><path d="M14 20H8.5"/></svg>
     </button>
     <div class="divider"></div>
+    <button class="iconbtn" id="undoBtn" title="Undo (Ctrl/Cmd+Z)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 7"/></svg>
+    </button>
+    <button class="iconbtn" id="redoBtn" title="Redo (Ctrl/Cmd+Shift+Z)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 7"/></svg>
+    </button>
+    <div class="divider"></div>
     <button class="iconbtn" id="doneBtn" title="Exit drawing mode">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>
     </button>
@@ -102,6 +109,25 @@
         </button>
         <button class="iconbtn" id="deleteBtn" title="Delete selected">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+        </button>
+        <button class="iconbtn" id="lockBtn" title="Lock / unlock selected">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        </button>
+      </div>
+      <div class="group" style="margin-top:6px;">
+        <button class="iconbtn" id="groupBtn" title="Group selected">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="10" height="10" rx="1"/><rect x="11" y="11" width="10" height="10" rx="1"/></svg>
+        </button>
+        <button class="iconbtn" id="ungroupBtn" title="Ungroup selected">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
+        </button>
+      </div>
+      <div class="group" style="margin-top:6px;">
+        <button class="iconbtn" id="sendBackwardBtn" title="Send backward (Ctrl/Cmd+[)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="12" height="12" rx="1"/><path d="M9 21h9a3 3 0 0 0 3-3V9" stroke-dasharray="2 3"/></svg>
+        </button>
+        <button class="iconbtn" id="sendForwardBtn" title="Send forward (Ctrl/Cmd+])">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="1"/><path d="M15 3H6a3 3 0 0 0-3 3v9" stroke-dasharray="2 3"/></svg>
         </button>
       </div>
     </div>
