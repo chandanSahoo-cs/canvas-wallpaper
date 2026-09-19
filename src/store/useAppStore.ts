@@ -12,12 +12,22 @@ import { getCenter, rotatePoint } from '../canvas/geometry';
 
 export const HISTORY_LIMIT = 50;
 
+export interface TextEditorState {
+  elementId: string | null;
+  canvasX: number;
+  canvasY: number;
+  text: string;
+  fontSize: number;
+  strokeColor: string;
+}
+
 export interface AppState {
   mode: 'wallpaper' | 'drawing';
   currentTool: ToolType;
   elements: CanvasElement[];
   selectedIds: Set<string>;
   draft: CanvasElement | null;
+  editingText: TextEditorState | null;
   isPreviewing: boolean;
 
   // Camera / Zoom (detail magnification)
@@ -46,6 +56,7 @@ export interface AppState {
   setTool: (tool: ToolType) => void;
   setElements: (elements: CanvasElement[]) => void;
   setDraft: (draft: CanvasElement | null) => void;
+  setEditingText: (editingText: TextEditorState | null) => void;
   setSelectedIds: (ids: Set<string> | string[]) => void;
   toggleSelectedId: (id: string) => void;
   selectGroupMembers: (id: string, shiftKey: boolean) => void;
@@ -94,6 +105,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   elements: [],
   selectedIds: new Set<string>(),
   draft: null,
+  editingText: null,
   isPreviewing: false,
 
   zoom: 1.0,
@@ -137,6 +149,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setElements: (elements) => set({ elements }),
   setDraft: (draft) => set({ draft }),
+  setEditingText: (editingText) => set({ editingText }),
 
   setSelectedIds: (ids) => {
     set({ selectedIds: ids instanceof Set ? ids : new Set(ids) });
@@ -434,11 +447,26 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   loadFromStorage: () => {
     try {
+      const sanitize = (raw: any): CanvasElement[] => {
+        if (!Array.isArray(raw)) return [];
+        return raw
+          .filter((el) => el && typeof el === 'object' && typeof el.type === 'string')
+          .map((el) => {
+            if (el.type === 'text') {
+              return {
+                ...el,
+                text: typeof el.text === 'string' ? el.text : '',
+              };
+            }
+            return el;
+          });
+      };
+
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         chrome.storage.local.get(['wallpaperElements', 'wallpaperBackground'], (result) => {
           if (result.wallpaperElements) {
             try {
-              set({ elements: JSON.parse(result.wallpaperElements) });
+              set({ elements: sanitize(JSON.parse(result.wallpaperElements)) });
             } catch (e) {}
           }
           if (result.wallpaperBackground) {
@@ -452,7 +480,11 @@ export const useAppStore = create<AppState>((set, get) => ({
         });
       } else {
         const rawEl = localStorage.getItem('wallpaperElements');
-        if (rawEl) set({ elements: JSON.parse(rawEl) });
+        if (rawEl) {
+          try {
+            set({ elements: sanitize(JSON.parse(rawEl)) });
+          } catch (e) {}
+        }
         const rawBg = localStorage.getItem('wallpaperBackground');
         if (rawBg) {
           try {

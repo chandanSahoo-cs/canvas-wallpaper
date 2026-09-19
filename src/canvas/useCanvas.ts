@@ -103,6 +103,11 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
 
       if (e.button !== 0) return; // Only primary button for drawing/tools
 
+      // If text editor is currently active, clicking canvas commits it via onBlur
+      if (state.editingText) {
+        return;
+      }
+
       const rawPos = { x: e.clientX, y: e.clientY };
       const pos = screenToCanvas(e.clientX, e.clientY);
       const tool = tools[state.currentTool];
@@ -180,8 +185,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         if (el.type === 'text') {
           const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
           if (elementContains(el, local)) {
-            const screen = canvasToScreen(el.x, el.y);
-            openTextEditor({ x: el.x, y: el.y }, screen, el as TextElement);
+            openTextEditor({ x: el.x, y: el.y }, el as TextElement);
             return;
           }
         }

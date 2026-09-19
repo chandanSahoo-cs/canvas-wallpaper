@@ -104,22 +104,24 @@ export function exportWallpaperAsSvg(): void {
       }
       case 'text': {
         const textEl = el as TextElement;
+        const textStr = typeof textEl.text === 'string' ? textEl.text : '';
+        if (!textStr) break;
         const fontSize = FONT_SIZE_MAP[textEl.strokeWidth] || 20;
-        const lines = textEl.text.split('\n');
+        const lines = textStr.split('\n');
         const lineHeight = fontSize * 1.3;
 
         let textSpans = '';
         for (let i = 0; i < lines.length; i++) {
-          textSpans += `<tspan x="${textEl.x}" dy="${i === 0 ? 0 : lineHeight}">${lines[
+          textSpans += `<tspan x="${textEl.x ?? 0}" dy="${i === 0 ? 0 : lineHeight}">${lines[
             i
           ].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</tspan>`;
         }
 
         svgParts.push(
-          `<text x="${textEl.x}" y="${
-            textEl.y + fontSize
-          }" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="${fontSize}" fill="${
-            textEl.strokeColor
+          `<text x="${textEl.x ?? 0}" y="${
+            (textEl.y ?? 0) + fontSize
+          }" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="${fontSize}" fill="${
+            textEl.strokeColor || '#1e1e1e'
           }" opacity="${opacity}"${rotateAttr}>${textSpans}</text>`
         );
         break;

@@ -96,6 +96,11 @@ export class CanvasRenderer {
   }
 
   private drawElement(el: CanvasElement): void {
+    const editingText = useAppStore.getState().editingText;
+    if (editingText?.elementId && el.id === editingText.elementId) {
+      return;
+    }
+
     this.ctx.save();
     this.ctx.globalAlpha = (el.opacity ?? 100) / 100;
 
@@ -183,15 +188,17 @@ export class CanvasRenderer {
   }
 
   private drawText(el: TextElement): void {
+    const textStr = typeof el.text === 'string' ? el.text : '';
+    if (!textStr) return;
     const fontSize = FONT_SIZE_MAP[el.strokeWidth] || 20;
-    this.ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
-    this.ctx.fillStyle = el.strokeColor;
+    this.ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    this.ctx.fillStyle = el.strokeColor || '#1e1e1e';
     this.ctx.textBaseline = 'top';
 
-    const lines = el.text.split('\n');
+    const lines = textStr.split('\n');
     const lineHeight = fontSize * 1.3;
     for (let i = 0; i < lines.length; i++) {
-      this.ctx.fillText(lines[i], el.x, el.y + i * lineHeight);
+      this.ctx.fillText(lines[i], el.x ?? 0, (el.y ?? 0) + i * lineHeight);
     }
   }
 

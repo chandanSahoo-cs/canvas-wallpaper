@@ -11,7 +11,8 @@ import { SearchBar } from './widgets/SearchBar';
 import { QuickLinks } from './widgets/QuickLinks';
 import { SettingsDialog } from './widgets/SettingsDialog';
 import { TemplateGallery } from './components/TemplateGallery';
-import { ToolType, ImageElement } from './elements/types';
+import { InlineTextEditor } from './components/InlineTextEditor';
+import { ToolType, ImageElement, TextElement } from './elements/types';
 import { newId, randomSeed } from './lib/utils';
 import { cn } from './lib/utils';
 
@@ -41,12 +42,64 @@ export const App: React.FC = () => {
   const setElements = useAppStore((s) => s.setElements);
   const saveToStorage = useAppStore((s) => s.saveToStorage);
   const loadFromStorage = useAppStore((s) => s.loadFromStorage);
+  const updateElement = useAppStore((s) => s.updateElement);
+  const editingText = useAppStore((s) => s.editingText);
+  const setEditingText = useAppStore((s) => s.setEditingText);
+  const zoom = useAppStore((s) => s.zoom);
+  const scrollOffset = useAppStore((s) => s.scrollOffset);
 
   const scenes = useSceneStore((s) => s.scenes);
   const activeSceneId = useSceneStore((s) => s.activeSceneId);
   const switchScene = useSceneStore((s) => s.switchScene);
   const createScene = useSceneStore((s) => s.createScene);
   const loadScenesFromStorage = useSceneStore((s) => s.loadScenesFromStorage);
+
+  const handleCommitText = (newText: string) => {
+    const text = newText.trimEnd();
+    if (!editingText) return;
+
+    if (editingText.elementId) {
+      if (text) {
+        pushHistory();
+        updateElement(editingText.elementId, { text });
+        setSelectedIds([editingText.elementId]);
+        saveToStorage();
+      } else {
+        pushHistory();
+        setElements(elements.filter((e) => e.id !== editingText.elementId));
+        setSelectedIds([]);
+        saveToStorage();
+      }
+    } else if (text) {
+      const el: TextElement = {
+        id: newId(),
+        type: 'text',
+        angle: 0,
+        locked: false,
+        groupIds: [],
+        x: editingText.canvasX,
+        y: editingText.canvasY,
+        text,
+        strokeColor: editingText.strokeColor,
+        fillColor: 'transparent',
+        strokeWidth: useAppStore.getState().currentStrokeWidth,
+        opacity: useAppStore.getState().currentOpacity,
+        seed: randomSeed(),
+      };
+      pushHistory();
+      setElements([...elements, el]);
+      setSelectedIds([el.id]);
+      saveToStorage();
+    }
+
+    setEditingText(null);
+    setTool('selection');
+  };
+
+  const handleCancelText = () => {
+    setEditingText(null);
+    setTool('selection');
+  };
 
   // Initialize storage
   useEffect(() => {
@@ -289,6 +342,17 @@ export const App: React.FC = () => {
           mode === 'wallpaper' ? 'pointer-events-none' : 'pointer-events-auto'
         )}
       />
+
+      {/* Excalidraw-style inline WYSIWYG text editor */}
+      {mode === 'drawing' && editingText && (
+        <InlineTextEditor
+          data={editingText}
+          zoom={zoom}
+          scrollOffset={scrollOffset}
+          onCommit={handleCommitText}
+          onCancel={handleCancelText}
+        />
+      )}
 
       {/* Wallpaper Mode Widgets Overlay */}
       {mode === 'wallpaper' && (

@@ -120,6 +120,21 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
   loadScenesFromStorage: () => {
     try {
+      const sanitize = (raw: any): CanvasElement[] => {
+        if (!Array.isArray(raw)) return [];
+        return raw
+          .filter((el) => el && typeof el === 'object' && typeof el.type === 'string')
+          .map((el) => {
+            if (el.type === 'text') {
+              return {
+                ...el,
+                text: typeof el.text === 'string' ? el.text : '',
+              };
+            }
+            return el;
+          });
+      };
+
       const applyScenes = (
         rawScenes: string | null,
         rawActiveId: string | null,
@@ -129,14 +144,20 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         let scenes: Scene[] = [];
         if (rawScenes) {
           try {
-            scenes = JSON.parse(rawScenes);
+            const parsedScenes = JSON.parse(rawScenes);
+            if (Array.isArray(parsedScenes)) {
+              scenes = parsedScenes.map((s: any) => ({
+                ...s,
+                elements: sanitize(s.elements),
+              }));
+            }
           } catch (e) {}
         }
 
         let fallbackElements: CanvasElement[] = [];
         if (rawFallbackElements) {
           try {
-            fallbackElements = JSON.parse(rawFallbackElements);
+            fallbackElements = sanitize(JSON.parse(rawFallbackElements));
           } catch (e) {}
         }
 

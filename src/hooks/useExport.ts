@@ -163,14 +163,16 @@ export async function exportWallpaperAsPng(): Promise<void> {
       }
       case 'text': {
         const textEl = el as TextElement;
+        const textStr = typeof textEl.text === 'string' ? textEl.text : '';
+        if (!textStr) break;
         const fontSize = FONT_SIZE_MAP[textEl.strokeWidth] || 20;
-        ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`;
-        ctx.fillStyle = textEl.strokeColor;
+        ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.fillStyle = textEl.strokeColor || '#1e1e1e';
         ctx.textBaseline = 'top';
-        const lines = textEl.text.split('\n');
+        const lines = textStr.split('\n');
         const lineHeight = fontSize * 1.3;
         for (let i = 0; i < lines.length; i++) {
-          ctx.fillText(lines[i], textEl.x, textEl.y + i * lineHeight);
+          ctx.fillText(lines[i], textEl.x ?? 0, (textEl.y ?? 0) + i * lineHeight);
         }
         break;
       }

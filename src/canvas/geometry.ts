@@ -76,17 +76,18 @@ export function getBBox(el: CanvasElement): BoundingBox {
     return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
   }
   if (el.type === 'text') {
-    const fontSize = FONT_SIZE_MAP[el.strokeWidth] || 20;
-    // Multi-line text height calculation
-    const lines = el.text.split('\n');
+    const textEl = el as TextElement;
+    const fontSize = FONT_SIZE_MAP[textEl.strokeWidth] || 20;
+    const textStr = typeof textEl.text === 'string' ? textEl.text : '';
+    const lines = textStr ? textStr.split('\n') : [''];
     const lineHeight = fontSize * 1.3;
     const maxLineLen = Math.max(...lines.map((l) => l.length), 1);
-    const approxWidth = maxLineLen * (fontSize * 0.6);
+    const approxWidth = Math.max(maxLineLen * (fontSize * 0.6), 24);
     return {
-      x: el.x,
-      y: el.y,
+      x: textEl.x ?? 0,
+      y: textEl.y ?? 0,
       w: approxWidth,
-      h: lines.length * lineHeight,
+      h: Math.max(lines.length * lineHeight, lineHeight),
     };
   }
   return { x: 0, y: 0, w: 0, h: 0 };
