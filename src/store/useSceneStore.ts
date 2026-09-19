@@ -201,12 +201,12 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         chrome.storage.local.get(
           ['wallpaperScenes', 'wallpaperActiveSceneId', 'wallpaperElements', 'wallpaperBackground'],
-          (res) => {
+          (res: Record<string, any>) => {
             applyScenes(
-              res.wallpaperScenes,
-              res.wallpaperActiveSceneId,
-              res.wallpaperElements,
-              res.wallpaperBackground
+              (res.wallpaperScenes as string) || null,
+              (res.wallpaperActiveSceneId as string) || null,
+              (res.wallpaperElements as string) || null,
+              (res.wallpaperBackground as string) || null
             );
           }
         );

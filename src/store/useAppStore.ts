@@ -463,18 +463,18 @@ export const useAppStore = create<AppState>((set, get) => ({
       };
 
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(['wallpaperElements', 'wallpaperBackground'], (result) => {
+        chrome.storage.local.get(['wallpaperElements', 'wallpaperBackground'], (result: Record<string, any>) => {
           if (result.wallpaperElements) {
             try {
-              set({ elements: sanitize(JSON.parse(result.wallpaperElements)) });
+              set({ elements: sanitize(JSON.parse(result.wallpaperElements as string)) });
             } catch (e) {}
           }
           if (result.wallpaperBackground) {
             try {
-              const bg = JSON.parse(result.wallpaperBackground);
+              const bg = JSON.parse(result.wallpaperBackground as string);
               set({ background: typeof bg === 'string' ? { type: 'color', color: bg } : bg });
             } catch (e) {
-              set({ background: { type: 'color', color: result.wallpaperBackground } });
+              set({ background: { type: 'color', color: String(result.wallpaperBackground) } });
             }
           }
         });

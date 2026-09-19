@@ -135,8 +135,8 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
 
     try {
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(['wallpaperWidgets'], (res) => {
-          if (res.wallpaperWidgets) apply(res.wallpaperWidgets);
+        chrome.storage.local.get(['wallpaperWidgets'], (res: Record<string, any>) => {
+          if (res.wallpaperWidgets) apply(res.wallpaperWidgets as string);
         });
       } else {
         apply(localStorage.getItem('wallpaperWidgets'));

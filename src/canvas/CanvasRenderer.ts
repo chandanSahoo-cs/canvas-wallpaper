@@ -1,4 +1,5 @@
 import rough from 'roughjs';
+import { useAppStore } from '../store/useAppStore';
 import {
   CanvasElement,
   Point,
