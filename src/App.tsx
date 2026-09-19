@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Pencil, Image as ImageIcon, EyeOff, Settings } from 'lucide-react';
+import { Pencil, Image as ImageIcon, EyeOff, Settings, Sparkles } from 'lucide-react';
 import { useCanvas } from './canvas/useCanvas';
 import { useAppStore } from './store/useAppStore';
 import { useSceneStore } from './store/useSceneStore';
@@ -10,6 +10,7 @@ import { ClockWidget } from './widgets/ClockWidget';
 import { SearchBar } from './widgets/SearchBar';
 import { QuickLinks } from './widgets/QuickLinks';
 import { SettingsDialog } from './widgets/SettingsDialog';
+import { TemplateGallery } from './components/TemplateGallery';
 import { ToolType, ImageElement } from './elements/types';
 import { newId, randomSeed } from './lib/utils';
 import { cn } from './lib/utils';
@@ -18,6 +19,7 @@ export const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useCanvas(canvasRef);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   const mode = useAppStore((s) => s.mode);
   const setMode = useAppStore((s) => s.setMode);
@@ -330,7 +332,17 @@ export const App: React.FC = () => {
             >
               + New
             </button>
+            <div className="w-px h-4 bg-neutral-200" />
+            <button
+              onClick={() => setIsGalleryOpen(true)}
+              title="Browse Wallpaper Templates"
+              className="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 font-medium rounded-lg transition-colors active:scale-95 flex items-center gap-1 text-xs"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" /> Templates
+            </button>
           </div>
+
+          <TemplateGallery isOpen={isGalleryOpen} onClose={() => setIsGalleryOpen(false)} />
         </>
       )}
 
