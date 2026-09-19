@@ -99,6 +99,8 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
     wordBreak: 'normal',
     boxSizing: 'content-box',
     zIndex: 50,
+    transformOrigin: 'top left',
+    transform: data.angle ? `rotate(${data.angle}rad)` : 'none',
   };
 
   return (

@@ -19,6 +19,7 @@ export interface TextEditorState {
   text: string;
   fontSize: number;
   strokeColor: string;
+  angle?: number;
 }
 
 export interface AppState {

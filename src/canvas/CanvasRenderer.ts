@@ -191,7 +191,7 @@ export class CanvasRenderer {
   private drawText(el: TextElement): void {
     const textStr = typeof el.text === 'string' ? el.text : '';
     if (!textStr) return;
-    const fontSize = FONT_SIZE_MAP[el.strokeWidth] || 20;
+    const fontSize = el.fontSize || FONT_SIZE_MAP[el.strokeWidth] || 20;
     this.ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
     this.ctx.fillStyle = el.strokeColor || '#1e1e1e';
     this.ctx.textBaseline = 'top';

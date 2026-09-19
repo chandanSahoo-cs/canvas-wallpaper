@@ -63,6 +63,7 @@ export interface TextElement extends BaseElement {
   x: number;
   y: number;
   text: string;
+  fontSize?: number;
 }
 
 export interface ImageElement extends BaseElement {

@@ -106,7 +106,7 @@ export function exportWallpaperAsSvg(): void {
         const textEl = el as TextElement;
         const textStr = typeof textEl.text === 'string' ? textEl.text : '';
         if (!textStr) break;
-        const fontSize = FONT_SIZE_MAP[textEl.strokeWidth] || 20;
+        const fontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
         const lines = textStr.split('\n');
         const lineHeight = fontSize * 1.3;
 

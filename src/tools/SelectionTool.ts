@@ -3,6 +3,7 @@ import { useAppStore } from '../store/useAppStore';
 import {
   Point,
   CanvasElement,
+  TextElement,
 } from '../elements/types';
 import {
   computeSelectionFrame,
@@ -14,6 +15,7 @@ import {
   getScreenBBox,
   normBox,
   distance,
+  FONT_SIZE_MAP,
 } from '../canvas/geometry';
 
 interface ResizeState {
@@ -192,6 +194,37 @@ export class SelectionTool implements Tool {
             width: snapshot.width * sx,
             height: snapshot.height * sy,
           });
+        } else if (snapshot.type === 'text') {
+          const textEl = snapshot as TextElement;
+          const origFontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
+          const scale = Math.max(
+            0.2,
+            handle === 'e' || handle === 'w'
+              ? Math.abs(sx)
+              : handle === 'n' || handle === 's'
+              ? Math.abs(sy)
+              : Math.max(Math.abs(sx), Math.abs(sy))
+          );
+          const newFontSize = Math.max(8, Math.min(240, Math.round(origFontSize * scale)));
+
+          let newX = textEl.x;
+          let newY = textEl.y;
+          if (handle.includes('w')) {
+            newX = anchorX - origBBox.w * scale;
+          } else if (handle.includes('e')) {
+            newX = anchorX;
+          }
+          if (handle.includes('n')) {
+            newY = anchorY - origBBox.h * scale;
+          } else if (handle.includes('s')) {
+            newY = anchorY;
+          }
+
+          store.updateElement(id, {
+            x: newX,
+            y: newY,
+            fontSize: newFontSize,
+          });
         }
       });
       return;
@@ -286,6 +319,15 @@ export class SelectionTool implements Tool {
   }
 
   getCursor(pos?: Point): string {
+    if (this.rotateState) return 'grabbing';
+    if (this.resizeState) {
+      const h = this.resizeState.handle;
+      if (h === 'n' || h === 's') return 'ns-resize';
+      if (h === 'e' || h === 'w') return 'ew-resize';
+      if (h === 'nw' || h === 'se') return 'nwse-resize';
+      if (h === 'ne' || h === 'sw') return 'nesw-resize';
+      return 'default';
+    }
     if (!pos) return 'default';
     const store = useAppStore.getState();
     const selectedMembers = store.elements.filter((el) => store.selectedIds.has(el.id));

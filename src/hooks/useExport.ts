@@ -165,7 +165,7 @@ export async function exportWallpaperAsPng(): Promise<void> {
         const textEl = el as TextElement;
         const textStr = typeof textEl.text === 'string' ? textEl.text : '';
         if (!textStr) break;
-        const fontSize = FONT_SIZE_MAP[textEl.strokeWidth] || 20;
+        const fontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
         ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
         ctx.fillStyle = textEl.strokeColor || '#1e1e1e';
         ctx.textBaseline = 'top';

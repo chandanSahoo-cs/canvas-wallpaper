@@ -23,7 +23,9 @@ export function openTextEditor(
 ): void {
   const store = useAppStore.getState();
   const fontSize =
-    FONT_SIZE_MAP[existingElement ? existingElement.strokeWidth : store.currentStrokeWidth] || 20;
+    existingElement?.fontSize ||
+    FONT_SIZE_MAP[existingElement ? existingElement.strokeWidth : store.currentStrokeWidth] ||
+    20;
 
   store.setEditingText({
     elementId: existingElement ? existingElement.id : null,
@@ -32,5 +34,6 @@ export function openTextEditor(
     text: existingElement ? existingElement.text || '' : '',
     fontSize,
     strokeColor: existingElement ? existingElement.strokeColor : store.currentStrokeColor,
+    angle: existingElement ? existingElement.angle : 0,
   });
 }

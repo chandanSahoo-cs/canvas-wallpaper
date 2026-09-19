@@ -1,8 +1,18 @@
 import { Point, CanvasElement, RectangleElement, DiamondElement, EllipseElement, LineElement, ArrowElement, FreedrawElement, TextElement, ImageElement } from '../elements/types';
 
 export const FONT_SIZE_MAP: Record<number, number> = { 1.5: 16, 3: 20, 5.5: 28 };
-export const HANDLE_HIT_RADIUS = 9;
+export const HANDLE_HIT_RADIUS = 16;
 export const ROTATE_HANDLE_OFFSET = 28;
+
+let sharedMeasureCtx: CanvasRenderingContext2D | null = null;
+function getSharedMeasureCtx(): CanvasRenderingContext2D | null {
+  if (typeof document === 'undefined') return null;
+  if (!sharedMeasureCtx) {
+    const c = document.createElement('canvas');
+    sharedMeasureCtx = c.getContext('2d');
+  }
+  return sharedMeasureCtx;
+}
 
 export interface BoundingBox {
   x: number;
@@ -77,12 +87,25 @@ export function getBBox(el: CanvasElement): BoundingBox {
   }
   if (el.type === 'text') {
     const textEl = el as TextElement;
-    const fontSize = FONT_SIZE_MAP[textEl.strokeWidth] || 20;
+    const fontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
     const textStr = typeof textEl.text === 'string' ? textEl.text : '';
     const lines = textStr ? textStr.split('\n') : [''];
     const lineHeight = fontSize * 1.3;
-    const maxLineLen = Math.max(...lines.map((l) => l.length), 1);
-    const approxWidth = Math.max(maxLineLen * (fontSize * 0.6), 24);
+
+    const ctx = getSharedMeasureCtx();
+    let maxLineWidth = 0;
+    if (ctx) {
+      ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      for (const line of lines) {
+        const w = ctx.measureText(line).width;
+        if (w > maxLineWidth) maxLineWidth = w;
+      }
+    } else {
+      const maxLineLen = Math.max(...lines.map((l) => l.length), 1);
+      maxLineWidth = maxLineLen * (fontSize * 0.6);
+    }
+
+    const approxWidth = Math.max(maxLineWidth + 4, 24);
     return {
       x: textEl.x ?? 0,
       y: textEl.y ?? 0,
