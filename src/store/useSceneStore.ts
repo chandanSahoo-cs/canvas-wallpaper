@@ -120,32 +120,106 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
   loadScenesFromStorage: () => {
     try {
-      const applyScenes = (rawScenes: string | null, rawActiveId: string | null) => {
+      const applyScenes = (
+        rawScenes: string | null,
+        rawActiveId: string | null,
+        rawFallbackElements: string | null,
+        rawFallbackBg: string | null
+      ) => {
+        let scenes: Scene[] = [];
         if (rawScenes) {
           try {
-            const scenes = JSON.parse(rawScenes);
-            if (Array.isArray(scenes) && scenes.length > 0) {
-              const activeId = rawActiveId && scenes.some((s: Scene) => s.id === rawActiveId) ? rawActiveId : scenes[0].id;
-              set({ scenes, activeSceneId: activeId });
-              const currentScene = scenes.find((s: Scene) => s.id === activeId);
-              if (currentScene) {
-                useAppStore.getState().setElements(currentScene.elements);
-                useAppStore.getState().setBackground(currentScene.background);
-              }
-            }
+            scenes = JSON.parse(rawScenes);
           } catch (e) {}
         }
+
+        let fallbackElements: CanvasElement[] = [];
+        if (rawFallbackElements) {
+          try {
+            fallbackElements = JSON.parse(rawFallbackElements);
+          } catch (e) {}
+        }
+
+        let fallbackBg: BackgroundConfig = { type: 'color', color: '#14141a' };
+        if (rawFallbackBg) {
+          try {
+            const parsed = JSON.parse(rawFallbackBg);
+            fallbackBg = typeof parsed === 'string' ? { type: 'color', color: parsed } : parsed;
+          } catch (e) {
+            fallbackBg = { type: 'color', color: rawFallbackBg };
+          }
+        }
+
+        if (!Array.isArray(scenes) || scenes.length === 0) {
+          scenes = [
+            {
+              id: 'default',
+              name: 'Wallpaper 1',
+              elements: fallbackElements,
+              background: fallbackBg,
+              createdAt: Date.now(),
+            },
+          ];
+        }
+
+        const activeId =
+          rawActiveId && scenes.some((s) => s.id === rawActiveId) ? rawActiveId : scenes[0].id;
+        set({ scenes, activeSceneId: activeId });
+
+        const currentScene = scenes.find((s) => s.id === activeId) || scenes[0];
+        let elementsToLoad = currentScene.elements;
+        if ((!elementsToLoad || elementsToLoad.length === 0) && fallbackElements.length > 0) {
+          elementsToLoad = fallbackElements;
+          currentScene.elements = fallbackElements;
+        }
+
+        useAppStore.getState().setElements(elementsToLoad || []);
+        useAppStore.getState().setBackground(currentScene.background || fallbackBg);
       };
 
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(['wallpaperScenes', 'wallpaperActiveSceneId'], (res) => {
-          applyScenes(res.wallpaperScenes, res.wallpaperActiveSceneId);
-        });
+        chrome.storage.local.get(
+          ['wallpaperScenes', 'wallpaperActiveSceneId', 'wallpaperElements', 'wallpaperBackground'],
+          (res) => {
+            applyScenes(
+              res.wallpaperScenes,
+              res.wallpaperActiveSceneId,
+              res.wallpaperElements,
+              res.wallpaperBackground
+            );
+          }
+        );
       } else {
-        applyScenes(localStorage.getItem('wallpaperScenes'), localStorage.getItem('wallpaperActiveSceneId'));
+        applyScenes(
+          localStorage.getItem('wallpaperScenes'),
+          localStorage.getItem('wallpaperActiveSceneId'),
+          localStorage.getItem('wallpaperElements'),
+          localStorage.getItem('wallpaperBackground')
+        );
       }
     } catch (e) {
       console.error('Scenes load error', e);
     }
   },
 }));
+
+// Automatically sync any canvas element and background changes to the active scene & storage
+let syncTimeout: any = null;
+useAppStore.subscribe((state, prevState) => {
+  if (state.elements !== prevState.elements || state.background !== prevState.background) {
+    const sceneState = useSceneStore.getState();
+    const updatedScenes = sceneState.scenes.map((s) =>
+      s.id === sceneState.activeSceneId
+        ? { ...s, elements: state.elements, background: state.background }
+        : s
+    );
+    useSceneStore.setState({ scenes: updatedScenes });
+
+    // Debounce disk save slightly so high-speed drawing doesn't thrash storage
+    clearTimeout(syncTimeout);
+    syncTimeout = setTimeout(() => {
+      sceneState.saveScenesToStorage();
+      useAppStore.getState().saveToStorage();
+    }, 150);
+  }
+});

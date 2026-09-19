@@ -50,7 +50,6 @@ export const App: React.FC = () => {
 
   // Initialize storage
   useEffect(() => {
-    loadFromStorage();
     loadScenesFromStorage();
     useWidgetStore.getState().loadFromStorage();
   }, []);
