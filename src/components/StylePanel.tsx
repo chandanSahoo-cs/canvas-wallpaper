@@ -21,6 +21,9 @@ export const StylePanel: React.FC = () => {
   const currentFillColor = useAppStore((s) => s.currentFillColor);
   const currentStrokeWidth = useAppStore((s) => s.currentStrokeWidth);
   const currentOpacity = useAppStore((s) => s.currentOpacity);
+  const currentFillStyle = useAppStore((s) => s.currentFillStyle);
+  const currentStrokeStyle = useAppStore((s) => s.currentStrokeStyle);
+  const currentRoughness = useAppStore((s) => s.currentRoughness);
   const background = useAppStore((s) => s.background);
   const selectedIds = useAppStore((s) => s.selectedIds);
   const elements = useAppStore((s) => s.elements);
@@ -55,6 +58,21 @@ export const StylePanel: React.FC = () => {
   const handleFillChange = (color: string) => {
     setCurrentStyles({ fillColor: color });
     if (hasSelection) updateSelectedElements({ fillColor: color });
+  };
+
+  const handleFillStyleChange = (style: FillStyle) => {
+    setCurrentStyles({ fillStyle: style });
+    if (hasSelection) updateSelectedElements({ fillStyle: style });
+  };
+
+  const handleStrokeStyleChange = (style: StrokeStyle) => {
+    setCurrentStyles({ strokeStyle: style });
+    if (hasSelection) updateSelectedElements({ strokeStyle: style });
+  };
+
+  const handleRoughnessChange = (roughness: number) => {
+    setCurrentStyles({ roughness });
+    if (hasSelection) updateSelectedElements({ roughness });
   };
 
   const handleWidthChange = (width: number) => {
@@ -142,6 +160,87 @@ export const StylePanel: React.FC = () => {
               className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
             />
           </label>
+        </div>
+      </div>
+
+      {/* Fill Style */}
+      <div>
+        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+          Fill Style
+        </div>
+        <div className="grid grid-cols-3 gap-1">
+          {[
+            { id: 'solid', label: 'Solid' },
+            { id: 'hachure', label: 'Hachure' },
+            { id: 'cross-hatch', label: 'Cross' },
+          ].map((f) => (
+            <button
+              key={f.id}
+              onClick={() => handleFillStyleChange(f.id as any)}
+              className={cn(
+                'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
+                currentFillStyle === f.id
+                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+              )}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Stroke Style */}
+      <div>
+        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+          Stroke Style
+        </div>
+        <div className="grid grid-cols-3 gap-1">
+          {[
+            { id: 'solid', label: 'Solid' },
+            { id: 'dashed', label: 'Dashed' },
+            { id: 'dotted', label: 'Dotted' },
+          ].map((s) => (
+            <button
+              key={s.id}
+              onClick={() => handleStrokeStyleChange(s.id as any)}
+              className={cn(
+                'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
+                currentStrokeStyle === s.id
+                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+              )}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Roughness / Sketchiness */}
+      <div>
+        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+          Aesthetic
+        </div>
+        <div className="grid grid-cols-3 gap-1">
+          {[
+            { val: 0.2, label: 'Clean' },
+            { val: 1.4, label: 'Sketch' },
+            { val: 2.5, label: 'Rough' },
+          ].map((r) => (
+            <button
+              key={r.val}
+              onClick={() => handleRoughnessChange(r.val)}
+              className={cn(
+                'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
+                currentRoughness === r.val
+                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+              )}
+            >
+              {r.label}
+            </button>
+          ))}
         </div>
       </div>
 
