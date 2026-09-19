@@ -16,6 +16,7 @@ import {
   ZoomOut,
   RotateCcw,
   Download,
+  Eye,
 } from 'lucide-react';
 import { exportWallpaperAsPng } from '../hooks/useExport';
 import { useAppStore } from '../store/useAppStore';
@@ -26,6 +27,7 @@ export const Toolbar: React.FC = () => {
   const currentTool = useAppStore((s) => s.currentTool);
   const setTool = useAppStore((s) => s.setTool);
   const setMode = useAppStore((s) => s.setMode);
+  const togglePreview = useAppStore((s) => s.togglePreview);
   const undo = useAppStore((s) => s.undo);
   const redo = useAppStore((s) => s.redo);
   const history = useAppStore((s) => s.history);
@@ -130,6 +132,15 @@ export const Toolbar: React.FC = () => {
         className="w-9 h-9 rounded-xl flex items-center justify-center text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-150 active:scale-95"
       >
         <Download className="w-4 h-4" />
+      </button>
+
+      {/* Preview Wallpaper */}
+      <button
+        title="Preview Wallpaper without UI (H)"
+        onClick={togglePreview}
+        className="w-9 h-9 rounded-xl flex items-center justify-center text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-150 active:scale-95"
+      >
+        <Eye className="w-4 h-4" />
       </button>
 
       <div className="w-px h-6 bg-neutral-200 mx-1" />

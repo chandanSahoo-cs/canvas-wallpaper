@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Pencil, Image as ImageIcon } from 'lucide-react';
+import { Pencil, Image as ImageIcon, EyeOff } from 'lucide-react';
 import { useCanvas } from './canvas/useCanvas';
 import { useAppStore } from './store/useAppStore';
 import { useSceneStore } from './store/useSceneStore';
@@ -15,6 +15,8 @@ export const App: React.FC = () => {
 
   const mode = useAppStore((s) => s.mode);
   const setMode = useAppStore((s) => s.setMode);
+  const isPreviewing = useAppStore((s) => s.isPreviewing);
+  const togglePreview = useAppStore((s) => s.togglePreview);
   const currentTool = useAppStore((s) => s.currentTool);
   const setTool = useAppStore((s) => s.setTool);
   const background = useAppStore((s) => s.background);
@@ -97,6 +99,12 @@ export const App: React.FC = () => {
       }
       if (e.key === 'Escape') {
         setSelectedIds([]);
+        return;
+      }
+
+      if (key === 'h' && !mod) {
+        e.preventDefault();
+        togglePreview();
         return;
       }
 
@@ -267,7 +275,7 @@ export const App: React.FC = () => {
       )}
 
       {/* Drawing Mode UI Overlays */}
-      {mode === 'drawing' && (
+      {mode === 'drawing' && !isPreviewing && (
         <>
           <Toolbar />
           <StylePanel />
@@ -294,6 +302,16 @@ export const App: React.FC = () => {
             </button>
           </div>
         </>
+      )}
+
+      {/* Floating Preview Pill when UI is hidden */}
+      {mode === 'drawing' && isPreviewing && (
+        <button
+          onClick={togglePreview}
+          className="fixed top-4 left-1/2 -translate-x-1/2 z-30 bg-neutral-900/85 hover:bg-neutral-900 text-white backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 shadow-xl active:scale-95 transition-all border border-white/10"
+        >
+          <EyeOff className="w-3.5 h-3.5" /> Exit Preview (H)
+        </button>
       )}
     </div>
   );

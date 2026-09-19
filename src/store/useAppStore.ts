@@ -18,6 +18,7 @@ export interface AppState {
   elements: CanvasElement[];
   selectedIds: Set<string>;
   draft: CanvasElement | null;
+  isPreviewing: boolean;
 
   // Camera / Zoom (detail magnification)
   zoom: number;
@@ -41,6 +42,7 @@ export interface AppState {
 
   // Actions
   setMode: (mode: 'wallpaper' | 'drawing') => void;
+  togglePreview: () => void;
   setTool: (tool: ToolType) => void;
   setElements: (elements: CanvasElement[]) => void;
   setDraft: (draft: CanvasElement | null) => void;
@@ -92,6 +94,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   elements: [],
   selectedIds: new Set<string>(),
   draft: null,
+  isPreviewing: false,
 
   zoom: 1.0,
   scrollOffset: { x: 0, y: 0 },
@@ -117,9 +120,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       mode,
       draft: null,
       selectedIds: new Set(),
+      isPreviewing: false,
       currentTool: mode === 'drawing' ? 'selection' : 'selection',
     });
   },
+
+  togglePreview: () => set((state) => ({ isPreviewing: !state.isPreviewing })),
 
   setTool: (tool) => {
     set({
