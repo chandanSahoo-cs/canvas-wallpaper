@@ -1,8 +1,8 @@
 {
   "name": "canvas-wallpaper",
   "version": "1.0.0",
-  "description": "",
-  "main": "newtab.js",
+  "description": "A drawable wallpaper for your New Tab page.",
+  "type": "module",
   "scripts": {
     "dev": "wxt",
     "build": "wxt build",
