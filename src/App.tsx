@@ -1,10 +1,15 @@
-import React, { useEffect, useRef } from 'react';
-import { Pencil, Image as ImageIcon, EyeOff } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Pencil, Image as ImageIcon, EyeOff, Settings } from 'lucide-react';
 import { useCanvas } from './canvas/useCanvas';
 import { useAppStore } from './store/useAppStore';
 import { useSceneStore } from './store/useSceneStore';
+import { useWidgetStore } from './store/useWidgetStore';
 import { Toolbar } from './components/Toolbar';
 import { StylePanel } from './components/StylePanel';
+import { ClockWidget } from './widgets/ClockWidget';
+import { SearchBar } from './widgets/SearchBar';
+import { QuickLinks } from './widgets/QuickLinks';
+import { SettingsDialog } from './widgets/SettingsDialog';
 import { ToolType, ImageElement } from './elements/types';
 import { newId, randomSeed } from './lib/utils';
 import { cn } from './lib/utils';
@@ -12,6 +17,7 @@ import { cn } from './lib/utils';
 export const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useCanvas(canvasRef);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const mode = useAppStore((s) => s.mode);
   const setMode = useAppStore((s) => s.setMode);
@@ -44,6 +50,7 @@ export const App: React.FC = () => {
   useEffect(() => {
     loadFromStorage();
     loadScenesFromStorage();
+    useWidgetStore.getState().loadFromStorage();
   }, []);
 
   // Keyboard shortcuts
@@ -263,16 +270,39 @@ export const App: React.FC = () => {
         )}
       />
 
-      {/* Floating Pencil Button (Wallpaper Mode Entrance) */}
+      {/* Wallpaper Mode Widgets Overlay */}
       {mode === 'wallpaper' && (
-        <button
-          title="Customize Wallpaper (Press E or click)"
-          onClick={() => setMode('drawing')}
-          className="fixed bottom-6 right-6 w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 z-20 border border-white/20"
-        >
-          <Pencil className="w-5 h-5" />
-        </button>
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 gap-8 pointer-events-none">
+          <div className="pointer-events-auto flex flex-col items-center gap-6 w-full max-w-xl">
+            <ClockWidget />
+            <SearchBar />
+            <QuickLinks />
+          </div>
+        </div>
       )}
+
+      {/* Floating Action Buttons (Wallpaper Mode) */}
+      {mode === 'wallpaper' && (
+        <div className="fixed bottom-6 right-6 z-20 flex items-center gap-2.5">
+          <button
+            title="Widget Settings"
+            onClick={() => setIsSettingsOpen(true)}
+            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 border border-white/20"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+          <button
+            title="Customize Wallpaper (Press E or click)"
+            onClick={() => setMode('drawing')}
+            className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 border border-white/20"
+          >
+            <Pencil className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+
+      {/* Settings Dialog Modal */}
+      <SettingsDialog isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
 
       {/* Drawing Mode UI Overlays */}
       {mode === 'drawing' && !isPreviewing && (
