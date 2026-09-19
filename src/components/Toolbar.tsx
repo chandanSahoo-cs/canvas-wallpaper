@@ -17,13 +17,22 @@ import {
   RotateCcw,
   Download,
   Eye,
+  Upload,
+  FileCode,
+  FileJson,
 } from 'lucide-react';
 import { exportWallpaperAsPng } from '../hooks/useExport';
+import { exportWallpaperAsSvg } from '../hooks/useSvgExport';
+import { exportWallpaperFile, importWallpaperFile } from '../hooks/useWallpaperFile';
 import { useAppStore } from '../store/useAppStore';
+import { useSceneStore } from '../store/useSceneStore';
 import { ToolType } from '../elements/types';
 import { cn } from '../lib/utils';
 
 export const Toolbar: React.FC = () => {
+  const [isExportMenuOpen, setIsExportMenuOpen] = React.useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
   const currentTool = useAppStore((s) => s.currentTool);
   const setTool = useAppStore((s) => s.setTool);
   const setMode = useAppStore((s) => s.setMode);
@@ -125,14 +134,84 @@ export const Toolbar: React.FC = () => {
 
       <div className="w-px h-6 bg-neutral-200 mx-1" />
 
-      {/* Export PNG */}
-      <button
-        title="Export Wallpaper as PNG"
-        onClick={() => exportWallpaperAsPng()}
-        className="w-9 h-9 rounded-xl flex items-center justify-center text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-150 active:scale-95"
-      >
-        <Download className="w-4 h-4" />
-      </button>
+      {/* Export / Share Menu */}
+      <div className="relative">
+        <button
+          title="Export / Share Wallpaper"
+          onClick={() => setIsExportMenuOpen((v) => !v)}
+          className={cn(
+            'w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95',
+            isExportMenuOpen
+              ? 'bg-indigo-50 text-indigo-600'
+              : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900'
+          )}
+        >
+          <Download className="w-4 h-4" />
+        </button>
+
+        {isExportMenuOpen && (
+          <div className="absolute top-12 left-1/2 -translate-x-1/2 bg-white rounded-2xl shadow-xl border border-neutral-200/80 p-1.5 flex flex-col gap-0.5 w-52 text-xs select-none z-50 animate-in fade-in zoom-in-95 duration-100">
+            <button
+              onClick={() => {
+                exportWallpaperAsPng();
+                setIsExportMenuOpen(false);
+              }}
+              className="w-full px-2.5 py-1.5 rounded-xl hover:bg-neutral-100 text-left flex items-center gap-2 text-neutral-700 hover:text-neutral-900 font-medium transition-colors"
+            >
+              <Download className="w-4 h-4 text-indigo-600" />
+              Save as PNG Image
+            </button>
+            <button
+              onClick={() => {
+                exportWallpaperAsSvg();
+                setIsExportMenuOpen(false);
+              }}
+              className="w-full px-2.5 py-1.5 rounded-xl hover:bg-neutral-100 text-left flex items-center gap-2 text-neutral-700 hover:text-neutral-900 font-medium transition-colors"
+            >
+              <FileCode className="w-4 h-4 text-rose-500" />
+              Export as SVG Vector
+            </button>
+            <div className="w-full h-px bg-neutral-100 my-0.5" />
+            <button
+              onClick={() => {
+                const currentScene = useSceneStore
+                  .getState()
+                  .scenes.find((s) => s.id === useSceneStore.getState().activeSceneId);
+                exportWallpaperFile(currentScene?.name);
+                setIsExportMenuOpen(false);
+              }}
+              className="w-full px-2.5 py-1.5 rounded-xl hover:bg-neutral-100 text-left flex items-center gap-2 text-neutral-700 hover:text-neutral-900 font-medium transition-colors"
+            >
+              <FileJson className="w-4 h-4 text-amber-500" />
+              Export Wallpaper File
+            </button>
+            <button
+              onClick={() => {
+                fileInputRef.current?.click();
+                setIsExportMenuOpen(false);
+              }}
+              className="w-full px-2.5 py-1.5 rounded-xl hover:bg-neutral-100 text-left flex items-center gap-2 text-neutral-700 hover:text-neutral-900 font-medium transition-colors"
+            >
+              <Upload className="w-4 h-4 text-emerald-600" />
+              Import Wallpaper File...
+            </button>
+          </div>
+        )}
+      </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".canvaswallpaper,.json"
+        className="hidden"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            await importWallpaperFile(file);
+            e.target.value = '';
+          }
+        }}
+      />
 
       {/* Preview Wallpaper */}
       <button

@@ -11,5 +11,10 @@ export default defineConfig({
     name: 'Canvas Wallpaper',
     description: 'A drawable wallpaper for your New Tab page. Toggle drawing mode on to sketch, toggle it off to keep it as your background.',
     permissions: ['storage', 'unlimitedStorage'],
+    icons: {
+      16: '/icon/16.png',
+      48: '/icon/48.png',
+      128: '/icon/128.png',
+    },
   },
 });
