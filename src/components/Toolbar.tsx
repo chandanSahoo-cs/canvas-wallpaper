@@ -15,7 +15,9 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
+  Download,
 } from 'lucide-react';
+import { exportWallpaperAsPng } from '../hooks/useExport';
 import { useAppStore } from '../store/useAppStore';
 import { ToolType } from '../elements/types';
 import { cn } from '../lib/utils';
@@ -118,6 +120,17 @@ export const Toolbar: React.FC = () => {
           <ZoomIn className="w-3.5 h-3.5" />
         </button>
       </div>
+
+      <div className="w-px h-6 bg-neutral-200 mx-1" />
+
+      {/* Export PNG */}
+      <button
+        title="Export Wallpaper as PNG"
+        onClick={() => exportWallpaperAsPng()}
+        className="w-9 h-9 rounded-xl flex items-center justify-center text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-150 active:scale-95"
+      >
+        <Download className="w-4 h-4" />
+      </button>
 
       <div className="w-px h-6 bg-neutral-200 mx-1" />
 
