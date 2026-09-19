@@ -66,7 +66,16 @@ export const App: React.FC = () => {
       }
 
       if (mode !== 'drawing') return;
-      if (document.activeElement?.tagName === 'TEXTAREA' || document.activeElement?.tagName === 'INPUT') {
+
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.tagName === 'TEXTAREA' ||
+        target?.tagName === 'INPUT' ||
+        target?.isContentEditable ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        document.activeElement?.tagName === 'INPUT' ||
+        (document.activeElement as HTMLElement)?.isContentEditable
+      ) {
         return;
       }
 
@@ -171,6 +180,16 @@ export const App: React.FC = () => {
     // Paste handler for images
     const handlePaste = (e: ClipboardEvent) => {
       if (mode !== 'drawing') return;
+      const target = e.target as HTMLElement | null;
+      if (
+        target?.tagName === 'TEXTAREA' ||
+        target?.tagName === 'INPUT' ||
+        target?.isContentEditable ||
+        document.activeElement?.tagName === 'TEXTAREA' ||
+        document.activeElement?.tagName === 'INPUT'
+      ) {
+        return;
+      }
       const items = e.clipboardData?.items;
       if (!items) return;
 

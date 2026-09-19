@@ -78,6 +78,15 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       };
     }
 
+    function canvasToScreen(cx: number, cy: number): Point {
+      const rect = canvas!.getBoundingClientRect();
+      const { zoom, scrollOffset } = useAppStore.getState();
+      return {
+        x: (cx - scrollOffset.x) * zoom + rect.left,
+        y: (cy - scrollOffset.y) * zoom + rect.top,
+      };
+    }
+
     // Pointer events
     const onPointerDown = (e: PointerEvent) => {
       const state = useAppStore.getState();
@@ -171,7 +180,8 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         if (el.type === 'text') {
           const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
           if (elementContains(el, local)) {
-            openTextEditor(pos, { x: e.clientX, y: e.clientY }, el as TextElement);
+            const screen = canvasToScreen(el.x, el.y);
+            openTextEditor({ x: el.x, y: el.y }, screen, el as TextElement);
             return;
           }
         }
@@ -213,7 +223,15 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
 
     // Keyboard handlers for spacebar pan and shortcuts
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !e.repeat && document.activeElement?.tagName !== 'TEXTAREA') {
+      const target = e.target as HTMLElement | null;
+      if (
+        e.code === 'Space' &&
+        !e.repeat &&
+        document.activeElement?.tagName !== 'TEXTAREA' &&
+        document.activeElement?.tagName !== 'INPUT' &&
+        target?.tagName !== 'TEXTAREA' &&
+        target?.tagName !== 'INPUT'
+      ) {
         isSpacePressedRef.current = true;
         canvas!.style.cursor = 'grab';
       }

@@ -4,8 +4,11 @@ import { Point, TextElement } from '../elements/types';
 import { newId, randomSeed } from '../lib/utils';
 import { FONT_SIZE_MAP } from '../canvas/geometry';
 
+let activeTextarea: HTMLTextAreaElement | null = null;
+
 export class TextTool implements Tool {
-  onPointerDown({ pos, rawPos }: ToolContext): void {
+  onPointerDown({ pos, rawPos, e }: ToolContext): void {
+    e.preventDefault();
     openTextEditor(pos, rawPos);
   }
 
@@ -22,39 +25,80 @@ export function openTextEditor(
   screenPos: Point,
   existingElement?: TextElement
 ): void {
+  // If an editor is already open, commit it first
+  if (activeTextarea) {
+    activeTextarea.blur();
+  }
+
   const store = useAppStore.getState();
   const fontSize = FONT_SIZE_MAP[store.currentStrokeWidth] || 20;
 
   const textarea = document.createElement('textarea');
+  activeTextarea = textarea;
   textarea.value = existingElement ? existingElement.text : '';
+
+  const maxW = Math.max(160, window.innerWidth - screenPos.x - 20);
+  const left = Math.min(screenPos.x, window.innerWidth - 180);
+
   Object.assign(textarea.style, {
     position: 'fixed',
-    left: screenPos.x + 'px',
-    top: screenPos.y + 'px',
-    font: `${fontSize}px -apple-system, BlinkMacSystemFont, sans-serif`,
+    left: `${Math.max(10, left)}px`,
+    top: `${Math.max(10, screenPos.y)}px`,
+    font: `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
     color: existingElement ? existingElement.strokeColor : store.currentStrokeColor,
-    background: 'transparent',
-    border: '1px dashed #6965db',
+    background: 'rgba(255, 255, 255, 0.08)',
+    backdropFilter: 'blur(4px)',
+    border: '1.5px dashed #6366f1',
+    borderRadius: '6px',
     outline: 'none',
     resize: 'both',
-    minWidth: '140px',
-    minHeight: `${fontSize * 1.5}px`,
-    zIndex: '50',
-    padding: '4px 6px',
-    lineHeight: '1.3',
+    minWidth: '160px',
+    maxWidth: `${maxW}px`,
+    minHeight: `${fontSize * 1.6}px`,
+    zIndex: '100',
+    padding: '4px 8px',
+    lineHeight: '1.35',
     whiteSpace: 'pre',
+    overflow: 'hidden',
+    boxShadow: '0 4px 14px rgba(0,0,0,0.25)',
   });
 
   document.body.appendChild(textarea);
-  textarea.focus();
+
+  // Auto-resize height as user types
+  const autoResize = () => {
+    textarea.style.height = 'auto';
+    textarea.style.height = `${Math.max(fontSize * 1.6, textarea.scrollHeight)}px`;
+  };
+  textarea.addEventListener('input', autoResize);
+
+  // Prevent canvas from stealing pointer events while interacting with the textarea
+  textarea.addEventListener('pointerdown', (e) => e.stopPropagation());
+  textarea.addEventListener('mousedown', (e) => e.stopPropagation());
+  textarea.addEventListener('click', (e) => e.stopPropagation());
+  textarea.addEventListener('dblclick', (e) => e.stopPropagation());
 
   let committed = false;
-  function commit() {
+  let allowBlur = false;
+
+  // Allow blur only after the initial click gesture has completed
+  setTimeout(() => {
+    allowBlur = true;
+  }, 250);
+
+  function commit(cancel = false) {
     if (committed) return;
     committed = true;
+    activeTextarea = null;
+
     const text = textarea.value.trimEnd();
     if (textarea.parentNode) {
       document.body.removeChild(textarea);
+    }
+
+    if (cancel) {
+      store.setTool('selection');
+      return;
     }
 
     if (text) {
@@ -87,18 +131,41 @@ export function openTextEditor(
       store.setElements(store.elements.filter((e) => e.id !== existingElement.id));
       store.saveToStorage();
     }
-    // Stay on current tool or switch to selection
+
     store.setTool('selection');
   }
 
-  textarea.addEventListener('blur', commit);
+  // Prevent premature blur caused by initial canvas click
+  textarea.addEventListener('blur', () => {
+    if (!allowBlur) {
+      setTimeout(() => {
+        if (activeTextarea === textarea) {
+          textarea.focus();
+        }
+      }, 10);
+      return;
+    }
+    commit();
+  });
+
+  // Stop shortcuts from leaking to App.tsx while typing
   textarea.addEventListener('keydown', (e) => {
+    e.stopPropagation();
     if (e.key === 'Escape') {
-      committed = true;
-      if (textarea.parentNode) document.body.removeChild(textarea);
-    } else if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
-      textarea.blur();
+      commit(true);
+    } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      commit();
     }
   });
+
+  // Focus and select text
+  setTimeout(() => {
+    textarea.focus();
+    if (existingElement) {
+      textarea.select();
+    }
+    autoResize();
+  }, 30);
 }
