@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Clock, Search, Link2, Settings } from 'lucide-react';
+import { X, Clock, Calendar, Search, Link2, Settings } from 'lucide-react';
 import { useWidgetStore } from '../store/useWidgetStore';
 
 interface SettingsDialogProps {
@@ -47,8 +47,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
             <div className="flex items-center gap-2.5">
               <Clock className="w-4 h-4 text-neutral-500 mt-0.5" />
               <div>
-                <div className="text-sm font-medium">Clock & Date</div>
-                <div className="text-xs text-neutral-500">Show time overlay on wallpaper</div>
+                <div className="text-sm font-medium">Digital Clock</div>
+                <div className="text-xs text-neutral-500">Show time on wallpaper</div>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -89,6 +89,26 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
               </div>
             </div>
           )}
+
+          {/* Date & Day Settings */}
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2.5">
+              <Calendar className="w-4 h-4 text-neutral-500 mt-0.5" />
+              <div>
+                <div className="text-sm font-medium">Date & Day</div>
+                <div className="text-xs text-neutral-500">Show day and date below clock</div>
+              </div>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                checked={showDate}
+                onChange={(e) => setShowDate(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+            </label>
+          </div>
 
           {/* Search Settings */}
           <div className="flex items-start justify-between">
