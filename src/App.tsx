@@ -212,16 +212,35 @@ export const App: React.FC = () => {
     };
   }, [mode, elements, selectedIds]);
 
-  // Background styling
+  // Background styling with gradient and pattern overlays
+  const patternOverlays: Record<string, { image: string; size: string }> = {
+    dots: {
+      image: 'radial-gradient(rgba(255,255,255,0.15) 1.2px, transparent 1.2px)',
+      size: '24px 24px',
+    },
+    grid: {
+      image:
+        'linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.08) 1px, transparent 1px)',
+      size: '24px 24px, 24px 24px',
+    },
+    lines: {
+      image: 'linear-gradient(rgba(255,255,255,0.08) 1px, transparent 1px)',
+      size: '100% 28px',
+    },
+  };
+
+  const pattern = background.pattern && background.pattern !== 'none' ? patternOverlays[background.pattern] : null;
+  const baseBg =
+    background.type === 'image' && background.imageUrl
+      ? `url(${background.imageUrl})`
+      : background.type === 'gradient' && background.gradient
+      ? background.gradient
+      : undefined;
+
   const bgStyle: React.CSSProperties = {
-    backgroundColor: background.type === 'color' ? background.color : undefined,
-    backgroundImage:
-      background.type === 'image' && background.imageUrl
-        ? `url(${background.imageUrl})`
-        : background.type === 'gradient' && background.gradient
-        ? background.gradient
-        : undefined,
-    backgroundSize: 'cover',
+    backgroundColor: background.color || '#14141a',
+    backgroundImage: pattern ? (baseBg ? `${pattern.image}, ${baseBg}` : pattern.image) : baseBg,
+    backgroundSize: pattern ? (baseBg ? `${pattern.size}, cover` : pattern.size) : 'cover',
     backgroundPosition: 'center',
   };
 

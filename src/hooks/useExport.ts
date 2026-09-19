@@ -21,10 +21,7 @@ export async function exportWallpaperAsPng(): Promise<void> {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   // 1. Draw background
-  if (background.type === 'color') {
-    ctx.fillStyle = background.color || '#14141a';
-    ctx.fillRect(0, 0, width, height);
-  } else if (background.type === 'image' && background.imageUrl) {
+  if (background.type === 'image' && background.imageUrl) {
     const bgImg = new Image();
     bgImg.src = background.imageUrl;
     await new Promise((resolve) => {
@@ -32,9 +29,74 @@ export async function exportWallpaperAsPng(): Promise<void> {
       else bgImg.onload = () => resolve(true);
     });
     ctx.drawImage(bgImg, 0, 0, width, height);
-  } else {
-    ctx.fillStyle = '#14141a';
+  } else if (background.type === 'gradient' && background.gradient) {
+    // For CSS gradients on canvas, create gradient or fallback to color
+    const grad = ctx.createLinearGradient(0, 0, width, height);
+    if (background.gradient.includes('#ff7e5f')) {
+      grad.addColorStop(0, '#ff7e5f');
+      grad.addColorStop(1, '#feb47b');
+    } else if (background.gradient.includes('#134e5e')) {
+      grad.addColorStop(0, '#134e5e');
+      grad.addColorStop(1, '#71b280');
+    } else if (background.gradient.includes('#0f0c29')) {
+      grad.addColorStop(0, '#0f0c29');
+      grad.addColorStop(0.5, '#302b63');
+      grad.addColorStop(1, '#24243e');
+    } else if (background.gradient.includes('#1b2735')) {
+      grad.addColorStop(0, '#1b2735');
+      grad.addColorStop(1, '#090a0f');
+    } else {
+      grad.addColorStop(0, background.color || '#14141a');
+      grad.addColorStop(1, '#000000');
+    }
+    ctx.fillStyle = grad;
     ctx.fillRect(0, 0, width, height);
+  } else {
+    ctx.fillStyle = background.color || '#14141a';
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  // Draw pattern overlay if selected
+  if (background.pattern && background.pattern !== 'none') {
+    ctx.save();
+    const isLight = background.color === '#f5f5f7' || (background.gradient && background.gradient.includes('#ff7e5f'));
+    const patColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.12)';
+    ctx.strokeStyle = patColor;
+    ctx.fillStyle = patColor;
+
+    if (background.pattern === 'dots') {
+      const step = 24;
+      for (let x = 12; x < width; x += step) {
+        for (let y = 12; y < height; y += step) {
+          ctx.beginPath();
+          ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    } else if (background.pattern === 'grid') {
+      const step = 24;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let x = 0; x <= width; x += step) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
+      }
+      for (let y = 0; y <= height; y += step) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+      }
+      ctx.stroke();
+    } else if (background.pattern === 'lines') {
+      const step = 28;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for (let y = 0; y <= height; y += step) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   // 2. Draw elements

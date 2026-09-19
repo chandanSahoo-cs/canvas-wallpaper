@@ -96,10 +96,12 @@ export type ToolType =
   | 'eraser';
 
 export type BackgroundType = 'color' | 'gradient' | 'image';
+export type PatternType = 'none' | 'dots' | 'grid' | 'lines';
 
 export interface BackgroundConfig {
   type: BackgroundType;
   color: string; // solid color or fallback
   gradient?: string; // CSS gradient string
   imageUrl?: string; // base64 data url
+  pattern?: PatternType;
 }

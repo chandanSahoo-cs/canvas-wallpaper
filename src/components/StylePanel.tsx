@@ -359,53 +359,111 @@ export const StylePanel: React.FC = () => {
       )}
 
       {/* Wallpaper Background Settings */}
-      <div className="pt-2 border-t border-neutral-100">
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
-          Wallpaper Background
-        </div>
-        <div className="flex items-center gap-1.5 flex-wrap">
-          {bgPresets.map((c) => (
+      <div className="pt-2 border-t border-neutral-100 flex flex-col gap-3">
+        <div>
+          <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+            Background Color
+          </div>
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {bgPresets.map((c) => (
+              <button
+                key={c}
+                onClick={() => setBackground({ type: 'color', color: c, gradient: undefined })}
+                className={cn(
+                  'w-6 h-6 rounded-full border-2 transition-transform active:scale-90',
+                  background.type === 'color' && background.color === c
+                    ? 'border-indigo-600 scale-110 shadow-sm'
+                    : 'border-black/10 hover:scale-105'
+                )}
+                style={{ backgroundColor: c }}
+              />
+            ))}
+
+            {/* Custom color picker */}
+            <label className="w-6 h-6 rounded-full overflow-hidden relative cursor-pointer border border-neutral-200 bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-500 active:scale-90 transition-transform">
+              <input
+                type="color"
+                value={background.color || '#14141a'}
+                onChange={(e) => setBackground({ type: 'color', color: e.target.value, gradient: undefined })}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              />
+            </label>
+
+            {/* Upload Background Image */}
             <button
-              key={c}
-              onClick={() => setBackground({ type: 'color', color: c })}
+              title="Set custom background image"
+              onClick={() => fileInputRef.current?.click()}
               className={cn(
-                'w-6 h-6 rounded-full border-2 transition-transform active:scale-90',
-                background.type === 'color' && background.color === c
-                  ? 'border-indigo-600 scale-110 shadow-sm'
-                  : 'border-black/10 hover:scale-105'
+                'w-6 h-6 rounded-full border border-neutral-200 hover:bg-neutral-100 flex items-center justify-center text-neutral-600 transition-transform active:scale-90',
+                background.type === 'image' && 'border-indigo-600 text-indigo-600 bg-indigo-50'
               )}
-              style={{ backgroundColor: c }}
-            />
-          ))}
-
-          {/* Custom color picker */}
-          <label className="w-6 h-6 rounded-full overflow-hidden relative cursor-pointer border border-neutral-200 bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-500 active:scale-90 transition-transform">
+            >
+              <ImageIcon className="w-3.5 h-3.5" />
+            </button>
             <input
-              type="color"
-              value={background.color || '#14141a'}
-              onChange={(e) => setBackground({ type: 'color', color: e.target.value })}
-              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleBackgroundImageUpload}
+              className="hidden"
             />
-          </label>
+          </div>
+        </div>
 
-          {/* Upload Background Image */}
-          <button
-            title="Set custom background image"
-            onClick={() => fileInputRef.current?.click()}
-            className={cn(
-              'w-6 h-6 rounded-full border border-neutral-200 hover:bg-neutral-100 flex items-center justify-center text-neutral-600 transition-transform active:scale-90',
-              background.type === 'image' && 'border-indigo-600 text-indigo-600 bg-indigo-50'
-            )}
-          >
-            <ImageIcon className="w-3.5 h-3.5" />
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleBackgroundImageUpload}
-            className="hidden"
-          />
+        {/* Gradients */}
+        <div>
+          <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+            Gradients
+          </div>
+          <div className="grid grid-cols-4 gap-1.5">
+            {[
+              { id: 'sunset', label: 'Sunset', grad: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)' },
+              { id: 'aurora', label: 'Aurora', grad: 'linear-gradient(135deg, #134e5e, #71b280)' },
+              { id: 'warm', label: 'Warm', grad: 'linear-gradient(135deg, #ff7e5f, #feb47b)' },
+              { id: 'midnight', label: 'Midnight', grad: 'radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%)' },
+            ].map((g) => (
+              <button
+                key={g.id}
+                title={g.label}
+                onClick={() => setBackground({ type: 'gradient', gradient: g.grad })}
+                className={cn(
+                  'h-6 rounded-md border transition-transform active:scale-90',
+                  background.type === 'gradient' && background.gradient === g.grad
+                    ? 'border-indigo-600 scale-105 shadow-sm ring-2 ring-indigo-200'
+                    : 'border-black/10 hover:scale-105'
+                )}
+                style={{ background: g.grad }}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Pattern Overlays */}
+        <div>
+          <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+            Texture Pattern
+          </div>
+          <div className="grid grid-cols-4 gap-1">
+            {[
+              { id: 'none', label: 'None' },
+              { id: 'dots', label: 'Dots' },
+              { id: 'grid', label: 'Grid' },
+              { id: 'lines', label: 'Lines' },
+            ].map((p) => (
+              <button
+                key={p.id}
+                onClick={() => setBackground({ pattern: p.id as any })}
+                className={cn(
+                  'py-1 rounded-lg border text-[10px] font-medium transition-all active:scale-95 text-center',
+                  (background.pattern ?? 'none') === p.id
+                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                    : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+                )}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
