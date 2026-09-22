@@ -343,7 +343,7 @@ export class CanvasRenderer {
       this.ctx.lineTo(midX, y0 - ROTATE_HANDLE_OFFSET);
       this.ctx.stroke();
 
-      // 8 Resize handle boxes
+      // 8 Resize handle dots (matching line handle style: white circle, indigo border)
       const handlePts = [
         [x0, y0],
         [midX, y0],
@@ -355,14 +355,18 @@ export class CanvasRenderer {
         [x0, midY],
       ];
       this.ctx.fillStyle = '#ffffff';
+      this.ctx.strokeStyle = '#6366f1';
+      this.ctx.lineWidth = 1.5;
       for (const [hx, hy] of handlePts) {
-        this.ctx.fillRect(hx - 4, hy - 4, 8, 8);
-        this.ctx.strokeRect(hx - 4, hy - 4, 8, 8);
+        this.ctx.beginPath();
+        this.ctx.arc(hx, hy, 5.5, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.stroke();
       }
 
       // Rotation circle handle
       this.ctx.beginPath();
-      this.ctx.arc(midX, y0 - ROTATE_HANDLE_OFFSET, 5, 0, Math.PI * 2);
+      this.ctx.arc(midX, y0 - ROTATE_HANDLE_OFFSET, 5.5, 0, Math.PI * 2);
       this.ctx.fill();
       this.ctx.stroke();
     }
