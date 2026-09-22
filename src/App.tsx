@@ -415,9 +415,9 @@ export const App: React.FC = () => {
       {(mode === "wallpaper" || isPreviewing) && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 gap-8 pointer-events-none">
           <div className="pointer-events-auto flex flex-col items-center gap-6 w-full max-w-xl">
-            <ClockWidget />
-            <SearchBar />
-            <QuickLinks />
+            <ClockWidget isLight={isLight} />
+            <SearchBar isLight={isLight} />
+            <QuickLinks isLight={isLight} />
           </div>
         </div>
       )}

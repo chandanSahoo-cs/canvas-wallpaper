@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { Plus, X, Globe } from 'lucide-react';
-import { useWidgetStore, QuickLink } from '../store/useWidgetStore';
+import { Plus, X } from 'lucide-react';
+import { useWidgetStore } from '../store/useWidgetStore';
 import { useAppStore } from '../store/useAppStore';
 import { isColorLight, cn } from '../lib/utils';
 
-export const QuickLinks: React.FC = () => {
+interface QuickLinksProps {
+  isLight?: boolean;
+}
+
+export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) => {
   const showQuickLinks = useWidgetStore((s) => s.showQuickLinks);
   const quickLinks = useWidgetStore((s) => s.quickLinks);
   const addQuickLink = useWidgetStore((s) => s.addQuickLink);
@@ -16,7 +20,10 @@ export const QuickLinks: React.FC = () => {
   const [newUrl, setNewUrl] = useState('');
 
   const isLight =
-    background.type === 'color' && isColorLight(background.color || '#14141a');
+    propIsLight !== undefined
+      ? propIsLight
+      : !(background?.type === 'image' && background?.imageUrl) &&
+        isColorLight(background?.color || '#14141a');
 
   if (!showQuickLinks) return null;
 
@@ -51,14 +58,14 @@ export const QuickLinks: React.FC = () => {
               className={cn(
                 'flex flex-col items-center gap-1.5 w-18 p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md',
                 isLight
-                  ? 'bg-neutral-900/10 hover:bg-neutral-900/15 border border-neutral-900/15 text-neutral-900'
+                  ? 'bg-white/80 hover:bg-white/95 border border-neutral-200/90 text-neutral-900 shadow-sm hover:shadow-md'
                   : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white'
               )}
             >
               <div
                 className={cn(
                   'w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden',
-                  isLight ? 'bg-neutral-900/10' : 'bg-white/20'
+                  isLight ? 'bg-neutral-100 border border-neutral-200/60' : 'bg-white/20'
                 )}
               >
                 <img
@@ -72,7 +79,7 @@ export const QuickLinks: React.FC = () => {
               </div>
               <span
                 className={cn(
-                  'text-[11px] font-medium truncate max-w-full drop-shadow-xs',
+                  'text-[11px] font-semibold truncate max-w-full drop-shadow-xs',
                   isLight ? 'text-neutral-800' : 'text-white/90'
                 )}
               >
@@ -103,21 +110,21 @@ export const QuickLinks: React.FC = () => {
         className={cn(
           'flex flex-col items-center justify-center w-18 h-[76px] p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md',
           isLight
-            ? 'bg-neutral-900/10 hover:bg-neutral-900/15 border border-neutral-900/15 text-neutral-700 hover:text-neutral-900'
+            ? 'bg-white/80 hover:bg-white/95 border border-neutral-200/90 text-neutral-700 hover:text-neutral-900 shadow-sm hover:shadow-md'
             : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white/80 hover:text-white'
         )}
       >
         <div
           className={cn(
             'w-10 h-10 rounded-xl flex items-center justify-center',
-            isLight ? 'bg-neutral-900/10' : 'bg-white/15'
+            isLight ? 'bg-neutral-100 border border-neutral-200/60' : 'bg-white/15'
           )}
         >
           <Plus className="w-5 h-5" />
         </div>
         <span
           className={cn(
-            'text-[11px] font-medium mt-1',
+            'text-[11px] font-semibold mt-1',
             isLight ? 'text-neutral-700' : 'text-white/80'
           )}
         >

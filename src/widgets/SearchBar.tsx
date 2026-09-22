@@ -4,14 +4,21 @@ import { useWidgetStore } from '../store/useWidgetStore';
 import { useAppStore } from '../store/useAppStore';
 import { isColorLight, cn } from '../lib/utils';
 
-export const SearchBar: React.FC = () => {
+interface SearchBarProps {
+  isLight?: boolean;
+}
+
+export const SearchBar: React.FC<SearchBarProps> = ({ isLight: propIsLight }) => {
   const showSearch = useWidgetStore((s) => s.showSearch);
   const searchEngine = useWidgetStore((s) => s.searchEngine);
   const background = useAppStore((s) => s.background);
   const [query, setQuery] = useState('');
 
   const isLight =
-    background.type === 'color' && isColorLight(background.color || '#14141a');
+    propIsLight !== undefined
+      ? propIsLight
+      : !(background?.type === 'image' && background?.imageUrl) &&
+        isColorLight(background?.color || '#14141a');
 
   if (!showSearch) return null;
 
@@ -37,9 +44,9 @@ export const SearchBar: React.FC = () => {
     >
       <div
         className={cn(
-          'absolute left-3.5 transition-colors',
+          'absolute left-3.5 transition-colors z-10',
           isLight
-            ? 'text-neutral-500 group-focus-within:text-neutral-900'
+            ? 'text-neutral-500 group-focus-within:text-indigo-600'
             : 'text-white/50 group-focus-within:text-white'
         )}
       >
@@ -53,7 +60,7 @@ export const SearchBar: React.FC = () => {
         className={cn(
           'w-full pl-10 pr-4 py-2.5 rounded-full backdrop-blur-xl text-sm outline-none transition-all shadow-lg focus:shadow-xl',
           isLight
-            ? 'bg-neutral-900/10 hover:bg-neutral-900/15 focus:bg-neutral-900/20 border border-neutral-900/15 focus:border-neutral-900/30 text-neutral-900 placeholder-neutral-500'
+            ? 'bg-white/80 hover:bg-white/95 focus:bg-white border border-neutral-300 focus:border-indigo-500 text-neutral-900 placeholder-neutral-500 shadow-black/10'
             : 'bg-white/15 hover:bg-white/20 focus:bg-white/25 border border-white/20 focus:border-white/40 text-white placeholder-white/50'
         )}
       />

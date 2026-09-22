@@ -261,7 +261,9 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setBackground: (bg) => {
     const prevBg = get().background;
-    const newBg = typeof bg === 'string' ? { type: 'color' as const, color: bg } : { ...prevBg, ...bg };
+    const newBg: BackgroundConfig = typeof bg === 'string'
+      ? { type: 'color', color: bg }
+      : { ...prevBg, ...bg, type: bg.type || prevBg.type || 'color' };
 
     const prevColor = prevBg.color || '#14141a';
     const newColor = newBg.color || '#14141a';

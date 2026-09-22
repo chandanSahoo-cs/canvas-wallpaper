@@ -47,8 +47,18 @@ export const StylePanel: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Tab state when no element is selected: 'canvas' | 'defaults'
-  const [activeTab, setActiveTab] = useState<'canvas' | 'defaults'>('canvas');
+  const selectedMembers = elements.filter((el) => selectedIds.has(el.id));
+  const hasSelection = selectedMembers.length > 0;
+  const isLocked = hasSelection && selectedMembers.every((el) => el.locked);
+
+  // Tab state: 'styles' | 'wallpaper'
+  const [activeTab, setActiveTab] = useState<'styles' | 'wallpaper'>('wallpaper');
+
+  React.useEffect(() => {
+    if (hasSelection) {
+      setActiveTab('styles');
+    }
+  }, [hasSelection]);
 
   const isLightBg = isColorLight(background.color || '#14141a');
   const strokePresets = isLightBg
@@ -56,10 +66,6 @@ export const StylePanel: React.FC = () => {
     : ['#ffffff', '#e03131', '#2f9e44', '#1971c2', '#f08c00', '#1e1e1e'];
   const fillPresets = ['transparent', '#ffc9c9', '#b2f2bb', '#a5d8ff', '#ffec99', '#f3f0ff'];
   const bgPresets = ['#14141a', '#1e1e24', '#f5f5f7', '#0b3d91', '#2d6a4f', '#2b1b3d'];
-
-  const selectedMembers = elements.filter((el) => selectedIds.has(el.id));
-  const hasSelection = selectedMembers.length > 0;
-  const isLocked = hasSelection && selectedMembers.every((el) => el.locked);
 
   const handleStrokeChange = (color: string) => {
     setCurrentStyles({ strokeColor: color });
@@ -143,54 +149,38 @@ export const StylePanel: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  // Determine whether to show Element Styles view vs Canvas view
-  const isDrawingTool = currentTool !== 'selection';
-  const showElementProperties = hasSelection || isDrawingTool || activeTab === 'defaults';
-
   return (
     <div className="fixed top-20 left-4 z-20 w-60 max-h-[calc(100vh-6rem)] bg-white/95 backdrop-blur-xl border border-neutral-200/80 shadow-xl rounded-2xl p-3.5 flex flex-col gap-3.5 text-xs select-none overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-neutral-200 hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300 [&::-webkit-scrollbar-thumb]:rounded-full">
-      {/* Header / Mode Switcher when nothing is selected */}
-      {!hasSelection && !isDrawingTool && (
-        <div className="flex items-center bg-neutral-100 p-0.5 rounded-xl">
-          <button
-            onClick={() => setActiveTab('canvas')}
-            className={cn(
-              'flex-1 py-1 rounded-lg font-medium text-[11px] transition-all flex items-center justify-center gap-1.5',
-              activeTab === 'canvas'
-                ? 'bg-white text-neutral-900 shadow-xs'
-                : 'text-neutral-500 hover:text-neutral-800'
-            )}
-          >
-            <Palette className="w-3.5 h-3.5" /> Canvas
-          </button>
-          <button
-            onClick={() => setActiveTab('defaults')}
-            className={cn(
-              'flex-1 py-1 rounded-lg font-medium text-[11px] transition-all flex items-center justify-center gap-1.5',
-              activeTab === 'defaults'
-                ? 'bg-white text-neutral-900 shadow-xs'
-                : 'text-neutral-500 hover:text-neutral-800'
-            )}
-          >
-            <Sliders className="w-3.5 h-3.5" /> Tool Defaults
-          </button>
-        </div>
-      )}
-
-      {/* Selected Indicator Badge */}
-      {hasSelection && (
-        <div className="flex items-center justify-between pb-2 border-b border-neutral-100">
-          <span className="text-[11px] font-semibold text-neutral-700">
-            {selectedMembers.length} {selectedMembers.length === 1 ? 'Element' : 'Elements'} Selected
-          </span>
-          <span className="text-[10px] font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full font-medium">
-            Properties
-          </span>
-        </div>
-      )}
+      {/* Top Tabs: Tool / Element Styles vs Wallpaper Canvas */}
+      <div className="flex items-center bg-neutral-100 p-0.5 rounded-xl shrink-0">
+        <button
+          onClick={() => setActiveTab('styles')}
+          className={cn(
+            'flex-1 py-1.5 rounded-lg font-medium text-[11px] transition-all flex items-center justify-center gap-1.5',
+            activeTab === 'styles'
+              ? 'bg-white text-neutral-900 shadow-xs'
+              : 'text-neutral-500 hover:text-neutral-800'
+          )}
+        >
+          <Paintbrush className="w-3.5 h-3.5" />
+          <span>{hasSelection ? `Selected (${selectedMembers.length})` : 'Tool Styles'}</span>
+        </button>
+        <button
+          onClick={() => setActiveTab('wallpaper')}
+          className={cn(
+            'flex-1 py-1.5 rounded-lg font-medium text-[11px] transition-all flex items-center justify-center gap-1.5',
+            activeTab === 'wallpaper'
+              ? 'bg-white text-neutral-900 shadow-xs'
+              : 'text-neutral-500 hover:text-neutral-800'
+          )}
+        >
+          <Palette className="w-3.5 h-3.5" />
+          <span>Wallpaper</span>
+        </button>
+      </div>
 
       {/* VIEW A: CANVAS WALLPAPER SETTINGS */}
-      {!showElementProperties ? (
+      {activeTab === 'wallpaper' ? (
         <div className="flex flex-col gap-4">
           {/* Background Color */}
           <div>
@@ -204,7 +194,7 @@ export const StylePanel: React.FC = () => {
                   onClick={() => setBackground({ type: 'color', color: c })}
                   className={cn(
                     'w-6 h-6 rounded-full border-2 transition-transform active:scale-90',
-                    background.type === 'color' && background.color === c
+                    (background.color || '#14141a').toLowerCase() === c.toLowerCase()
                       ? 'border-indigo-600 scale-110 shadow-sm'
                       : 'border-black/10 hover:scale-105'
                   )}
