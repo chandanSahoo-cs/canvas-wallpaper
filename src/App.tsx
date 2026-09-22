@@ -15,6 +15,7 @@ import { ClockWidget } from "./widgets/ClockWidget";
 import { QuickLinks } from "./widgets/QuickLinks";
 import { SearchBar } from "./widgets/SearchBar";
 import { SettingsDialog } from "./widgets/SettingsDialog";
+import { WidgetLayoutOverlay } from "./widgets/WidgetLayoutOverlay";
 
 export const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -49,8 +50,25 @@ export const App: React.FC = () => {
   const setEditingText = useAppStore((s) => s.setEditingText);
   const zoom = useAppStore((s) => s.zoom);
   const scrollOffset = useAppStore((s) => s.scrollOffset);
-
   const loadScenesFromStorage = useSceneStore((s) => s.loadScenesFromStorage);
+
+  const widgetPositions = useWidgetStore((s) => s.widgetPositions);
+  const isLayoutMode = useWidgetStore((s) => s.isLayoutMode);
+  const showClock = useWidgetStore((s) => s.showClock);
+  const showSearch = useWidgetStore((s) => s.showSearch);
+  const showQuickLinks = useWidgetStore((s) => s.showQuickLinks);
+
+  const [isNarrowScreen, setIsNarrowScreen] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsNarrowScreen(window.innerWidth < 768);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleCommitText = (newText: string) => {
     const text = newText.trimEnd();
@@ -412,15 +430,65 @@ export const App: React.FC = () => {
       )}
 
       {/* Wallpaper Mode & Preview Mode Widgets Overlay */}
-      {(mode === "wallpaper" || isPreviewing) && (
-        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 gap-8 pointer-events-none">
-          <div className="pointer-events-auto flex flex-col items-center gap-6 w-full max-w-xl">
-            <ClockWidget isLight={isLight} />
-            <SearchBar isLight={isLight} />
-            <QuickLinks isLight={isLight} />
-          </div>
+      {(mode === "wallpaper" || isPreviewing) && !isLayoutMode && (
+        <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
+          {isNarrowScreen ? (
+            /* Narrow Viewport Fallback: Centered Stack */
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 gap-8">
+              <div className="pointer-events-auto flex flex-col items-center gap-6 w-full max-w-xl">
+                <ClockWidget isLight={isLight} />
+                <SearchBar isLight={isLight} />
+                <QuickLinks isLight={isLight} />
+              </div>
+            </div>
+          ) : (
+            /* Full-Screen Free-Form Spatial Positioning */
+            <>
+              {showClock && (
+                <div
+                  className="absolute pointer-events-auto transition-transform"
+                  style={{
+                    left: `${widgetPositions.clock.x}%`,
+                    top: `${widgetPositions.clock.y}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
+                >
+                  <ClockWidget isLight={isLight} />
+                </div>
+              )}
+
+              {showSearch && (
+                <div
+                  className="absolute pointer-events-auto w-full max-w-md transition-transform px-4"
+                  style={{
+                    left: `${widgetPositions.search.x}%`,
+                    top: `${widgetPositions.search.y}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
+                >
+                  <SearchBar isLight={isLight} />
+                </div>
+              )}
+
+              {showQuickLinks && (
+                <div
+                  className="absolute pointer-events-auto max-w-xl transition-transform px-4"
+                  style={{
+                    left: `${widgetPositions.quickLinks.x}%`,
+                    top: `${widgetPositions.quickLinks.y}%`,
+                    transform: "translate(-50%, -50%)",
+                  }}
+                >
+                  <QuickLinks isLight={isLight} />
+                </div>
+              )}
+            </>
+          )}
         </div>
       )}
+
+      {/* Full-Screen Interactive Widget Layout Customizer */}
+      {isLayoutMode && <WidgetLayoutOverlay isLight={isLight} />}
 
       {/* Floating Action Micro-Dock (Wallpaper Mode) */}
       {mode === "wallpaper" && (

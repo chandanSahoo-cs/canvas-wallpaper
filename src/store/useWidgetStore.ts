@@ -8,6 +8,23 @@ export interface QuickLink {
   icon?: string;
 }
 
+export interface WidgetPosition {
+  x: number; // 0 to 100 (% of viewport width)
+  y: number; // 0 to 100 (% of viewport height)
+}
+
+export interface WidgetPositions {
+  clock: WidgetPosition;
+  search: WidgetPosition;
+  quickLinks: WidgetPosition;
+}
+
+export const DEFAULT_WIDGET_POSITIONS: WidgetPositions = {
+  clock: { x: 50, y: 38 },
+  search: { x: 50, y: 52 },
+  quickLinks: { x: 50, y: 64 },
+};
+
 export interface WidgetSettings {
   showClock: boolean;
   clockFormat: '12h' | '24h';
@@ -16,6 +33,10 @@ export interface WidgetSettings {
   searchEngine: 'google' | 'duckduckgo' | 'bing';
   showQuickLinks: boolean;
   quickLinks: QuickLink[];
+
+  // Free-form layout positions
+  widgetPositions: WidgetPositions;
+  isLayoutMode: boolean;
 
   setShowClock: (show: boolean) => void;
   setClockFormat: (format: '12h' | '24h') => void;
@@ -27,6 +48,11 @@ export interface WidgetSettings {
   addQuickLink: (title: string, url: string) => void;
   removeQuickLink: (id: string) => void;
   updateQuickLink: (id: string, title: string, url: string) => void;
+
+  setWidgetPosition: (widget: keyof WidgetPositions, pos: WidgetPosition) => void;
+  setAllWidgetPositions: (positions: WidgetPositions) => void;
+  resetWidgetPositions: () => void;
+  setIsLayoutMode: (enabled: boolean) => void;
 
   saveToStorage: () => void;
   loadFromStorage: () => void;
@@ -47,6 +73,9 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
   searchEngine: 'google',
   showQuickLinks: true,
   quickLinks: DEFAULT_QUICK_LINKS,
+
+  widgetPositions: DEFAULT_WIDGET_POSITIONS,
+  isLayoutMode: false,
 
   setShowClock: (show) => {
     set({ showClock: show });
@@ -110,9 +139,55 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
     get().saveToStorage();
   },
 
+  setWidgetPosition: (widget, pos) => {
+    // Clamp coordinates safely within [5, 95] to prevent off-screen loss
+    const clampedX = Math.min(95, Math.max(5, Math.round(pos.x * 10) / 10));
+    const clampedY = Math.min(95, Math.max(5, Math.round(pos.y * 10) / 10));
+
+    set((state) => ({
+      widgetPositions: {
+        ...state.widgetPositions,
+        [widget]: { x: clampedX, y: clampedY },
+      },
+    }));
+    get().saveToStorage();
+  },
+
+  setAllWidgetPositions: (positions) => {
+    set({ widgetPositions: positions });
+    get().saveToStorage();
+  },
+
+  resetWidgetPositions: () => {
+    set({ widgetPositions: DEFAULT_WIDGET_POSITIONS });
+    get().saveToStorage();
+  },
+
+  setIsLayoutMode: (enabled) => {
+    set({ isLayoutMode: enabled });
+  },
+
   saveToStorage: () => {
-    const { showClock, clockFormat, showDate, showSearch, searchEngine, showQuickLinks, quickLinks } = get();
-    const data = { showClock, clockFormat, showDate, showSearch, searchEngine, showQuickLinks, quickLinks };
+    const {
+      showClock,
+      clockFormat,
+      showDate,
+      showSearch,
+      searchEngine,
+      showQuickLinks,
+      quickLinks,
+      widgetPositions,
+    } = get();
+    const data = {
+      showClock,
+      clockFormat,
+      showDate,
+      showSearch,
+      searchEngine,
+      showQuickLinks,
+      quickLinks,
+      widgetPositions,
+    };
     try {
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         chrome.storage.local.set({ wallpaperWidgets: JSON.stringify(data) });
@@ -129,7 +204,14 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
       if (!raw) return;
       try {
         const data = JSON.parse(raw);
-        set((state) => ({ ...state, ...data }));
+        set((state) => ({
+          ...state,
+          ...data,
+          widgetPositions: {
+            ...DEFAULT_WIDGET_POSITIONS,
+            ...(data.widgetPositions || {}),
+          },
+        }));
       } catch (e) {}
     };
 

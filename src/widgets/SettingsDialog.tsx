@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Clock, Calendar, Search, Link2, Settings } from 'lucide-react';
+import { X, Clock, Calendar, Search, Link2, Settings, LayoutGrid, Move, RotateCcw } from 'lucide-react';
 import { useWidgetStore } from '../store/useWidgetStore';
 
 interface SettingsDialogProps {
@@ -22,6 +22,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
 
   const showQuickLinks = useWidgetStore((s) => s.showQuickLinks);
   const setShowQuickLinks = useWidgetStore((s) => s.setShowQuickLinks);
+
+  const setIsLayoutMode = useWidgetStore((s) => s.setIsLayoutMode);
+  const resetWidgetPositions = useWidgetStore((s) => s.resetWidgetPositions);
 
   if (!isOpen) return null;
 
@@ -163,6 +166,37 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
               />
               <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
             </label>
+          </div>
+
+          {/* Widget Layout & Alignment */}
+          <div className="pt-3 border-t border-neutral-100 flex flex-col gap-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <LayoutGrid className="w-4 h-4 text-indigo-600" />
+                <div>
+                  <div className="text-sm font-medium">Widget Layout</div>
+                  <div className="text-xs text-neutral-500">Align accessories anywhere on full screen</div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <button
+                onClick={() => {
+                  onClose();
+                  setIsLayoutMode(true);
+                }}
+                className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium text-xs flex items-center justify-center gap-2 border border-indigo-200/80 active:scale-95 transition-all"
+              >
+                <Move className="w-3.5 h-3.5" /> Customize Layout (Drag Anywhere)
+              </button>
+              <button
+                onClick={resetWidgetPositions}
+                title="Reset widgets to default center stack"
+                className="p-2 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-600 active:scale-95 transition-all"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
 
