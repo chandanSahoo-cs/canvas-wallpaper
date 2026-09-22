@@ -33,6 +33,7 @@ export function openTextEditor(
     canvasY: existingElement ? existingElement.y : canvasPos.y,
     text: existingElement ? existingElement.text || '' : '',
     fontSize,
+    fontFamily: existingElement?.fontFamily || store.currentFontFamily || 'handwritten',
     strokeColor: existingElement ? existingElement.strokeColor : store.currentStrokeColor,
     angle: existingElement ? existingElement.angle : 0,
   });

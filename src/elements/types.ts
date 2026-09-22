@@ -58,12 +58,15 @@ export interface FreedrawElement extends BaseElement {
   points: Point[];
 }
 
+export type FontFamily = 'handwritten' | 'sans' | 'monospace';
+
 export interface TextElement extends BaseElement {
   type: 'text';
   x: number;
   y: number;
   text: string;
   fontSize?: number;
+  fontFamily?: FontFamily;
 }
 
 export interface ImageElement extends BaseElement {

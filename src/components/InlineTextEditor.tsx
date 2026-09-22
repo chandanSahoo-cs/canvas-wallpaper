@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Point } from '../elements/types';
 import { TextEditorState } from '../store/useAppStore';
+import { getFontFamilyString } from '../canvas/geometry';
 
 interface InlineTextEditorProps {
   data: TextEditorState;
@@ -30,15 +31,25 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
   const [text, setText] = useState(data.text || '');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isCommittedRef = useRef(false);
+  const mountedAtRef = useRef(Date.now());
 
-  // Focus and select all text if editing existing element
+  // Focus and select all text if editing existing element; ensure reliable focus on mount
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.focus();
+    const el = textareaRef.current;
+    if (el) {
+      el.focus();
       if (data.elementId && data.text) {
-        textareaRef.current.select();
+        el.select();
+      } else {
+        el.selectionStart = el.selectionEnd = el.value.length;
       }
     }
+    const timer = setTimeout(() => {
+      if (textareaRef.current && document.activeElement !== textareaRef.current) {
+        textareaRef.current.focus();
+      }
+    }, 20);
+    return () => clearTimeout(timer);
   }, []);
 
   const commit = (cancel = false) => {
@@ -51,18 +62,28 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
     }
   };
 
+  const handleBlur = () => {
+    // Prevent immediate blur from the opening mouseup/click event
+    if (Date.now() - mountedAtRef.current < 150) {
+      textareaRef.current?.focus();
+      return;
+    }
+    commit(false);
+  };
+
   // Compute screen coordinates and scaled font metrics
   const screenX = (data.canvasX - scrollOffset.x) * zoom;
   const screenY = (data.canvasY - scrollOffset.y) * zoom;
   const scaledFontSize = Math.max(12, data.fontSize * zoom);
-  const lineHeight = scaledFontSize * 1.3;
+  const fontFamily = getFontFamilyString(data.fontFamily);
+  const lineHeight = scaledFontSize * 1.25;
 
   // Measure text to dynamically fit width and height like Excalidraw
   const lines = text.split('\n');
   const ctx = getMeasureCtx();
   let maxLineWidth = 0;
   if (ctx) {
-    ctx.font = `${scaledFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    ctx.font = `${scaledFontSize}px ${fontFamily}`;
     for (const line of lines) {
       const w = ctx.measureText(line).width;
       if (w > maxLineWidth) maxLineWidth = w;
@@ -72,9 +93,9 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
   }
 
   // Minimum width gives room for blinking caret at start
-  const minWidth = Math.max(28, Math.ceil(scaledFontSize * 1.2));
-  const editorWidth = Math.max(minWidth, Math.ceil(maxLineWidth + 12));
-  const editorHeight = Math.max(lineHeight, lines.length * lineHeight);
+  const minWidth = Math.max(32, Math.ceil(scaledFontSize * 1.2));
+  const editorWidth = Math.max(minWidth, Math.ceil(maxLineWidth + 16));
+  const editorHeight = Math.max(lineHeight, lines.length * lineHeight + 4);
 
   const style: React.CSSProperties = {
     position: 'fixed',
@@ -82,16 +103,17 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
     top: `${screenY}px`,
     width: `${editorWidth}px`,
     height: `${editorHeight}px`,
-    font: `${scaledFontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`,
-    lineHeight: '1.3',
+    font: `${scaledFontSize}px ${fontFamily}`,
+    fontFamily,
+    fontSize: `${scaledFontSize}px`,
+    lineHeight: '1.25',
     color: data.strokeColor || '#1e1e1e',
     caretColor: data.strokeColor || '#1e1e1e',
     background: 'transparent',
-    border: '1px dashed rgba(99, 102, 241, 0.75)',
-    borderRadius: '2px',
+    border: 'none',
     outline: 'none',
     boxShadow: 'none',
-    padding: '0px 2px',
+    padding: '0px',
     margin: '0px',
     resize: 'none',
     overflow: 'hidden',
@@ -111,15 +133,18 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
       spellCheck={false}
       autoCapitalize="none"
       autoComplete="off"
+      autoFocus
       onChange={(e) => setText(e.target.value)}
-      onBlur={() => commit(false)}
+      onBlur={handleBlur}
       onKeyDown={(e) => {
-        // Isolate all key events from global shortcuts
+        // Isolate key events from global shortcuts
         e.stopPropagation();
+        e.nativeEvent.stopImmediatePropagation();
 
         if (e.key === 'Escape') {
           e.preventDefault();
-          commit(true);
+          // In Excalidraw, Escape commits whatever was typed (empty text will be cleaned up on commit)
+          commit(false);
         } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
           e.preventDefault();
           commit(false);

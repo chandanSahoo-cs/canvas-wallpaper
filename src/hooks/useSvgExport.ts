@@ -1,6 +1,6 @@
 import { useAppStore } from '../store/useAppStore';
 import { CanvasElement, TextElement, ImageElement } from '../elements/types';
-import { getCenter, normBox, diamondPoints, FONT_SIZE_MAP } from '../canvas/geometry';
+import { getCenter, normBox, diamondPoints, FONT_SIZE_MAP, getFontFamilyString } from '../canvas/geometry';
 
 export function exportWallpaperAsSvg(): void {
   const { elements, background } = useAppStore.getState();
@@ -135,10 +135,11 @@ export function exportWallpaperAsSvg(): void {
           ].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</tspan>`;
         }
 
+        const fontFamily = getFontFamilyString(textEl.fontFamily).replace(/"/g, "'");
         svgParts.push(
           `<text x="${textEl.x ?? 0}" y="${
             (textEl.y ?? 0) + fontSize
-          }" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="${fontSize}" fill="${
+          }" font-family="${fontFamily}" font-size="${fontSize}" fill="${
             textEl.strokeColor || '#1e1e1e'
           }" opacity="${opacity}"${rotateAttr}>${textSpans}</text>`
         );

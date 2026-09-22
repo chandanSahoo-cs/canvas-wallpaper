@@ -1,6 +1,19 @@
-import { Point, CanvasElement, RectangleElement, DiamondElement, EllipseElement, LineElement, ArrowElement, FreedrawElement, TextElement, ImageElement } from '../elements/types';
+import { Point, CanvasElement, RectangleElement, DiamondElement, EllipseElement, LineElement, ArrowElement, FreedrawElement, TextElement, ImageElement, FontFamily } from '../elements/types';
 
-export const FONT_SIZE_MAP: Record<number, number> = { 1.5: 16, 3: 20, 5.5: 28 };
+export const FONT_SIZE_MAP: Record<number, number> = { 1.5: 16, 3: 20, 5.5: 28, 8: 36 };
+export const EXCALIDRAW_FONT_FAMILY =
+  'Excalifont, Virgil, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+
+export function getFontFamilyString(family?: FontFamily): string {
+  if (family === 'sans') {
+    return '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  }
+  if (family === 'monospace') {
+    return '"Cascadia Code", "Courier New", monospace';
+  }
+  return EXCALIDRAW_FONT_FAMILY;
+}
+
 export const HANDLE_HIT_RADIUS = 16;
 export const ROTATE_HANDLE_OFFSET = 28;
 
@@ -96,12 +109,12 @@ export function getBBox(el: CanvasElement): BoundingBox {
     const fontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
     const textStr = typeof textEl.text === 'string' ? textEl.text : '';
     const lines = textStr ? textStr.split('\n') : [''];
-    const lineHeight = fontSize * 1.3;
+    const lineHeight = fontSize * 1.25;
 
     const ctx = getSharedMeasureCtx();
     let maxLineWidth = 0;
     if (ctx) {
-      ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.font = `${fontSize}px ${getFontFamilyString(textEl.fontFamily)}`;
       for (const line of lines) {
         const w = ctx.measureText(line).width;
         if (w > maxLineWidth) maxLineWidth = w;

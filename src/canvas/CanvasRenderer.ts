@@ -14,6 +14,7 @@ import {
   getHandlePositions,
   ROTATE_HANDLE_OFFSET,
   FONT_SIZE_MAP,
+  getFontFamilyString,
 } from './geometry';
 import { getRoughDrawable, roughOptions } from './rough-cache';
 
@@ -199,12 +200,12 @@ export class CanvasRenderer {
     const textStr = typeof el.text === 'string' ? el.text : '';
     if (!textStr) return;
     const fontSize = el.fontSize || FONT_SIZE_MAP[el.strokeWidth] || 20;
-    this.ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+    this.ctx.font = `${fontSize}px ${getFontFamilyString(el.fontFamily)}`;
     this.ctx.fillStyle = el.strokeColor || '#1e1e1e';
     this.ctx.textBaseline = 'top';
 
     const lines = textStr.split('\n');
-    const lineHeight = fontSize * 1.3;
+    const lineHeight = fontSize * 1.25;
     for (let i = 0; i < lines.length; i++) {
       this.ctx.fillText(lines[i], el.x ?? 0, (el.y ?? 0) + i * lineHeight);
     }
@@ -244,7 +245,10 @@ export class CanvasRenderer {
   }
 
   private drawSelectionOverlays(elements: CanvasElement[], selectedIds: Set<string>): void {
-    const selectedMembers = elements.filter((el) => selectedIds.has(el.id));
+    const editingText = useAppStore.getState().editingText;
+    const selectedMembers = elements.filter(
+      (el) => selectedIds.has(el.id) && (!editingText || el.id !== editingText.elementId)
+    );
     if (selectedMembers.length === 0) return;
 
     // Draw item outlines for multi-selection

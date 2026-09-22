@@ -6,6 +6,7 @@ import {
   FillStyle,
   StrokeStyle,
   BackgroundConfig,
+  FontFamily,
 } from '../elements/types';
 import { newId } from '../lib/utils';
 import { getCenter, rotatePoint } from '../canvas/geometry';
@@ -18,6 +19,7 @@ export interface TextEditorState {
   canvasY: number;
   text: string;
   fontSize: number;
+  fontFamily?: FontFamily;
   strokeColor: string;
   angle?: number;
 }
@@ -46,6 +48,7 @@ export interface AppState {
   currentStrokeStyle: StrokeStyle;
   currentRoughness: number;
   currentOpacity: number;
+  currentFontFamily: FontFamily;
 
   // History for undo / redo
   history: CanvasElement[][];
@@ -75,6 +78,7 @@ export interface AppState {
     strokeStyle: StrokeStyle;
     roughness: number;
     opacity: number;
+    fontFamily: FontFamily;
   }>) => void;
 
   // Manipulation on selected
@@ -124,6 +128,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   currentStrokeStyle: 'solid',
   currentRoughness: 1.4,
   currentOpacity: 100,
+  currentFontFamily: 'handwritten',
 
   history: [],
   future: [],

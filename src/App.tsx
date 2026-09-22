@@ -6,6 +6,7 @@ import { StylePanel } from "./components/StylePanel";
 import { TemplateGallery } from "./components/TemplateGallery";
 import { Toolbar } from "./components/Toolbar";
 import { ImageElement, TextElement, ToolType } from "./elements/types";
+import { openTextEditor } from "./tools/TextTool";
 import { cn, newId, randomSeed } from "./lib/utils";
 import { useAppStore } from "./store/useAppStore";
 import { useSceneStore } from "./store/useSceneStore";
@@ -80,6 +81,10 @@ export const App: React.FC = () => {
         y: editingText.canvasY,
         text,
         fontSize: editingText.fontSize,
+        fontFamily:
+          editingText.fontFamily ||
+          useAppStore.getState().currentFontFamily ||
+          "handwritten",
         strokeColor: editingText.strokeColor,
         fillColor: "transparent",
         strokeWidth: useAppStore.getState().currentStrokeWidth,
@@ -120,6 +125,9 @@ export const App: React.FC = () => {
 
       if (mode !== "drawing") return;
 
+      // Never trigger canvas shortcuts while typing into text editor
+      if (useAppStore.getState().editingText) return;
+
       const target = e.target as HTMLElement | null;
       if (
         target?.tagName === "TEXTAREA" ||
@@ -134,6 +142,17 @@ export const App: React.FC = () => {
 
       const key = e.key.toLowerCase();
       const mod = e.metaKey || e.ctrlKey;
+
+      // Enter on single selected text element -> edit it like Excalidraw
+      if (e.key === "Enter" && !mod && selectedIds.size === 1) {
+        const selectedId = Array.from(selectedIds)[0];
+        const selectedEl = elements.find((el) => el.id === selectedId);
+        if (selectedEl && selectedEl.type === "text" && !selectedEl.locked) {
+          e.preventDefault();
+          openTextEditor({ x: selectedEl.x, y: selectedEl.y }, selectedEl as TextElement);
+          return;
+        }
+      }
 
       if (mod && key === "z") {
         e.preventDefault();

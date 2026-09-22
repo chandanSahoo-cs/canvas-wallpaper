@@ -14,9 +14,12 @@ import {
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
 import { cn } from '../lib/utils';
-import { FillStyle, StrokeStyle } from '../elements/types';
+import { FillStyle, StrokeStyle, FontFamily, TextElement } from '../elements/types';
+import { FONT_SIZE_MAP } from '../canvas/geometry';
 
 export const StylePanel: React.FC = () => {
+  const currentTool = useAppStore((s) => s.currentTool);
+  const currentFontFamily = useAppStore((s) => s.currentFontFamily);
   const currentStrokeColor = useAppStore((s) => s.currentStrokeColor);
   const currentFillColor = useAppStore((s) => s.currentFillColor);
   const currentStrokeWidth = useAppStore((s) => s.currentStrokeWidth);
@@ -78,6 +81,28 @@ export const StylePanel: React.FC = () => {
   const handleWidthChange = (width: number) => {
     setCurrentStyles({ strokeWidth: width });
     if (hasSelection) updateSelectedElements({ strokeWidth: width });
+  };
+
+  const isTextOnly =
+    (hasSelection && selectedMembers.every((m) => m.type === 'text')) ||
+    (!hasSelection && currentTool === 'text');
+
+  const selectedFontSize =
+    selectedMembers[0]?.type === 'text'
+      ? (selectedMembers[0] as TextElement).fontSize || FONT_SIZE_MAP[selectedMembers[0].strokeWidth] || 20
+      : FONT_SIZE_MAP[currentStrokeWidth] || 20;
+
+  const handleFontFamilyChange = (fontFamily: FontFamily) => {
+    setCurrentStyles({ fontFamily });
+    if (hasSelection) updateSelectedElements({ fontFamily } as any);
+  };
+
+  const handleFontSizeChange = (fontSize: number) => {
+    const matchingWidth = Object.entries(FONT_SIZE_MAP).find(([, size]) => size === fontSize)?.[0];
+    if (matchingWidth) {
+      setCurrentStyles({ strokeWidth: Number(matchingWidth) });
+    }
+    if (hasSelection) updateSelectedElements({ fontSize } as any);
   };
 
   const handleOpacityChange = (opacity: number) => {
@@ -163,117 +188,182 @@ export const StylePanel: React.FC = () => {
         </div>
       </div>
 
-      {/* Fill Style */}
-      <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
-          Fill Style
+      {/* Excalidraw-style Font Family */}
+      {isTextOnly && (
+        <div>
+          <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+            Font Family
+          </div>
+          <div className="grid grid-cols-3 gap-1">
+            {[
+              { id: 'handwritten', label: 'Hand-drawn' },
+              { id: 'sans', label: 'Normal' },
+              { id: 'monospace', label: 'Code' },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => handleFontFamilyChange(f.id as FontFamily)}
+                className={cn(
+                  'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
+                  (selectedMembers[0]?.type === 'text'
+                    ? (selectedMembers[0] as TextElement).fontFamily || 'handwritten'
+                    : currentFontFamily) === f.id
+                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                    : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+                )}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-3 gap-1">
-          {[
-            { id: 'solid', label: 'Solid' },
-            { id: 'hachure', label: 'Hachure' },
-            { id: 'cross-hatch', label: 'Cross' },
-          ].map((f) => (
-            <button
-              key={f.id}
-              onClick={() => handleFillStyleChange(f.id as any)}
-              className={cn(
-                'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
-                currentFillStyle === f.id
-                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
-                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
-              )}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      )}
 
-      {/* Stroke Style */}
-      <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
-          Stroke Style
+      {/* Excalidraw-style Font Size */}
+      {isTextOnly && (
+        <div>
+          <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+            Font Size
+          </div>
+          <div className="grid grid-cols-4 gap-1">
+            {[
+              { size: 16, label: 'S' },
+              { size: 20, label: 'M' },
+              { size: 28, label: 'L' },
+              { size: 36, label: 'XL' },
+            ].map((s) => (
+              <button
+                key={s.size}
+                onClick={() => handleFontSizeChange(s.size)}
+                className={cn(
+                  'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
+                  selectedFontSize === s.size
+                    ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                    : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+                )}
+              >
+                {s.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-3 gap-1">
-          {[
-            { id: 'solid', label: 'Solid' },
-            { id: 'dashed', label: 'Dashed' },
-            { id: 'dotted', label: 'Dotted' },
-          ].map((s) => (
-            <button
-              key={s.id}
-              onClick={() => handleStrokeStyleChange(s.id as any)}
-              className={cn(
-                'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
-                currentStrokeStyle === s.id
-                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
-                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
-              )}
-            >
-              {s.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      )}
 
-      {/* Roughness / Sketchiness */}
-      <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
-          Aesthetic
-        </div>
-        <div className="grid grid-cols-3 gap-1">
-          {[
-            { val: 0.2, label: 'Clean' },
-            { val: 1.4, label: 'Sketch' },
-            { val: 2.5, label: 'Rough' },
-          ].map((r) => (
-            <button
-              key={r.val}
-              onClick={() => handleRoughnessChange(r.val)}
-              className={cn(
-                'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
-                currentRoughness === r.val
-                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
-                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
-              )}
-            >
-              {r.label}
-            </button>
-          ))}
-        </div>
-      </div>
+      {!isTextOnly && (
+        <>
+          {/* Fill Style */}
+          <div>
+            <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+              Fill Style
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              {[
+                { id: 'solid', label: 'Solid' },
+                { id: 'hachure', label: 'Hachure' },
+                { id: 'cross-hatch', label: 'Cross' },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => handleFillStyleChange(f.id as any)}
+                  className={cn(
+                    'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
+                    currentFillStyle === f.id
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                      : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+                  )}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
 
-      {/* Stroke Width */}
-      <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
-          Stroke Width
-        </div>
-        <div className="flex items-center gap-1">
-          {[
-            { size: 1.5, label: 'Thin', dot: 4 },
-            { size: 3, label: 'Medium', dot: 8 },
-            { size: 5.5, label: 'Thick', dot: 12 },
-          ].map((s) => (
-            <button
-              key={s.size}
-              onClick={() => handleWidthChange(s.size)}
-              title={s.label}
-              className={cn(
-                'flex-1 py-1.5 rounded-lg flex items-center justify-center border transition-all active:scale-95',
-                currentStrokeWidth === s.size
-                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
-                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
-              )}
-            >
-              <span
-                className="rounded-full bg-current block"
-                style={{ width: `${s.dot}px`, height: `${s.dot}px` }}
-              />
-            </button>
-          ))}
-        </div>
-      </div>
+          {/* Stroke Style */}
+          <div>
+            <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+              Stroke Style
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              {[
+                { id: 'solid', label: 'Solid' },
+                { id: 'dashed', label: 'Dashed' },
+                { id: 'dotted', label: 'Dotted' },
+              ].map((s) => (
+                <button
+                  key={s.id}
+                  onClick={() => handleStrokeStyleChange(s.id as any)}
+                  className={cn(
+                    'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
+                    currentStrokeStyle === s.id
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                      : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+                  )}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Roughness / Sketchiness */}
+          <div>
+            <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+              Aesthetic
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              {[
+                { val: 0.2, label: 'Clean' },
+                { val: 1.4, label: 'Sketch' },
+                { val: 2.5, label: 'Rough' },
+              ].map((r) => (
+                <button
+                  key={r.val}
+                  onClick={() => handleRoughnessChange(r.val)}
+                  className={cn(
+                    'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
+                    currentRoughness === r.val
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                      : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+                  )}
+                >
+                  {r.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Stroke Width */}
+          <div>
+            <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
+              Stroke Width
+            </div>
+            <div className="flex items-center gap-1">
+              {[
+                { size: 1.5, label: 'Thin', dot: 4 },
+                { size: 3, label: 'Medium', dot: 8 },
+                { size: 5.5, label: 'Thick', dot: 12 },
+              ].map((s) => (
+                <button
+                  key={s.size}
+                  onClick={() => handleWidthChange(s.size)}
+                  title={s.label}
+                  className={cn(
+                    'flex-1 py-1.5 rounded-lg flex items-center justify-center border transition-all active:scale-95',
+                    currentStrokeWidth === s.size
+                      ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
+                      : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+                  )}
+                >
+                  <span
+                    className="rounded-full bg-current block"
+                    style={{ width: `${s.dot}px`, height: `${s.dot}px` }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
 
       {/* Opacity */}
       <div>

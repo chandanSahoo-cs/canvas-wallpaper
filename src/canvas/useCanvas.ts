@@ -173,23 +173,31 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       }
     };
 
-    // Double-click to re-edit text
+    // Double-click to edit existing text, add text into shapes, or start typing anywhere like Excalidraw
     const onDoubleClick = (e: MouseEvent) => {
       const state = useAppStore.getState();
       if (state.mode !== 'drawing') return;
 
       const pos = screenToCanvas(e.clientX, e.clientY);
-      // Hit test for text elements
+      // Hit test elements top-to-bottom
       for (let i = state.elements.length - 1; i >= 0; i--) {
         const el = state.elements[i];
-        if (el.type === 'text') {
-          const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
-          if (elementContains(el, local)) {
+        const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
+        if (elementContains(el, local)) {
+          if (el.type === 'text') {
             openTextEditor({ x: el.x, y: el.y }, el as TextElement);
+            return;
+          }
+          if (el.type === 'rectangle' || el.type === 'diamond' || el.type === 'ellipse') {
+            const center = getCenter(el);
+            openTextEditor({ x: center.x - 24, y: center.y - 12 });
             return;
           }
         }
       }
+
+      // Double-click on blank canvas starts typing at that location
+      openTextEditor(pos);
     };
 
     // Wheel event for zoom with Ctrl or touchpad pinch
@@ -257,8 +265,13 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
-    // Initial render
+    // Initial render and font load trigger
     triggerRender();
+    if (typeof document !== 'undefined' && 'fonts' in document) {
+      document.fonts.ready.then(() => {
+        triggerRender();
+      });
+    }
 
     return () => {
       window.removeEventListener('resize', handleResize);

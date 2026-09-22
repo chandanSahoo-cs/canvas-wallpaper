@@ -2,7 +2,7 @@ import rough from 'roughjs';
 import { useAppStore } from '../store/useAppStore';
 import { CanvasElement, Point, TextElement, ImageElement } from '../elements/types';
 import { getRoughDrawable, roughOptions } from '../canvas/rough-cache';
-import { getCenter, FONT_SIZE_MAP } from '../canvas/geometry';
+import { getCenter, FONT_SIZE_MAP, getFontFamilyString } from '../canvas/geometry';
 
 export async function exportWallpaperAsPng(): Promise<void> {
   const state = useAppStore.getState();
@@ -178,11 +178,11 @@ export async function exportWallpaperAsPng(): Promise<void> {
         const textStr = typeof textEl.text === 'string' ? textEl.text : '';
         if (!textStr) break;
         const fontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
-        ctx.font = `${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.font = `${fontSize}px ${getFontFamilyString(textEl.fontFamily)}`;
         ctx.fillStyle = textEl.strokeColor || '#1e1e1e';
         ctx.textBaseline = 'top';
         const lines = textStr.split('\n');
-        const lineHeight = fontSize * 1.3;
+        const lineHeight = fontSize * 1.25;
         for (let i = 0; i < lines.length; i++) {
           ctx.fillText(lines[i], textEl.x ?? 0, (textEl.y ?? 0) + i * lineHeight);
         }
