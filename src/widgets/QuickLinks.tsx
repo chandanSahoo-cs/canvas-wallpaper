@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 import { Plus, X, Globe } from 'lucide-react';
 import { useWidgetStore, QuickLink } from '../store/useWidgetStore';
+import { useAppStore } from '../store/useAppStore';
+import { isColorLight, cn } from '../lib/utils';
 
 export const QuickLinks: React.FC = () => {
   const showQuickLinks = useWidgetStore((s) => s.showQuickLinks);
   const quickLinks = useWidgetStore((s) => s.quickLinks);
   const addQuickLink = useWidgetStore((s) => s.addQuickLink);
   const removeQuickLink = useWidgetStore((s) => s.removeQuickLink);
+  const background = useAppStore((s) => s.background);
 
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newUrl, setNewUrl] = useState('');
+
+  const isLight =
+    background.type === 'color' && isColorLight(background.color || '#14141a');
 
   if (!showQuickLinks) return null;
 
@@ -32,7 +38,7 @@ export const QuickLinks: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center gap-3 flex-wrap max-w-xl mx-auto">
+    <div className="flex items-center justify-center gap-3 flex-wrap max-w-xl mx-auto select-none">
       {quickLinks.map((link) => {
         const domain = getDomain(link.url);
         const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
@@ -42,9 +48,19 @@ export const QuickLinks: React.FC = () => {
             <a
               href={link.url}
               title={link.title}
-              className="flex flex-col items-center gap-1.5 w-18 p-2 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/15 transition-all duration-150 hover:scale-105 active:scale-95 text-white"
+              className={cn(
+                'flex flex-col items-center gap-1.5 w-18 p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md',
+                isLight
+                  ? 'bg-neutral-900/10 hover:bg-neutral-900/15 border border-neutral-900/15 text-neutral-900'
+                  : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white'
+              )}
             >
-              <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center overflow-hidden">
+              <div
+                className={cn(
+                  'w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden',
+                  isLight ? 'bg-neutral-900/10' : 'bg-white/20'
+                )}
+              >
                 <img
                   src={faviconUrl}
                   alt={link.title}
@@ -54,7 +70,12 @@ export const QuickLinks: React.FC = () => {
                   }}
                 />
               </div>
-              <span className="text-[11px] font-medium truncate max-w-full text-white/90 drop-shadow-sm">
+              <span
+                className={cn(
+                  'text-[11px] font-medium truncate max-w-full drop-shadow-xs',
+                  isLight ? 'text-neutral-800' : 'text-white/90'
+                )}
+              >
                 {link.title}
               </span>
             </a>
@@ -67,7 +88,7 @@ export const QuickLinks: React.FC = () => {
                 removeQuickLink(link.id);
               }}
               title="Remove shortcut"
-              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-neutral-900/80 hover:bg-neutral-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow-md"
+              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-neutral-900/90 hover:bg-neutral-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow-md"
             >
               <X className="w-3 h-3" />
             </button>
@@ -79,18 +100,35 @@ export const QuickLinks: React.FC = () => {
       <button
         onClick={() => setIsAdding(true)}
         title="Add Shortcut"
-        className="flex flex-col items-center justify-center w-18 h-[76px] p-2 rounded-2xl bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/15 text-white/80 hover:text-white transition-all duration-150 hover:scale-105 active:scale-95"
+        className={cn(
+          'flex flex-col items-center justify-center w-18 h-[76px] p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md',
+          isLight
+            ? 'bg-neutral-900/10 hover:bg-neutral-900/15 border border-neutral-900/15 text-neutral-700 hover:text-neutral-900'
+            : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white/80 hover:text-white'
+        )}
       >
-        <div className="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center">
+        <div
+          className={cn(
+            'w-10 h-10 rounded-xl flex items-center justify-center',
+            isLight ? 'bg-neutral-900/10' : 'bg-white/15'
+          )}
+        >
           <Plus className="w-5 h-5" />
         </div>
-        <span className="text-[11px] font-medium text-white/80 mt-1">Add</span>
+        <span
+          className={cn(
+            'text-[11px] font-medium mt-1',
+            isLight ? 'text-neutral-700' : 'text-white/80'
+          )}
+        >
+          Add
+        </span>
       </button>
 
       {/* Add Shortcut Modal */}
       {isAdding && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border border-neutral-200">
+          <div className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border border-neutral-200 animate-in fade-in zoom-in-95 duration-150">
             <h3 className="text-sm font-semibold text-neutral-800 mb-3">Add Shortcut</h3>
             <form onSubmit={handleAdd} className="flex flex-col gap-3">
               <div>
@@ -99,40 +137,38 @@ export const QuickLinks: React.FC = () => {
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. GitHub"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-neutral-200 text-sm outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                  placeholder="e.g. GitHub"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
                 />
               </div>
-
               <div>
                 <label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider block mb-1">
                   URL
                 </label>
                 <input
-                  type="text"
-                  required
-                  placeholder="e.g. github.com"
+                  type="url"
                   value={newUrl}
                   onChange={(e) => setNewUrl(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-neutral-200 text-sm outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                  placeholder="https://..."
+                  required
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
                 />
               </div>
-
-              <div className="flex items-center justify-end gap-2 mt-2">
+              <div className="flex justify-end gap-2 mt-2">
                 <button
                   type="button"
                   onClick={() => setIsAdding(false)}
-                  className="px-3 py-1.5 rounded-xl border border-neutral-200 text-xs font-medium text-neutral-600 hover:bg-neutral-50"
+                  className="px-3 py-1.5 text-xs text-neutral-600 hover:bg-neutral-100 rounded-xl"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium shadow-sm active:scale-95"
+                  className="px-4 py-1.5 text-xs bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 shadow-sm"
                 >
-                  Save
+                  Add Shortcut
                 </button>
               </div>
             </form>

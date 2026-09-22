@@ -2,6 +2,7 @@ import { EyeOff, Pencil, Settings } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useCanvas } from "./canvas/useCanvas";
 import { InlineTextEditor } from "./components/InlineTextEditor";
+import { SceneSwitcher } from "./components/SceneSwitcher";
 import { StylePanel } from "./components/StylePanel";
 import { Toolbar } from "./components/Toolbar";
 import { ImageElement, TextElement, ToolType } from "./elements/types";
@@ -49,10 +50,6 @@ export const App: React.FC = () => {
   const zoom = useAppStore((s) => s.zoom);
   const scrollOffset = useAppStore((s) => s.scrollOffset);
 
-  const scenes = useSceneStore((s) => s.scenes);
-  const activeSceneId = useSceneStore((s) => s.activeSceneId);
-  const switchScene = useSceneStore((s) => s.switchScene);
-  const createScene = useSceneStore((s) => s.createScene);
   const loadScenesFromStorage = useSceneStore((s) => s.loadScenesFromStorage);
 
   const handleCommitText = (newText: string) => {
@@ -425,30 +422,31 @@ export const App: React.FC = () => {
         </div>
       )}
 
-      {/* Floating Action Buttons (Wallpaper Mode) */}
+      {/* Floating Action Micro-Dock (Wallpaper Mode) */}
       {mode === "wallpaper" && (
-        <div className="fixed bottom-6 right-6 z-20 flex items-center gap-2.5">
+        <div
+          className={cn(
+            "fixed bottom-6 right-6 z-20 flex items-center p-1.5 rounded-full backdrop-blur-xl border transition-all duration-300 shadow-2xl",
+            isLight
+              ? "bg-neutral-900/85 hover:bg-neutral-900 text-white border-neutral-700/60 shadow-black/25"
+              : "bg-white/20 hover:bg-white/25 text-white border-white/25 shadow-black/35"
+          )}
+        >
           <button
             title="Widget Settings"
             onClick={() => setIsSettingsOpen(true)}
-            className={cn(
-              "w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 shadow-xl",
-              isLight
-                ? "bg-neutral-900/85 hover:bg-neutral-900 text-white border border-neutral-700/60 shadow-black/20"
-                : "bg-white/20 hover:bg-white/30 text-white border border-white/25 shadow-black/30"
-            )}>
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 active:scale-95 transition-all text-white"
+          >
             <Settings className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]" />
           </button>
+          <div className={cn("w-px h-4 mx-0.5", isLight ? "bg-white/20" : "bg-white/30")} />
           <button
             title="Customize Wallpaper (Press E or click)"
             onClick={() => setMode("drawing")}
-            className={cn(
-              "w-12 h-12 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 shadow-xl",
-              isLight
-                ? "bg-neutral-900/85 hover:bg-neutral-900 text-white border border-neutral-700/60 shadow-black/20"
-                : "bg-white/20 hover:bg-white/30 text-white border border-white/25 shadow-black/30"
-            )}>
-            <Pencil className="w-5 h-5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]" />
+            className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-white/15 active:scale-95 transition-all text-white text-xs font-semibold"
+          >
+            <Pencil className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]" />
+            <span>Draw</span>
           </button>
         </div>
       )}
@@ -464,26 +462,7 @@ export const App: React.FC = () => {
         <>
           <Toolbar />
           <StylePanel />
-
-          {/* Scene Switcher (Top Left) */}
-          <div className="fixed top-4 left-4 z-20 flex items-center gap-1.5 bg-white/95 backdrop-blur-md border border-neutral-200/80 shadow-lg rounded-2xl p-1.5 text-xs">
-            <select
-              value={activeSceneId}
-              onChange={(e) => switchScene(e.target.value)}
-              className="bg-transparent font-medium text-neutral-800 py-1 px-2 rounded-lg outline-none cursor-pointer hover:bg-neutral-100 transition-colors">
-              {scenes.map((s) => (
-                <option key={s.id} value={s.id}>
-                  {s.name}
-                </option>
-              ))}
-            </select>
-            <button
-              onClick={() => createScene()}
-              title="Add New Wallpaper Scene"
-              className="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium rounded-lg transition-colors active:scale-95">
-              + New
-            </button>
-          </div>
+          <SceneSwitcher />
         </>
       )}
 
