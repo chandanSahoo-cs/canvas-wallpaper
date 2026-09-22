@@ -26,7 +26,8 @@ import { exportWallpaperAsSvg } from '../hooks/useSvgExport';
 import { exportWallpaperFile, importWallpaperFile } from '../hooks/useWallpaperFile';
 import { useAppStore } from '../store/useAppStore';
 import { useSceneStore } from '../store/useSceneStore';
-import { ToolType } from '../elements/types';
+import { ToolType, TextElement } from '../elements/types';
+import { FONT_SIZE_MAP } from '../canvas/geometry';
 import { cn } from '../lib/utils';
 
 export const Toolbar: React.FC = () => {
@@ -44,6 +45,9 @@ export const Toolbar: React.FC = () => {
   const zoom = useAppStore((s) => s.zoom);
   const setZoom = useAppStore((s) => s.setZoom);
   const resetZoom = useAppStore((s) => s.resetZoom);
+  const elements = useAppStore((s) => s.elements);
+  const selectedIds = useAppStore((s) => s.selectedIds);
+  const selectedElement = elements.find((e) => selectedIds.has(e.id));
 
   const tools: { id: ToolType; label: string; icon: React.ReactNode; shortcut: string }[] = [
     { id: 'selection', label: 'Select', icon: <Pointer className="w-4 h-4" />, shortcut: 'V' },
@@ -74,6 +78,49 @@ export const Toolbar: React.FC = () => {
           {t.icon}
         </button>
       ))}
+
+      {/* Selected Element Properties pill on Toolbar */}
+      {selectedElement && (
+        <>
+          <div className="w-px h-6 bg-neutral-200 mx-1" />
+          <div
+            title="Selected element properties"
+            className="flex items-center gap-1.5 px-2 py-1 bg-neutral-100/90 rounded-xl text-xs font-medium text-neutral-700 select-none shadow-xs border border-neutral-200/50"
+          >
+            <span className="capitalize text-neutral-600 font-semibold text-[11px]">
+              {selectedElement.type}
+            </span>
+            <div
+              title={`Stroke Color: ${selectedElement.strokeColor}`}
+              className="w-3.5 h-3.5 rounded-full border border-black/20 shadow-xs flex-shrink-0"
+              style={{ backgroundColor: selectedElement.strokeColor }}
+            />
+            {'fillColor' in selectedElement && selectedElement.fillColor && (
+              <div
+                title={`Fill Color: ${selectedElement.fillColor}`}
+                className={cn(
+                  'w-3.5 h-3.5 rounded-full border border-black/20 shadow-xs flex-shrink-0',
+                  selectedElement.fillColor === 'transparent' &&
+                    'bg-[radial-gradient(#999_1px,transparent_1px)] [background-size:3px_3px] bg-white'
+                )}
+                style={
+                  selectedElement.fillColor !== 'transparent'
+                    ? { backgroundColor: selectedElement.fillColor }
+                    : {}
+                }
+              />
+            )}
+            <span className="text-neutral-500 text-[10px] font-mono">
+              {selectedElement.type === 'text'
+                ? `${(selectedElement as TextElement).fontSize || FONT_SIZE_MAP[selectedElement.strokeWidth] || 20}px`
+                : `${selectedElement.strokeWidth}px`}
+            </span>
+            {selectedElement.opacity !== undefined && selectedElement.opacity < 100 && (
+              <span className="text-neutral-400 text-[10px]">{selectedElement.opacity}%</span>
+            )}
+          </div>
+        </>
+      )}
 
       <div className="w-px h-6 bg-neutral-200 mx-1" />
 

@@ -87,10 +87,21 @@ export const StylePanel: React.FC = () => {
     (hasSelection && selectedMembers.every((m) => m.type === 'text')) ||
     (!hasSelection && currentTool === 'text');
 
-  const selectedFontSize =
-    selectedMembers[0]?.type === 'text'
-      ? (selectedMembers[0] as TextElement).fontSize || FONT_SIZE_MAP[selectedMembers[0].strokeWidth] || 20
-      : FONT_SIZE_MAP[currentStrokeWidth] || 20;
+  const firstSelected = hasSelection ? selectedMembers[0] : null;
+
+  const activeStrokeColor = firstSelected ? firstSelected.strokeColor : currentStrokeColor;
+  const activeFillColor = firstSelected ? firstSelected.fillColor : currentFillColor;
+  const activeStrokeWidth = firstSelected ? firstSelected.strokeWidth : currentStrokeWidth;
+  const activeStrokeStyle = firstSelected ? (firstSelected.strokeStyle || 'solid') : currentStrokeStyle;
+  const activeFillStyle = firstSelected ? (firstSelected.fillStyle || 'solid') : currentFillStyle;
+  const activeRoughness = firstSelected ? (firstSelected.roughness ?? 1.4) : currentRoughness;
+  const activeOpacity = firstSelected ? (firstSelected.opacity ?? 100) : currentOpacity;
+  const activeFontFamily = firstSelected?.type === 'text'
+    ? (firstSelected as TextElement).fontFamily || 'handwritten'
+    : currentFontFamily;
+  const activeFontSize = firstSelected?.type === 'text'
+    ? (firstSelected as TextElement).fontSize || FONT_SIZE_MAP[firstSelected.strokeWidth] || 20
+    : FONT_SIZE_MAP[currentStrokeWidth] || 20;
 
   const handleFontFamilyChange = (fontFamily: FontFamily) => {
     setCurrentStyles({ fontFamily });
@@ -138,7 +149,7 @@ export const StylePanel: React.FC = () => {
               onClick={() => handleStrokeChange(c)}
               className={cn(
                 'w-6 h-6 rounded-full border-2 transition-transform active:scale-90',
-                currentStrokeColor === c
+                activeStrokeColor === c
                   ? 'border-indigo-600 scale-110 shadow-sm'
                   : 'border-black/10 hover:scale-105'
               )}
@@ -148,7 +159,7 @@ export const StylePanel: React.FC = () => {
           <label className="w-6 h-6 rounded-full overflow-hidden relative cursor-pointer border border-neutral-200 bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-500 active:scale-90 transition-transform">
             <input
               type="color"
-              value={currentStrokeColor}
+              value={activeStrokeColor}
               onChange={(e) => handleStrokeChange(e.target.value)}
               className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
             />
@@ -168,7 +179,7 @@ export const StylePanel: React.FC = () => {
               onClick={() => handleFillChange(c)}
               className={cn(
                 'w-6 h-6 rounded-full border-2 transition-transform active:scale-90',
-                currentFillColor === c
+                activeFillColor === c
                   ? 'border-indigo-600 scale-110 shadow-sm'
                   : 'border-black/10 hover:scale-105',
                 c === 'transparent' &&
@@ -180,7 +191,7 @@ export const StylePanel: React.FC = () => {
           <label className="w-6 h-6 rounded-full overflow-hidden relative cursor-pointer border border-neutral-200 bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-500 active:scale-90 transition-transform">
             <input
               type="color"
-              value={currentFillColor === 'transparent' ? '#ffffff' : currentFillColor}
+              value={activeFillColor === 'transparent' ? '#ffffff' : activeFillColor}
               onChange={(e) => handleFillChange(e.target.value)}
               className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
             />
@@ -205,9 +216,7 @@ export const StylePanel: React.FC = () => {
                 onClick={() => handleFontFamilyChange(f.id as FontFamily)}
                 className={cn(
                   'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
-                  (selectedMembers[0]?.type === 'text'
-                    ? (selectedMembers[0] as TextElement).fontFamily || 'handwritten'
-                    : currentFontFamily) === f.id
+                  activeFontFamily === f.id
                     ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
                     : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
                 )}
@@ -237,7 +246,7 @@ export const StylePanel: React.FC = () => {
                 onClick={() => handleFontSizeChange(s.size)}
                 className={cn(
                   'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
-                  selectedFontSize === s.size
+                  activeFontSize === s.size
                     ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
                     : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
                 )}
@@ -267,7 +276,7 @@ export const StylePanel: React.FC = () => {
                   onClick={() => handleFillStyleChange(f.id as any)}
                   className={cn(
                     'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
-                    currentFillStyle === f.id
+                    activeFillStyle === f.id
                       ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
                       : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
                   )}
@@ -294,7 +303,7 @@ export const StylePanel: React.FC = () => {
                   onClick={() => handleStrokeStyleChange(s.id as any)}
                   className={cn(
                     'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
-                    currentStrokeStyle === s.id
+                    activeStrokeStyle === s.id
                       ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
                       : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
                   )}
@@ -321,7 +330,7 @@ export const StylePanel: React.FC = () => {
                   onClick={() => handleRoughnessChange(r.val)}
                   className={cn(
                     'py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95',
-                    currentRoughness === r.val
+                    Math.abs(activeRoughness - r.val) < 0.3
                       ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
                       : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
                   )}
@@ -349,7 +358,7 @@ export const StylePanel: React.FC = () => {
                   title={s.label}
                   className={cn(
                     'flex-1 py-1.5 rounded-lg flex items-center justify-center border transition-all active:scale-95',
-                    currentStrokeWidth === s.size
+                    activeStrokeWidth === s.size
                       ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
                       : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
                   )}
@@ -369,13 +378,13 @@ export const StylePanel: React.FC = () => {
       <div>
         <div className="flex items-center justify-between text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-1">
           <span>Opacity</span>
-          <span>{currentOpacity}%</span>
+          <span>{activeOpacity}%</span>
         </div>
         <input
           type="range"
           min="10"
           max="100"
-          value={currentOpacity}
+          value={activeOpacity}
           onChange={(e) => handleOpacityChange(Number(e.target.value))}
           className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
         />

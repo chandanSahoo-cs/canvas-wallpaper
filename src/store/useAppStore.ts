@@ -158,14 +158,47 @@ export const useAppStore = create<AppState>((set, get) => ({
   setEditingText: (editingText) => set({ editingText }),
 
   setSelectedIds: (ids) => {
-    set({ selectedIds: ids instanceof Set ? ids : new Set(ids) });
+    const next = ids instanceof Set ? ids : new Set(ids);
+    const { elements } = get();
+    const firstSelected = elements.find((e) => next.has(e.id));
+    if (firstSelected) {
+      set({
+        selectedIds: next,
+        currentStrokeColor: firstSelected.strokeColor ?? get().currentStrokeColor,
+        currentFillColor: firstSelected.fillColor ?? get().currentFillColor,
+        currentStrokeWidth: firstSelected.strokeWidth ?? get().currentStrokeWidth,
+        currentStrokeStyle: firstSelected.strokeStyle ?? get().currentStrokeStyle,
+        currentFillStyle: firstSelected.fillStyle ?? get().currentFillStyle,
+        currentRoughness: firstSelected.roughness ?? get().currentRoughness,
+        currentOpacity: firstSelected.opacity ?? get().currentOpacity,
+        currentFontFamily: (firstSelected as any).fontFamily ?? get().currentFontFamily,
+      });
+    } else {
+      set({ selectedIds: next });
+    }
   },
 
   toggleSelectedId: (id) => {
     const next = new Set(get().selectedIds);
     if (next.has(id)) next.delete(id);
     else next.add(id);
-    set({ selectedIds: next });
+    const { elements } = get();
+    const firstSelected = elements.find((e) => next.has(e.id));
+    if (firstSelected) {
+      set({
+        selectedIds: next,
+        currentStrokeColor: firstSelected.strokeColor ?? get().currentStrokeColor,
+        currentFillColor: firstSelected.fillColor ?? get().currentFillColor,
+        currentStrokeWidth: firstSelected.strokeWidth ?? get().currentStrokeWidth,
+        currentStrokeStyle: firstSelected.strokeStyle ?? get().currentStrokeStyle,
+        currentFillStyle: firstSelected.fillStyle ?? get().currentFillStyle,
+        currentRoughness: firstSelected.roughness ?? get().currentRoughness,
+        currentOpacity: firstSelected.opacity ?? get().currentOpacity,
+        currentFontFamily: (firstSelected as any).fontFamily ?? get().currentFontFamily,
+      });
+    } else {
+      set({ selectedIds: next });
+    }
   },
 
   selectGroupMembers: (hitId, shiftKey) => {
@@ -182,9 +215,35 @@ export const useAppStore = create<AppState>((set, get) => ({
       const allIn = groupMembers.every((id) => selectedIds.has(id));
       const next = new Set(selectedIds);
       groupMembers.forEach((id) => (allIn ? next.delete(id) : next.add(id)));
-      set({ selectedIds: next });
-    } else if (!selectedIds.has(hitId)) {
-      set({ selectedIds: new Set(groupMembers) });
+      const firstSelected = elements.find((e) => next.has(e.id));
+      if (firstSelected) {
+        set({
+          selectedIds: next,
+          currentStrokeColor: firstSelected.strokeColor ?? get().currentStrokeColor,
+          currentFillColor: firstSelected.fillColor ?? get().currentFillColor,
+          currentStrokeWidth: firstSelected.strokeWidth ?? get().currentStrokeWidth,
+          currentStrokeStyle: firstSelected.strokeStyle ?? get().currentStrokeStyle,
+          currentFillStyle: firstSelected.fillStyle ?? get().currentFillStyle,
+          currentRoughness: firstSelected.roughness ?? get().currentRoughness,
+          currentOpacity: firstSelected.opacity ?? get().currentOpacity,
+          currentFontFamily: (firstSelected as any).fontFamily ?? get().currentFontFamily,
+        });
+      } else {
+        set({ selectedIds: next });
+      }
+    } else {
+      const next = new Set(groupMembers);
+      set({
+        selectedIds: next,
+        currentStrokeColor: hit.strokeColor ?? get().currentStrokeColor,
+        currentFillColor: hit.fillColor ?? get().currentFillColor,
+        currentStrokeWidth: hit.strokeWidth ?? get().currentStrokeWidth,
+        currentStrokeStyle: hit.strokeStyle ?? get().currentStrokeStyle,
+        currentFillStyle: hit.fillStyle ?? get().currentFillStyle,
+        currentRoughness: hit.roughness ?? get().currentRoughness,
+        currentOpacity: hit.opacity ?? get().currentOpacity,
+        currentFontFamily: (hit as any).fontFamily ?? get().currentFontFamily,
+      });
     }
   },
 
