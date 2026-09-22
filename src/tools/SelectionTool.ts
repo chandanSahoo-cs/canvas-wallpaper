@@ -10,6 +10,7 @@ import {
 import {
   computeSelectionFrame,
   hitTestHandle,
+  isPointInsideSelectionFrame,
   elementContains,
   rectsIntersect,
   rotatePoint,
@@ -192,7 +193,30 @@ export class SelectionTool implements Tool {
       }
     }
 
-    // 2. Hit test elements (top to bottom)
+    // 2. If click is inside current selected frame, do NOT deselect; prepare to move current selection
+    if (selectedMembers.length > 0 && !e.shiftKey) {
+      const frame = computeSelectionFrame(selectedMembers);
+      const isInsideSelection =
+        frame &&
+        (isPointInsideSelectionFrame(pos, frame) ||
+          selectedMembers.some((el) => {
+            const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
+            return elementContains(el, local);
+          }));
+
+      if (isInsideSelection) {
+        const currentSelectedMembers = selectedMembers.filter((el) => !el.locked);
+        const snaps = currentSelectedMembers.map((el) => ({
+          id: el.id,
+          snapshot: JSON.parse(JSON.stringify(el)),
+        }));
+        this.moveState = snaps.length ? { pos, snapshots: snaps, historyPushed: false } : null;
+        return;
+      }
+    }
+
+    // 3. Click was outside current selection frame (or shift key was pressed):
+    // Hit test elements (top to bottom)
     let hit: CanvasElement | null = null;
     for (let i = elements.length - 1; i >= 0; i--) {
       const el = elements[i];
@@ -490,6 +514,15 @@ export class SelectionTool implements Tool {
             if (handle === 'e' || handle === 'w') return 'ew-resize';
             if (handle === 'nw' || handle === 'se') return 'nwse-resize';
             if (handle === 'ne' || handle === 'sw') return 'nesw-resize';
+          }
+          if (
+            isPointInsideSelectionFrame(pos, frame) ||
+            selectedMembers.some((el) => {
+              const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
+              return elementContains(el, local);
+            })
+          ) {
+            return 'move';
           }
         }
       }

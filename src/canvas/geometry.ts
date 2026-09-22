@@ -253,3 +253,15 @@ export function hitTestHandle(pos: Point, frame: SelectionFrame): string | null 
   }
   return null;
 }
+
+export function isPointInsideSelectionFrame(pos: Point, frame: SelectionFrame): boolean {
+  const local = frame.angle ? rotatePoint(pos, frame.center, -frame.angle) : pos;
+  const PAD = 8;
+  const b = frame.bbox;
+  return (
+    local.x >= b.x - PAD &&
+    local.x <= b.x + b.w + PAD &&
+    local.y >= b.y - PAD &&
+    local.y <= b.y + b.h + PAD
+  );
+}
