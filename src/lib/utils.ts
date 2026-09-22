@@ -38,3 +38,7 @@ export function isColorLight(colorStr: string): boolean {
   }
   return false;
 }
+
+export function getDefaultStrokeColor(bgColor?: string): string {
+  return isColorLight(bgColor || '#14141a') ? '#1e1e1e' : '#ffffff';
+}

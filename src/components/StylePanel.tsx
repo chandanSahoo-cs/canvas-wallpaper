@@ -13,7 +13,7 @@ import {
   Palette,
 } from 'lucide-react';
 import { useAppStore } from '../store/useAppStore';
-import { cn } from '../lib/utils';
+import { cn, isColorLight } from '../lib/utils';
 import { FillStyle, StrokeStyle, FontFamily, TextElement } from '../elements/types';
 import { FONT_SIZE_MAP } from '../canvas/geometry';
 
@@ -45,7 +45,10 @@ export const StylePanel: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const strokePresets = ['#1e1e1e', '#e03131', '#2f9e44', '#1971c2', '#f08c00', '#ffffff'];
+  const isLightBg = isColorLight(background.color || '#14141a');
+  const strokePresets = isLightBg
+    ? ['#1e1e1e', '#e03131', '#2f9e44', '#1971c2', '#f08c00', '#ffffff']
+    : ['#ffffff', '#e03131', '#2f9e44', '#1971c2', '#f08c00', '#1e1e1e'];
   const fillPresets = ['transparent', '#ffc9c9', '#b2f2bb', '#a5d8ff', '#ffec99', '#f3f0ff'];
   const bgPresets = ['#14141a', '#1e1e24', '#f5f5f7', '#0b3d91', '#2d6a4f', '#2b1b3d'];
 

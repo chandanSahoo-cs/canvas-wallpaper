@@ -8,7 +8,7 @@ import {
   BackgroundConfig,
   FontFamily,
 } from '../elements/types';
-import { newId } from '../lib/utils';
+import { newId, isColorLight } from '../lib/utils';
 import { getCenter, rotatePoint } from '../canvas/geometry';
 
 export const HISTORY_LIMIT = 50;
@@ -121,7 +121,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     color: '#14141a',
   },
 
-  currentStrokeColor: '#1e1e1e',
+  currentStrokeColor: '#ffffff',
   currentFillColor: 'transparent',
   currentFillStyle: 'solid',
   currentStrokeWidth: 1.5,
@@ -260,11 +260,35 @@ export const useAppStore = create<AppState>((set, get) => ({
   resetZoom: () => set({ zoom: 1.0, scrollOffset: { x: 0, y: 0 } }),
 
   setBackground: (bg) => {
-    if (typeof bg === 'string') {
-      set({ background: { type: 'color', color: bg } });
-    } else {
-      set({ background: { ...get().background, ...bg } });
+    const prevBg = get().background;
+    const newBg = typeof bg === 'string' ? { type: 'color' as const, color: bg } : { ...prevBg, ...bg };
+
+    const prevColor = prevBg.color || '#14141a';
+    const newColor = newBg.color || '#14141a';
+    const prevIsLight = isColorLight(prevColor);
+    const newIsLight = isColorLight(newColor);
+
+    let nextStroke = get().currentStrokeColor;
+    let nextElements = get().elements;
+
+    // When background switches between light and dark, adapt default monochrome colors
+    if (prevIsLight !== newIsLight) {
+      if (newIsLight) {
+        // Switched to light background: default stroke becomes black (#1e1e1e)
+        if (nextStroke === '#ffffff') nextStroke = '#1e1e1e';
+        nextElements = nextElements.map((el) =>
+          el.strokeColor === '#ffffff' ? { ...el, strokeColor: '#1e1e1e' } : el
+        );
+      } else {
+        // Switched to dark background: default stroke becomes white (#ffffff)
+        if (nextStroke === '#1e1e1e' || nextStroke === '#000000') nextStroke = '#ffffff';
+        nextElements = nextElements.map((el) =>
+          el.strokeColor === '#1e1e1e' || el.strokeColor === '#000000' ? { ...el, strokeColor: '#ffffff' } : el
+        );
+      }
     }
+
+    set({ background: newBg, currentStrokeColor: nextStroke, elements: nextElements });
     get().saveToStorage();
   },
 
@@ -537,9 +561,16 @@ export const useAppStore = create<AppState>((set, get) => ({
           if (result.wallpaperBackground) {
             try {
               const bg = JSON.parse(result.wallpaperBackground as string);
-              set({ background: typeof bg === 'string' ? { type: 'color', color: bg } : bg });
+              const bgObj = typeof bg === 'string' ? { type: 'color' as const, color: bg } : bg;
+              const isLight = isColorLight(bgObj.color || '#14141a');
+              const curStroke = get().currentStrokeColor;
+              let nextStroke = curStroke;
+              if (isLight && curStroke === '#ffffff') nextStroke = '#1e1e1e';
+              else if (!isLight && (curStroke === '#1e1e1e' || curStroke === '#000000')) nextStroke = '#ffffff';
+              set({ background: bgObj, currentStrokeColor: nextStroke });
             } catch (e) {
-              set({ background: { type: 'color', color: String(result.wallpaperBackground) } });
+              const bgObj = { type: 'color' as const, color: String(result.wallpaperBackground) };
+              set({ background: bgObj, currentStrokeColor: isColorLight(bgObj.color) ? '#1e1e1e' : '#ffffff' });
             }
           }
         });
@@ -554,9 +585,16 @@ export const useAppStore = create<AppState>((set, get) => ({
         if (rawBg) {
           try {
             const bg = JSON.parse(rawBg);
-            set({ background: typeof bg === 'string' ? { type: 'color', color: bg } : bg });
+            const bgObj = typeof bg === 'string' ? { type: 'color' as const, color: bg } : bg;
+            const isLight = isColorLight(bgObj.color || '#14141a');
+            const curStroke = get().currentStrokeColor;
+            let nextStroke = curStroke;
+            if (isLight && curStroke === '#ffffff') nextStroke = '#1e1e1e';
+            else if (!isLight && (curStroke === '#1e1e1e' || curStroke === '#000000')) nextStroke = '#ffffff';
+            set({ background: bgObj, currentStrokeColor: nextStroke });
           } catch (e) {
-            set({ background: { type: 'color', color: rawBg } });
+            const bgObj = { type: 'color' as const, color: rawBg };
+            set({ background: bgObj, currentStrokeColor: isColorLight(bgObj.color) ? '#1e1e1e' : '#ffffff' });
           }
         }
       }

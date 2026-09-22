@@ -202,7 +202,7 @@ export class CanvasRenderer {
     if (!textStr) return;
     const fontSize = el.fontSize || FONT_SIZE_MAP[el.strokeWidth] || 20;
     this.ctx.font = `${fontSize}px ${getFontFamilyString(el.fontFamily)}`;
-    this.ctx.fillStyle = el.strokeColor || '#1e1e1e';
+    this.ctx.fillStyle = el.strokeColor || useAppStore.getState().currentStrokeColor || '#ffffff';
     this.ctx.textBaseline = 'top';
 
     const lines = textStr.split('\n');
