@@ -266,12 +266,37 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
 
-    // Initial render and font load trigger
+    // Initial render and robust font load trigger
     triggerRender();
+
+    let fontInterval: ReturnType<typeof setInterval> | null = null;
+    const onFontsLoaded = () => {
+      triggerRender();
+    };
+
     if (typeof document !== 'undefined' && 'fonts' in document) {
-      document.fonts.ready.then(() => {
-        triggerRender();
-      });
+      document.fonts.addEventListener('loadingdone', onFontsLoaded);
+
+      Promise.all([
+        document.fonts.load('20px Excalifont'),
+        document.fonts.load('20px Virgil'),
+        document.fonts.ready,
+      ])
+        .then(onFontsLoaded)
+        .catch(() => {
+          triggerRender();
+        });
+
+      // Poll briefly to ensure canvas redraws as soon as Excalifont is verified ready
+      let attempts = 0;
+      fontInterval = setInterval(() => {
+        attempts++;
+        if (document.fonts.check('20px Excalifont') || attempts >= 15) {
+          if (fontInterval) clearInterval(fontInterval);
+          fontInterval = null;
+          triggerRender();
+        }
+      }, 100);
     }
 
     return () => {
@@ -284,6 +309,12 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       canvas.removeEventListener('wheel', onWheel);
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      if (typeof document !== 'undefined' && 'fonts' in document) {
+        document.fonts.removeEventListener('loadingdone', onFontsLoaded);
+      }
+      if (fontInterval) {
+        clearInterval(fontInterval);
+      }
       unsubscribe();
     };
   }, [canvasRef]);
