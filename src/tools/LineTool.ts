@@ -73,7 +73,8 @@ export class LineTool implements Tool {
 
     store.pushHistory();
     store.setElements([...store.elements, draft]);
-    store.setSelectedIds(new Set());
+    store.setSelectedIds(new Set([draft.id]));
+    store.setTool('selection');
     store.setDraft(null);
     store.saveToStorage();
   }

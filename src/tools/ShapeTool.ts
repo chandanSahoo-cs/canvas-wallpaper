@@ -80,7 +80,8 @@ export class ShapeTool implements Tool {
 
     store.pushHistory();
     store.setElements([...store.elements, finalized]);
-    store.setSelectedIds(new Set());
+    store.setSelectedIds(new Set([finalized.id]));
+    store.setTool('selection');
     store.setDraft(null);
     store.saveToStorage();
   }
