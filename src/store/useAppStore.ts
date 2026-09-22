@@ -8,7 +8,7 @@ import {
   BackgroundConfig,
   FontFamily,
 } from '../elements/types';
-import { newId, isColorLight } from '../lib/utils';
+import { newId, isColorLight, randomSeed } from '../lib/utils';
 import { getCenter, rotatePoint } from '../canvas/geometry';
 
 export const HISTORY_LIMIT = 50;
@@ -87,6 +87,10 @@ export interface AppState {
   moveSelected: (snapshots: { id: string; snapshot: CanvasElement }[], dx: number, dy: number) => void;
   deleteSelected: () => void;
   duplicateSelected: () => void;
+  copySelected: () => void;
+  cutSelected: () => void;
+  pasteClipboard: (elementsToPaste?: CanvasElement[]) => void;
+  clipboard: CanvasElement[];
   toggleLockSelected: () => void;
   groupSelected: () => void;
   ungroupSelected: () => void;
@@ -104,11 +108,14 @@ export interface AppState {
   loadFromStorage: () => void;
 }
 
+let pasteOffsetMultiplier = 1;
+
 export const useAppStore = create<AppState>((set, get) => ({
   mode: 'wallpaper',
   currentTool: 'selection',
   elements: [],
   selectedIds: new Set<string>(),
+  clipboard: [],
   draft: null,
   editingText: null,
   isPreviewing: false,
@@ -390,6 +397,95 @@ export const useAppStore = create<AppState>((set, get) => ({
     set((state) => ({
       elements: [...state.elements, ...newElements],
       selectedIds: new Set(newIds),
+    }));
+    get().saveToStorage();
+  },
+
+  copySelected: () => {
+    const { elements, selectedIds } = get();
+    if (selectedIds.size === 0) return;
+    const selected = elements.filter((el) => selectedIds.has(el.id) && !el.locked);
+    if (selected.length === 0) return;
+
+    pasteOffsetMultiplier = 1;
+    const cloned = JSON.parse(JSON.stringify(selected)) as CanvasElement[];
+    set({ clipboard: cloned });
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        navigator.clipboard
+          .writeText(
+            JSON.stringify({
+              type: 'canvas-elements',
+              version: 1,
+              elements: cloned,
+            })
+          )
+          .catch(() => {});
+      }
+    } catch {
+      // Ignore clipboard restrictions
+    }
+  },
+
+  cutSelected: () => {
+    const { selectedIds } = get();
+    if (selectedIds.size === 0) return;
+    get().copySelected();
+    get().deleteSelected();
+  },
+
+  pasteClipboard: (elementsToPaste?: CanvasElement[]) => {
+    const { elements } = get();
+    const source =
+      elementsToPaste && elementsToPaste.length > 0 ? elementsToPaste : get().clipboard;
+    if (!source || source.length === 0) return;
+
+    get().pushHistory();
+
+    const offset = 20 * pasteOffsetMultiplier;
+    pasteOffsetMultiplier = (pasteOffsetMultiplier % 15) + 1;
+
+    const groupIdMap = new Map<string, string>();
+    const newElements: CanvasElement[] = [];
+    const newIds: string[] = [];
+
+    source.forEach((el) => {
+      const clone = JSON.parse(JSON.stringify(el)) as CanvasElement;
+      clone.id = newId();
+      clone.locked = false;
+      clone.seed = randomSeed();
+
+      if (clone.groupIds && clone.groupIds.length) {
+        clone.groupIds = clone.groupIds.map((gid) => {
+          if (!groupIdMap.has(gid)) groupIdMap.set(gid, newId());
+          return groupIdMap.get(gid)!;
+        });
+      }
+
+      if ('points' in clone && Array.isArray(clone.points)) {
+        clone.points = clone.points.map((p) => ({
+          x: p.x + offset,
+          y: p.y + offset,
+        })) as [Point, Point] & Point[];
+      } else if (
+        'x' in clone &&
+        'y' in clone &&
+        typeof clone.x === 'number' &&
+        typeof clone.y === 'number'
+      ) {
+        clone.x += offset;
+        clone.y += offset;
+      }
+
+      newElements.push(clone);
+      newIds.push(clone.id);
+    });
+
+    set((state) => ({
+      elements: [...state.elements, ...newElements],
+      selectedIds: new Set(newIds),
+      currentTool: 'selection',
     }));
     get().saveToStorage();
   },

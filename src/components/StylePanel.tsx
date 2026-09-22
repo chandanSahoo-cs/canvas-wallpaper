@@ -616,7 +616,7 @@ export const StylePanel: React.FC = () => {
               </div>
               <div className="grid grid-cols-4 gap-1">
                 <button
-                  title="Duplicate"
+                  title="Duplicate (Ctrl+D)"
                   onClick={duplicateSelected}
                   className="p-1.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 flex items-center justify-center text-neutral-700 active:scale-95 transition-all"
                 >
@@ -635,7 +635,7 @@ export const StylePanel: React.FC = () => {
                   {isLocked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
                 </button>
                 <button
-                  title="Delete"
+                  title="Delete (Del / Backspace)"
                   onClick={deleteSelected}
                   className="p-1.5 rounded-lg border border-neutral-200 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 flex items-center justify-center text-neutral-700 active:scale-95 transition-all"
                 >

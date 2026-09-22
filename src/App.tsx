@@ -21,6 +21,7 @@ export const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useCanvas(canvasRef);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const lastPasteHandledRef = useRef(0);
 
   const mode = useAppStore((s) => s.mode);
   const setMode = useAppStore((s) => s.setMode);
@@ -35,6 +36,9 @@ export const App: React.FC = () => {
   const undo = useAppStore((s) => s.undo);
   const redo = useAppStore((s) => s.redo);
   const duplicateSelected = useAppStore((s) => s.duplicateSelected);
+  const copySelected = useAppStore((s) => s.copySelected);
+  const cutSelected = useAppStore((s) => s.cutSelected);
+  const pasteClipboard = useAppStore((s) => s.pasteClipboard);
   const deleteSelected = useAppStore((s) => s.deleteSelected);
   const sendBackward = useAppStore((s) => s.sendBackward);
   const sendForward = useAppStore((s) => s.sendForward);
@@ -187,6 +191,28 @@ export const App: React.FC = () => {
         duplicateSelected();
         return;
       }
+      if (mod && key === "c") {
+        if (selectedIds.size > 0) {
+          e.preventDefault();
+          copySelected();
+          return;
+        }
+      }
+      if (mod && key === "x") {
+        if (selectedIds.size > 0) {
+          e.preventDefault();
+          cutSelected();
+          return;
+        }
+      }
+      if (mod && key === "v") {
+        // Fallback for Ctrl+V in case browser paste event doesn't fire
+        setTimeout(() => {
+          if (Date.now() - lastPasteHandledRef.current > 50) {
+            pasteClipboard();
+          }
+        }, 40);
+      }
       if (mod && key === "a") {
         e.preventDefault();
         const unlocked = elements.filter((el) => !el.locked).map((el) => el.id);
@@ -288,7 +314,7 @@ export const App: React.FC = () => {
       }
     };
 
-    // Paste handler for images
+    // Paste handler for images and copied elements
     const handlePaste = (e: ClipboardEvent) => {
       if (mode !== "drawing") return;
       const target = e.target as HTMLElement | null;
@@ -297,55 +323,92 @@ export const App: React.FC = () => {
         target?.tagName === "INPUT" ||
         target?.isContentEditable ||
         document.activeElement?.tagName === "TEXTAREA" ||
-        document.activeElement?.tagName === "INPUT"
+        document.activeElement?.tagName === "INPUT" ||
+        (document.activeElement as HTMLElement)?.isContentEditable
       ) {
         return;
       }
+
+      lastPasteHandledRef.current = Date.now();
+
+      // 1. Check if clipboard text contains canvas elements
+      const text = e.clipboardData?.getData("text/plain");
+      if (text) {
+        try {
+          const parsed = JSON.parse(text);
+          if (
+            parsed &&
+            parsed.type === "canvas-elements" &&
+            Array.isArray(parsed.elements) &&
+            parsed.elements.length > 0
+          ) {
+            e.preventDefault();
+            pasteClipboard(parsed.elements);
+            return;
+          }
+        } catch {
+          // not canvas-elements JSON
+        }
+      }
+
+      // 2. Check for images in clipboard items
       const items = e.clipboardData?.items;
-      if (!items) return;
+      let hasImage = false;
+      if (items) {
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf("image") !== -1) {
+            hasImage = true;
+            const blob = items[i].getAsFile();
+            if (!blob) continue;
+            const reader = new FileReader();
+            reader.onload = () => {
+              const dataUrl = reader.result as string;
+              const img = new Image();
+              img.onload = () => {
+                const maxW = 400;
+                const maxH = 300;
+                const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+                const w = img.width * scale;
+                const h = img.height * scale;
 
-      for (let i = 0; i < items.length; i++) {
-        if (items[i].type.indexOf("image") !== -1) {
-          const blob = items[i].getAsFile();
-          if (!blob) continue;
-          const reader = new FileReader();
-          reader.onload = () => {
-            const dataUrl = reader.result as string;
-            const img = new Image();
-            img.onload = () => {
-              const maxW = 400;
-              const maxH = 300;
-              const scale = Math.min(maxW / img.width, maxH / img.height, 1);
-              const w = img.width * scale;
-              const h = img.height * scale;
+                const imageEl: ImageElement = {
+                  id: newId(),
+                  type: "image",
+                  angle: 0,
+                  locked: false,
+                  groupIds: [],
+                  x: window.innerWidth / 2 - w / 2,
+                  y: window.innerHeight / 2 - h / 2,
+                  width: w,
+                  height: h,
+                  dataUrl,
+                  strokeColor: "#1e1e1e",
+                  fillColor: "transparent",
+                  strokeWidth: 1.5,
+                  opacity: 100,
+                  seed: randomSeed(),
+                };
 
-              const imageEl: ImageElement = {
-                id: newId(),
-                type: "image",
-                angle: 0,
-                locked: false,
-                groupIds: [],
-                x: window.innerWidth / 2 - w / 2,
-                y: window.innerHeight / 2 - h / 2,
-                width: w,
-                height: h,
-                dataUrl,
-                strokeColor: "#1e1e1e",
-                fillColor: "transparent",
-                strokeWidth: 1.5,
-                opacity: 100,
-                seed: randomSeed(),
+                pushHistory();
+                setElements([...useAppStore.getState().elements, imageEl]);
+                setSelectedIds([imageEl.id]);
+                setTool("selection");
+                saveToStorage();
               };
-
-              pushHistory();
-              setElements([...useAppStore.getState().elements, imageEl]);
-              setSelectedIds([imageEl.id]);
-              saveToStorage();
+              img.src = dataUrl;
             };
-            img.src = dataUrl;
-          };
-          reader.readAsDataURL(blob);
-          break;
+            reader.readAsDataURL(blob);
+            return;
+          }
+        }
+      }
+
+      // 3. Fallback: if internal store has copied elements, paste them
+      if (!hasImage) {
+        const state = useAppStore.getState();
+        if (state.clipboard && state.clipboard.length > 0) {
+          e.preventDefault();
+          pasteClipboard();
         }
       }
     };
