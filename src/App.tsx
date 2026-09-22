@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import { useCanvas } from "./canvas/useCanvas";
 import { InlineTextEditor } from "./components/InlineTextEditor";
 import { StylePanel } from "./components/StylePanel";
-import { TemplateGallery } from "./components/TemplateGallery";
 import { Toolbar } from "./components/Toolbar";
 import { ImageElement, TextElement, ToolType } from "./elements/types";
 import { openTextEditor } from "./tools/TextTool";
@@ -20,7 +19,6 @@ export const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useCanvas(canvasRef);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
   const mode = useAppStore((s) => s.mode);
   const setMode = useAppStore((s) => s.setMode);
@@ -485,19 +483,7 @@ export const App: React.FC = () => {
               className="px-2 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium rounded-lg transition-colors active:scale-95">
               + New
             </button>
-            <div className="w-px h-4 bg-neutral-200" />
-            <button
-              onClick={() => setIsGalleryOpen(true)}
-              title="Browse Wallpaper Templates"
-              className="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-800 font-medium rounded-lg transition-colors active:scale-95 flex items-center gap-1 text-xs">
-              Templates
-            </button>
           </div>
-
-          <TemplateGallery
-            isOpen={isGalleryOpen}
-            onClose={() => setIsGalleryOpen(false)}
-          />
         </>
       )}
 
