@@ -38,6 +38,9 @@ export const App: React.FC = () => {
   const deleteSelected = useAppStore((s) => s.deleteSelected);
   const sendBackward = useAppStore((s) => s.sendBackward);
   const sendForward = useAppStore((s) => s.sendForward);
+  const groupSelected = useAppStore((s) => s.groupSelected);
+  const ungroupSelected = useAppStore((s) => s.ungroupSelected);
+  const toggleLockSelected = useAppStore((s) => s.toggleLockSelected);
   const pushHistory = useAppStore((s) => s.pushHistory);
   const setElements = useAppStore((s) => s.setElements);
   const saveToStorage = useAppStore((s) => s.saveToStorage);
@@ -174,6 +177,20 @@ export const App: React.FC = () => {
         e.preventDefault();
         const unlocked = elements.filter((el) => !el.locked).map((el) => el.id);
         setSelectedIds(unlocked);
+        return;
+      }
+      if (mod && key === "g") {
+        e.preventDefault();
+        if (e.shiftKey) {
+          ungroupSelected();
+        } else {
+          groupSelected();
+        }
+        return;
+      }
+      if (mod && e.shiftKey && key === "l") {
+        e.preventDefault();
+        toggleLockSelected();
         return;
       }
       if (mod && key === "]") {

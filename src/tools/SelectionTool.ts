@@ -14,6 +14,7 @@ import {
   rectsIntersect,
   rotatePoint,
   getCenter,
+  getBBox,
   getScreenBBox,
   normBox,
   distance,
@@ -77,6 +78,66 @@ export class SelectionTool implements Tool {
 
     const selectedMembers = elements.filter((el) => selectedIds.has(el.id));
     const allLocked = selectedMembers.length > 0 && selectedMembers.every((el) => el.locked);
+    const anyLocked = selectedMembers.some((el) => el.locked);
+    const hasGroup = selectedMembers.some((el) => el.groupIds && el.groupIds.length > 0);
+    const isGrouped =
+      hasGroup &&
+      (selectedMembers.length > 1 ||
+        (selectedMembers[0]?.groupIds && selectedMembers[0].groupIds.length > 0));
+
+    // Check hit on Lock marker or Group marker of selection
+    if (selectedMembers.length > 0) {
+      const frame = computeSelectionFrame(selectedMembers);
+      if (frame) {
+        const b = frame.bbox;
+        const PAD = 8;
+        const x0 = b.x - PAD;
+        const x1 = b.x + b.w + PAD;
+        const y0 = b.y - PAD;
+        const narrow = x1 - x0 < 45;
+        const lockOffset = narrow && isGrouped ? 8 : 0;
+        const groupOffset = narrow && (allLocked || anyLocked) ? -8 : 0;
+
+        if (anyLocked || allLocked) {
+          const lockPos = rotatePoint(
+            { x: x1 + lockOffset, y: y0 - 14 },
+            frame.center,
+            frame.angle
+          );
+          if (distance(pos, lockPos) <= 14) {
+            store.toggleLockSelected();
+            return;
+          }
+        }
+
+        if (isGrouped) {
+          const groupPos = rotatePoint(
+            { x: x0 + groupOffset, y: y0 - 14 },
+            frame.center,
+            frame.angle
+          );
+          if (distance(pos, groupPos) <= 14) {
+            store.ungroupSelected();
+            return;
+          }
+        }
+      }
+    }
+
+    // Check hit on Lock badge of an unselected locked element
+    for (let i = elements.length - 1; i >= 0; i--) {
+      const el = elements[i];
+      if (el.locked && !selectedIds.has(el.id)) {
+        const b = getBBox(el);
+        const center = getCenter(el);
+        const tr = rotatePoint({ x: b.x + b.w + 4, y: b.y - 12 }, center, el.angle || 0);
+        if (distance(pos, tr) <= 14) {
+          store.setSelectedIds(new Set([el.id]));
+          store.toggleLockSelected();
+          return;
+        }
+      }
+    }
 
     // 1. Check resize/rotate handle hit
     if (selectedMembers.length > 0 && !allLocked) {
@@ -382,20 +443,68 @@ export class SelectionTool implements Tool {
     if (!pos) return 'default';
     const store = useAppStore.getState();
     const selectedMembers = store.elements.filter((el) => store.selectedIds.has(el.id));
-    if (selectedMembers.length > 0 && !selectedMembers.every((el) => el.locked)) {
+    if (selectedMembers.length > 0) {
+      const anyLocked = selectedMembers.some((el) => el.locked);
+      const allLocked = selectedMembers.every((el) => el.locked);
+      const hasGroup = selectedMembers.some((el) => el.groupIds && el.groupIds.length > 0);
+      const isGrouped =
+        hasGroup &&
+        (selectedMembers.length > 1 ||
+          (selectedMembers[0]?.groupIds && selectedMembers[0].groupIds.length > 0));
+
       const frame = computeSelectionFrame(selectedMembers);
       if (frame) {
-        const handle = hitTestHandle(pos, frame);
-        if (handle && handle.startsWith('line-')) return 'crosshair';
-        if (handle === 'rotate') return 'grab';
-        if (handle) {
-          if (handle === 'n' || handle === 's') return 'ns-resize';
-          if (handle === 'e' || handle === 'w') return 'ew-resize';
-          if (handle === 'nw' || handle === 'se') return 'nwse-resize';
-          if (handle === 'ne' || handle === 'sw') return 'nesw-resize';
+        const b = frame.bbox;
+        const PAD = 8;
+        const x0 = b.x - PAD;
+        const x1 = b.x + b.w + PAD;
+        const y0 = b.y - PAD;
+        const narrow = x1 - x0 < 45;
+        const lockOffset = narrow && isGrouped ? 8 : 0;
+        const groupOffset = narrow && (allLocked || anyLocked) ? -8 : 0;
+
+        if (anyLocked || allLocked) {
+          const lockPos = rotatePoint(
+            { x: x1 + lockOffset, y: y0 - 14 },
+            frame.center,
+            frame.angle
+          );
+          if (distance(pos, lockPos) <= 14) return 'pointer';
+        }
+
+        if (isGrouped) {
+          const groupPos = rotatePoint(
+            { x: x0 + groupOffset, y: y0 - 14 },
+            frame.center,
+            frame.angle
+          );
+          if (distance(pos, groupPos) <= 14) return 'pointer';
+        }
+
+        if (!allLocked) {
+          const handle = hitTestHandle(pos, frame);
+          if (handle && handle.startsWith('line-')) return 'crosshair';
+          if (handle === 'rotate') return 'grab';
+          if (handle) {
+            if (handle === 'n' || handle === 's') return 'ns-resize';
+            if (handle === 'e' || handle === 'w') return 'ew-resize';
+            if (handle === 'nw' || handle === 'se') return 'nwse-resize';
+            if (handle === 'ne' || handle === 'sw') return 'nesw-resize';
+          }
         }
       }
     }
+
+    // Hover over unselected locked element badge
+    for (const el of store.elements) {
+      if (el.locked && !store.selectedIds.has(el.id)) {
+        const b = getBBox(el);
+        const center = getCenter(el);
+        const tr = rotatePoint({ x: b.x + b.w + 4, y: b.y - 12 }, center, el.angle || 0);
+        if (distance(pos, tr) <= 14) return 'pointer';
+      }
+    }
+
     return 'default';
   }
 }
