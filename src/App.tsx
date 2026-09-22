@@ -1,4 +1,4 @@
-import { EyeOff, Pencil, Settings } from "lucide-react";
+import { EyeOff, Pencil, LayoutGrid } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useCanvas } from "./canvas/useCanvas";
 import { InlineTextEditor } from "./components/InlineTextEditor";
@@ -54,6 +54,7 @@ export const App: React.FC = () => {
 
   const widgetPositions = useWidgetStore((s) => s.widgetPositions);
   const isLayoutMode = useWidgetStore((s) => s.isLayoutMode);
+  const setIsLayoutMode = useWidgetStore((s) => s.setIsLayoutMode);
   const showClock = useWidgetStore((s) => s.showClock);
   const showSearch = useWidgetStore((s) => s.showSearch);
   const showQuickLinks = useWidgetStore((s) => s.showQuickLinks);
@@ -501,11 +502,11 @@ export const App: React.FC = () => {
           )}
         >
           <button
-            title="Widget Settings"
-            onClick={() => setIsSettingsOpen(true)}
+            title="Widget Layout & Accessories (Drag anywhere on grid)"
+            onClick={() => setIsLayoutMode(true)}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 active:scale-95 transition-all text-white"
           >
-            <Settings className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]" />
+            <LayoutGrid className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]" />
           </button>
           <div className={cn("w-px h-4 mx-0.5", isLight ? "bg-white/20" : "bg-white/30")} />
           <button
