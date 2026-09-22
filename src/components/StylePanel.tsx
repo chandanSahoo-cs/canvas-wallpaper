@@ -467,7 +467,7 @@ export const StylePanel: React.FC = () => {
             {bgPresets.map((c) => (
               <button
                 key={c}
-                onClick={() => setBackground({ type: 'color', color: c, gradient: undefined })}
+                onClick={() => setBackground({ type: 'color', color: c })}
                 className={cn(
                   'w-6 h-6 rounded-full border-2 transition-transform active:scale-90',
                   background.type === 'color' && background.color === c
@@ -483,7 +483,7 @@ export const StylePanel: React.FC = () => {
               <input
                 type="color"
                 value={background.color || '#14141a'}
-                onChange={(e) => setBackground({ type: 'color', color: e.target.value, gradient: undefined })}
+                onChange={(e) => setBackground({ type: 'color', color: e.target.value })}
                 className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
               />
             </label>
@@ -506,34 +506,6 @@ export const StylePanel: React.FC = () => {
               onChange={handleBackgroundImageUpload}
               className="hidden"
             />
-          </div>
-        </div>
-
-        {/* Gradients */}
-        <div>
-          <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
-            Gradients
-          </div>
-          <div className="grid grid-cols-4 gap-1.5">
-            {[
-              { id: 'sunset', label: 'Sunset', grad: 'linear-gradient(135deg, #0f0c29, #302b63, #24243e)' },
-              { id: 'aurora', label: 'Aurora', grad: 'linear-gradient(135deg, #134e5e, #71b280)' },
-              { id: 'warm', label: 'Warm', grad: 'linear-gradient(135deg, #ff7e5f, #feb47b)' },
-              { id: 'midnight', label: 'Midnight', grad: 'radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%)' },
-            ].map((g) => (
-              <button
-                key={g.id}
-                title={g.label}
-                onClick={() => setBackground({ type: 'gradient', gradient: g.grad })}
-                className={cn(
-                  'h-6 rounded-md border transition-transform active:scale-90',
-                  background.type === 'gradient' && background.gradient === g.grad
-                    ? 'border-indigo-600 scale-105 shadow-sm ring-2 ring-indigo-200'
-                    : 'border-black/10 hover:scale-105'
-                )}
-                style={{ background: g.grad }}
-              />
-            ))}
           </div>
         </div>
 

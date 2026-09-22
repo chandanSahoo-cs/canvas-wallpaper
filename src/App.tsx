@@ -351,9 +351,7 @@ export const App: React.FC = () => {
   const baseBg =
     background.type === "image" && background.imageUrl
       ? `url(${background.imageUrl})`
-      : background.type === "gradient" && background.gradient
-        ? background.gradient
-        : undefined;
+      : undefined;
 
   const bgStyle: React.CSSProperties = {
     backgroundColor: background.color || "#14141a",

@@ -145,11 +145,10 @@ export const TEMPLATES: WallpaperTemplate[] = [
     title: "Sunset Vibes",
     category: "aesthetic",
     description:
-      "Smooth twilight gradient with minimalist sketched geometric accents",
+      "Deep twilight backdrop with minimalist sketched geometric accents",
     background: {
-      type: "gradient",
-      color: "#0f0c29",
-      gradient: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)",
+      type: "color",
+      color: "#1b1938",
       pattern: "dots",
     },
     elements: () => {
