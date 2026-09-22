@@ -495,27 +495,27 @@ export const App: React.FC = () => {
       {mode === "wallpaper" && (
         <div
           className={cn(
-            "fixed bottom-6 right-6 z-20 flex items-center p-1.5 rounded-full backdrop-blur-xl border transition-all duration-300 shadow-2xl",
+            "fixed bottom-6 right-6 z-20 flex items-center p-1 rounded-full backdrop-blur-xl border transition-all duration-200 shadow-2xl",
             isLight
-              ? "bg-neutral-900/85 hover:bg-neutral-900 text-white border-neutral-700/60 shadow-black/25"
-              : "bg-white/20 hover:bg-white/25 text-white border-white/25 shadow-black/35"
+              ? "bg-neutral-900/90 text-white border-neutral-700/60 shadow-black/25"
+              : "bg-black/45 text-white border-white/20 shadow-black/40"
           )}
         >
           <button
             title="Widget Layout & Accessories (Drag anywhere on grid)"
             onClick={() => setIsLayoutMode(true)}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 active:scale-95 transition-all text-white"
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 text-white active:scale-95 transition-colors"
           >
-            <LayoutGrid className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]" />
+            <LayoutGrid className="w-4 h-4" />
           </button>
           <div className={cn("w-px h-4 mx-0.5", isLight ? "bg-white/20" : "bg-white/30")} />
           <button
             title="Customize Wallpaper (Press E or click)"
             onClick={() => setMode("drawing")}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-full hover:bg-white/15 active:scale-95 transition-all text-white text-xs font-semibold"
+            className="h-9 px-3.5 rounded-full flex items-center justify-center gap-2 hover:bg-white/15 text-white text-xs font-semibold active:scale-95 transition-colors leading-none"
           >
-            <Pencil className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]" />
-            <span>Draw</span>
+            <Pencil className="w-4 h-4" />
+            <span className="leading-none">Draw</span>
           </button>
         </div>
       )}
