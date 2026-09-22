@@ -51,13 +51,14 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     // Render loop helper
     function triggerRender() {
       const state = useAppStore.getState();
+      const isCleanView = state.mode === 'wallpaper' || state.isPreviewing;
       renderer.render({
         elements: state.elements,
-        draft: state.draft,
-        selectedIds: state.selectedIds,
-        zoom: state.zoom,
-        scrollOffset: state.scrollOffset,
-        marquee: selectionTool.marqueeState,
+        draft: isCleanView ? null : state.draft,
+        selectedIds: isCleanView ? new Set() : state.selectedIds,
+        zoom: isCleanView ? 1 : state.zoom,
+        scrollOffset: isCleanView ? { x: 0, y: 0 } : state.scrollOffset,
+        marquee: isCleanView ? null : selectionTool.marqueeState,
       });
     }
 
@@ -90,7 +91,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     // Pointer events
     const onPointerDown = (e: PointerEvent) => {
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing') return;
+      if (state.mode !== 'drawing' || state.isPreviewing) return;
 
       // Space + Drag or Middle mouse button -> Panning
       if (isSpacePressedRef.current || e.button === 1) {
@@ -119,7 +120,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
 
     const onPointerMove = (e: PointerEvent) => {
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing') return;
+      if (state.mode !== 'drawing' || state.isPreviewing) return;
 
       if (isPanningRef.current) {
         const dx = (e.clientX - panStartRef.current.x) / state.zoom;
@@ -149,7 +150,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         return;
       }
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing') return;
+      if (state.mode !== 'drawing' || state.isPreviewing) return;
 
       const rawPos = { x: e.clientX, y: e.clientY };
       const pos = screenToCanvas(e.clientX, e.clientY);
@@ -163,7 +164,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     const onPointerCancel = (e: PointerEvent) => {
       isPanningRef.current = false;
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing') return;
+      if (state.mode !== 'drawing' || state.isPreviewing) return;
       const rawPos = { x: e.clientX, y: e.clientY };
       const pos = screenToCanvas(e.clientX, e.clientY);
       const tool = tools[state.currentTool];
@@ -176,7 +177,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     // Double-click to edit existing text, add text into shapes, or start typing anywhere like Excalidraw
     const onDoubleClick = (e: MouseEvent) => {
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing') return;
+      if (state.mode !== 'drawing' || state.isPreviewing) return;
 
       const pos = screenToCanvas(e.clientX, e.clientY);
       // Hit test elements top-to-bottom
@@ -203,7 +204,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     // Wheel event for zoom with Ctrl or touchpad pinch
     const onWheel = (e: WheelEvent) => {
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing') return;
+      if (state.mode !== 'drawing' || state.isPreviewing) return;
 
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();

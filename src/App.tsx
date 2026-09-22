@@ -401,12 +401,12 @@ export const App: React.FC = () => {
         ref={canvasRef}
         className={cn(
           "absolute inset-0 w-full h-full touch-none",
-          mode === "wallpaper" ? "pointer-events-none" : "pointer-events-auto",
+          mode === "wallpaper" || isPreviewing ? "pointer-events-none" : "pointer-events-auto",
         )}
       />
 
       {/* Excalidraw-style inline WYSIWYG text editor */}
-      {mode === "drawing" && editingText && (
+      {mode === "drawing" && editingText && !isPreviewing && (
         <InlineTextEditor
           data={editingText}
           zoom={zoom}
@@ -416,8 +416,8 @@ export const App: React.FC = () => {
         />
       )}
 
-      {/* Wallpaper Mode Widgets Overlay */}
-      {mode === "wallpaper" && (
+      {/* Wallpaper Mode & Preview Mode Widgets Overlay */}
+      {(mode === "wallpaper" || isPreviewing) && (
         <div className="absolute inset-0 z-10 flex flex-col items-center justify-center p-6 gap-8 pointer-events-none">
           <div className="pointer-events-auto flex flex-col items-center gap-6 w-full max-w-xl">
             <ClockWidget />
