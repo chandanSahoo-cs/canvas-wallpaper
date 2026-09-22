@@ -7,7 +7,7 @@ import { TemplateGallery } from "./components/TemplateGallery";
 import { Toolbar } from "./components/Toolbar";
 import { ImageElement, TextElement, ToolType } from "./elements/types";
 import { openTextEditor } from "./tools/TextTool";
-import { cn, newId, randomSeed } from "./lib/utils";
+import { cn, newId, randomSeed, isColorLight } from "./lib/utils";
 import { useAppStore } from "./store/useAppStore";
 import { useSceneStore } from "./store/useSceneStore";
 import { useWidgetStore } from "./store/useWidgetStore";
@@ -385,6 +385,13 @@ export const App: React.FC = () => {
     backgroundPosition: "center",
   };
 
+  const isLight = React.useMemo(() => {
+    if (background.type === "image" && background.imageUrl) {
+      return false;
+    }
+    return isColorLight(background.color || "#14141a");
+  }, [background.color, background.type, background.imageUrl]);
+
   return (
     <div
       className="relative w-screen h-screen overflow-hidden select-none"
@@ -426,14 +433,24 @@ export const App: React.FC = () => {
           <button
             title="Widget Settings"
             onClick={() => setIsSettingsOpen(true)}
-            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 border border-white/20">
-            <Settings className="w-4 h-4" />
+            className={cn(
+              "w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 shadow-xl",
+              isLight
+                ? "bg-neutral-900/85 hover:bg-neutral-900 text-white border border-neutral-700/60 shadow-black/20"
+                : "bg-white/20 hover:bg-white/30 text-white border border-white/25 shadow-black/30"
+            )}>
+            <Settings className="w-4 h-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]" />
           </button>
           <button
             title="Customize Wallpaper (Press E or click)"
             onClick={() => setMode("drawing")}
-            className="w-12 h-12 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md text-white shadow-xl flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 border border-white/20">
-            <Pencil className="w-5 h-5" />
+            className={cn(
+              "w-12 h-12 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 shadow-xl",
+              isLight
+                ? "bg-neutral-900/85 hover:bg-neutral-900 text-white border border-neutral-700/60 shadow-black/20"
+                : "bg-white/20 hover:bg-white/30 text-white border border-white/25 shadow-black/30"
+            )}>
+            <Pencil className="w-5 h-5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]" />
           </button>
         </div>
       )}
