@@ -25,6 +25,8 @@ export interface SelectionFrame {
   bbox: BoundingBox;
   angle: number;
   center: Point;
+  isLine?: boolean;
+  lineElement?: LineElement | ArrowElement;
 }
 
 export function distance(a: Point, b: Point): number {
@@ -69,12 +71,16 @@ export function getBBox(el: CanvasElement): BoundingBox {
     return normBox(el);
   }
   if (el.type === 'line' || el.type === 'arrow') {
-    const [p0, p1] = el.points;
+    const xs = el.points.map((p) => p.x);
+    const ys = el.points.map((p) => p.y);
+    if (xs.length === 0) return { x: 0, y: 0, w: 0, h: 0 };
+    const minX = Math.min(...xs), maxX = Math.max(...xs);
+    const minY = Math.min(...ys), maxY = Math.max(...ys);
     return {
-      x: Math.min(p0.x, p1.x),
-      y: Math.min(p0.y, p1.y),
-      w: Math.abs(p1.x - p0.x),
-      h: Math.abs(p1.y - p0.y),
+      x: minX,
+      y: minY,
+      w: Math.max(maxX - minX, 4),
+      h: Math.max(maxY - minY, 4),
     };
   }
   if (el.type === 'freedraw') {
@@ -151,7 +157,10 @@ export function elementContains(el: CanvasElement, localPos: Point): boolean {
     return localPos.x >= b.x - 4 && localPos.x <= b.x + b.w + 4 && localPos.y >= b.y - 4 && localPos.y <= b.y + b.h + 4;
   }
   if (el.type === 'line' || el.type === 'arrow') {
-    return distanceToSegment(localPos, el.points[0], el.points[1]) <= 6 + el.strokeWidth;
+    for (let i = 0; i < el.points.length - 1; i++) {
+      if (distanceToSegment(localPos, el.points[i], el.points[i + 1]) <= 6 + el.strokeWidth) return true;
+    }
+    return false;
   }
   if (el.type === 'freedraw') {
     for (let i = 0; i < el.points.length - 1; i++) {
@@ -166,7 +175,14 @@ export function computeSelectionFrame(members: CanvasElement[]): SelectionFrame 
   if (members.length === 0) return null;
   if (members.length === 1) {
     const el = members[0];
-    return { bbox: getBBox(el), angle: el.angle || 0, center: getCenter(el) };
+    const isLine = el.type === 'line' || el.type === 'arrow';
+    return {
+      bbox: getBBox(el),
+      angle: el.angle || 0,
+      center: getCenter(el),
+      isLine,
+      lineElement: isLine ? (el as LineElement | ArrowElement) : undefined,
+    };
   }
   const boxes = members.map(getScreenBBox);
   const x0 = Math.min(...boxes.map((b) => b.x));
@@ -178,6 +194,23 @@ export function computeSelectionFrame(members: CanvasElement[]): SelectionFrame 
 }
 
 export function getHandlePositions(frame: SelectionFrame): Record<string, Point> {
+  if (frame.isLine && frame.lineElement && frame.lineElement.points.length >= 2) {
+    const pts = frame.lineElement.points;
+    const p0 = pts[0];
+    const pEnd = pts[pts.length - 1];
+    let pMid: Point;
+    if (pts.length === 3) {
+      pMid = pts[1];
+    } else {
+      pMid = { x: (p0.x + pEnd.x) / 2, y: (p0.y + pEnd.y) / 2 };
+    }
+    return {
+      'line-start': p0,
+      'line-mid': pMid,
+      'line-end': pEnd,
+    };
+  }
+
   const b = frame.bbox;
   const PAD = 8;
   const x0 = b.x - PAD, y0 = b.y - PAD, x1 = b.x + b.w + PAD, y1 = b.y + b.h + PAD;

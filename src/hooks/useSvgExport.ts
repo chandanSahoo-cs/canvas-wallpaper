@@ -59,14 +59,35 @@ export function exportWallpaperAsSvg(): void {
         break;
       }
       case 'line': {
-        const [p0, p1] = el.points;
-        svgParts.push(
-          `<line x1="${p0.x}" y1="${p0.y}" x2="${p1.x}" y2="${p1.y}" ${commonAttr} />`
-        );
+        const pts = el.points;
+        if (pts.length === 2) {
+          svgParts.push(
+            `<line x1="${pts[0].x}" y1="${pts[0].y}" x2="${pts[1].x}" y2="${pts[1].y}" ${commonAttr} />`
+          );
+        } else if (pts.length > 2) {
+          const ptStr = pts.map((p) => `${p.x},${p.y}`).join(' ');
+          svgParts.push(
+            `<polyline points="${ptStr}" fill="none" ${commonAttr} />`
+          );
+        }
         break;
       }
       case 'arrow': {
-        const [p0, p1] = el.points;
+        const pts = el.points;
+        if (pts.length < 2) break;
+        if (pts.length === 2) {
+          svgParts.push(
+            `<line x1="${pts[0].x}" y1="${pts[0].y}" x2="${pts[1].x}" y2="${pts[1].y}" ${commonAttr} />`
+          );
+        } else {
+          const ptStr = pts.map((p) => `${p.x},${p.y}`).join(' ');
+          svgParts.push(
+            `<polyline points="${ptStr}" fill="none" ${commonAttr} />`
+          );
+        }
+
+        const p1 = pts[pts.length - 1];
+        const p0 = pts[pts.length - 2];
         const angle = Math.atan2(p1.y - p0.y, p1.x - p0.x);
         const headLen = 10 + el.strokeWidth * 3;
         const a1 = angle + Math.PI - 0.5;
@@ -76,9 +97,6 @@ export function exportWallpaperAsSvg(): void {
         const h2x = p1.x + headLen * Math.cos(a2);
         const h2y = p1.y + headLen * Math.sin(a2);
 
-        svgParts.push(
-          `<line x1="${p0.x}" y1="${p0.y}" x2="${p1.x}" y2="${p1.y}" ${commonAttr} />`
-        );
         svgParts.push(
           `<line x1="${p1.x}" y1="${p1.y}" x2="${h1x}" y2="${h1y}" ${commonAttr} />`
         );

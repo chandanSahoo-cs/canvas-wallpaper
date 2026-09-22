@@ -45,12 +45,12 @@ export interface EllipseElement extends BaseElement {
 
 export interface LineElement extends BaseElement {
   type: 'line';
-  points: [Point, Point];
+  points: Point[];
 }
 
 export interface ArrowElement extends BaseElement {
   type: 'arrow';
-  points: [Point, Point];
+  points: Point[];
 }
 
 export interface FreedrawElement extends BaseElement {

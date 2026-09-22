@@ -11,6 +11,7 @@ import {
   getCenter,
   getScreenBBox,
   computeSelectionFrame,
+  getHandlePositions,
   ROTATE_HANDLE_OFFSET,
   FONT_SIZE_MAP,
 } from './geometry';
@@ -123,17 +124,16 @@ export class CanvasRenderer {
         break;
       }
       case 'line': {
-        this.rc.line(
-          el.points[0].x,
-          el.points[0].y,
-          el.points[1].x,
-          el.points[1].y,
-          roughOptions(el)
-        );
+        const pts = el.points;
+        if (pts.length === 2) {
+          this.rc.line(pts[0].x, pts[0].y, pts[1].x, pts[1].y, roughOptions(el));
+        } else if (pts.length > 2) {
+          this.rc.linearPath(pts.map((p) => [p.x, p.y]), roughOptions(el));
+        }
         break;
       }
       case 'arrow': {
-        this.drawArrow(el);
+        this.drawArrow(el as CanvasElement & { points: Point[] });
         break;
       }
       case 'freedraw': {
@@ -153,16 +153,23 @@ export class CanvasRenderer {
     this.ctx.restore();
   }
 
-  private drawArrow(el: CanvasElement & { points: [Point, Point] }): void {
-    const [p0, p1] = el.points;
+  private drawArrow(el: CanvasElement & { points: Point[] }): void {
+    const pts = el.points;
+    if (pts.length < 2) return;
     const opts = roughOptions(el);
-    this.rc.line(p0.x, p0.y, p1.x, p1.y, opts);
-    const angle = Math.atan2(p1.y - p0.y, p1.x - p0.x);
+    if (pts.length === 2) {
+      this.rc.line(pts[0].x, pts[0].y, pts[1].x, pts[1].y, opts);
+    } else {
+      this.rc.linearPath(pts.map((p) => [p.x, p.y]), opts);
+    }
+    const pLast = pts[pts.length - 1];
+    const pPrev = pts[pts.length - 2];
+    const angle = Math.atan2(pLast.y - pPrev.y, pLast.x - pPrev.x);
     const headLen = 10 + el.strokeWidth * 3;
     const a1 = angle + Math.PI - 0.5;
     const a2 = angle + Math.PI + 0.5;
-    this.rc.line(p1.x, p1.y, p1.x + headLen * Math.cos(a1), p1.y + headLen * Math.sin(a1), opts);
-    this.rc.line(p1.x, p1.y, p1.x + headLen * Math.cos(a2), p1.y + headLen * Math.sin(a2), opts);
+    this.rc.line(pLast.x, pLast.y, pLast.x + headLen * Math.cos(a1), pLast.y + headLen * Math.sin(a1), opts);
+    this.rc.line(pLast.x, pLast.y, pLast.x + headLen * Math.cos(a2), pLast.y + headLen * Math.sin(a2), opts);
   }
 
   private drawFreedraw(el: CanvasElement & { points: Point[] }): void {
@@ -254,6 +261,58 @@ export class CanvasRenderer {
 
     const frame = computeSelectionFrame(selectedMembers);
     if (!frame) return;
+
+    // Single line or arrow selected: draw clean 3 control points (start, mid, end) like Excalidraw
+    if (frame.isLine && frame.lineElement) {
+      const handles = getHandlePositions(frame);
+      const startPt = handles['line-start'];
+      const midPt = handles['line-mid'];
+      const endPt = handles['line-end'];
+
+      if (!startPt || !endPt) return;
+
+      this.ctx.save();
+
+      // Connecting guideline between handles if multi-point
+      if (frame.lineElement.points.length > 2) {
+        this.ctx.strokeStyle = 'rgba(99, 102, 241, 0.6)';
+        this.ctx.lineWidth = 1;
+        this.ctx.setLineDash([3, 3]);
+        this.ctx.beginPath();
+        this.ctx.moveTo(startPt.x, startPt.y);
+        this.ctx.lineTo(midPt.x, midPt.y);
+        this.ctx.lineTo(endPt.x, endPt.y);
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+      }
+
+      // Draw Start point handle (circle, radius 6, white fill, indigo border)
+      this.ctx.fillStyle = '#ffffff';
+      this.ctx.strokeStyle = '#6366f1';
+      this.ctx.lineWidth = 2;
+      this.ctx.beginPath();
+      this.ctx.arc(startPt.x, startPt.y, 6, 0, Math.PI * 2);
+      this.ctx.fill();
+      this.ctx.stroke();
+
+      // Draw End point handle (circle, radius 6, white fill, indigo border)
+      this.ctx.beginPath();
+      this.ctx.arc(endPt.x, endPt.y, 6, 0, Math.PI * 2);
+      this.ctx.fill();
+      this.ctx.stroke();
+
+      // Draw Mid point handle (circle, radius 5, solid indigo fill, white border)
+      this.ctx.fillStyle = '#6366f1';
+      this.ctx.strokeStyle = '#ffffff';
+      this.ctx.lineWidth = 1.5;
+      this.ctx.beginPath();
+      this.ctx.arc(midPt.x, midPt.y, 5, 0, Math.PI * 2);
+      this.ctx.fill();
+      this.ctx.stroke();
+
+      this.ctx.restore();
+      return;
+    }
 
     const allLocked = selectedMembers.every((el) => el.locked);
 

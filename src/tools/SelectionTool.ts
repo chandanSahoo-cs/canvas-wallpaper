@@ -4,6 +4,8 @@ import {
   Point,
   CanvasElement,
   TextElement,
+  LineElement,
+  ArrowElement,
 } from '../elements/types';
 import {
   computeSelectionFrame,
@@ -45,16 +47,25 @@ interface MarqueeState {
   current: Point;
 }
 
+interface LineHandleState {
+  handle: 'line-start' | 'line-mid' | 'line-end';
+  elementId: string;
+  initialPoints: Point[];
+  historyPushed: boolean;
+}
+
 export class SelectionTool implements Tool {
   private resizeState: ResizeState | null = null;
   private rotateState: RotateState | null = null;
   private moveState: MoveState | null = null;
+  private lineHandleState: LineHandleState | null = null;
   public marqueeState: MarqueeState | null = null;
 
   public clear() {
     this.resizeState = null;
     this.rotateState = null;
     this.moveState = null;
+    this.lineHandleState = null;
     this.marqueeState = null;
   }
 
@@ -72,6 +83,16 @@ export class SelectionTool implements Tool {
       const frame = computeSelectionFrame(selectedMembers);
       if (frame) {
         const handle = hitTestHandle(pos, frame);
+        if (handle && handle.startsWith('line-')) {
+          const el = selectedMembers[0] as LineElement | ArrowElement;
+          this.lineHandleState = {
+            handle: handle as 'line-start' | 'line-mid' | 'line-end',
+            elementId: el.id,
+            initialPoints: JSON.parse(JSON.stringify(el.points)),
+            historyPushed: false,
+          };
+          return;
+        }
         if (handle === 'rotate') {
           const members = selectedMembers
             .filter((el) => !el.locked)
@@ -144,6 +165,31 @@ export class SelectionTool implements Tool {
 
   onPointerMove({ pos, e }: ToolContext): void {
     const store = useAppStore.getState();
+
+    // 0. Line handle drag (start, mid, end)
+    if (this.lineHandleState) {
+      if (!this.lineHandleState.historyPushed) {
+        store.pushHistory();
+        this.lineHandleState.historyPushed = true;
+      }
+      const { handle, elementId, initialPoints } = this.lineHandleState;
+      let nextPoints = [...initialPoints];
+
+      if (handle === 'line-start') {
+        nextPoints[0] = pos;
+      } else if (handle === 'line-end') {
+        nextPoints[nextPoints.length - 1] = pos;
+      } else if (handle === 'line-mid') {
+        if (nextPoints.length === 2) {
+          nextPoints = [nextPoints[0], pos, nextPoints[1]];
+        } else {
+          nextPoints[1] = pos;
+        }
+      }
+
+      store.updateElement(elementId, { points: nextPoints });
+      return;
+    }
 
     // 1. Resize
     if (this.resizeState) {
@@ -297,6 +343,10 @@ export class SelectionTool implements Tool {
 
   onPointerUp(): void {
     const store = useAppStore.getState();
+    if (this.lineHandleState) {
+      this.lineHandleState = null;
+      store.saveToStorage();
+    }
     if (this.resizeState) {
       this.resizeState = null;
       store.saveToStorage();
@@ -319,6 +369,7 @@ export class SelectionTool implements Tool {
   }
 
   getCursor(pos?: Point): string {
+    if (this.lineHandleState) return 'crosshair';
     if (this.rotateState) return 'grabbing';
     if (this.resizeState) {
       const h = this.resizeState.handle;
@@ -335,6 +386,7 @@ export class SelectionTool implements Tool {
       const frame = computeSelectionFrame(selectedMembers);
       if (frame) {
         const handle = hitTestHandle(pos, frame);
+        if (handle && handle.startsWith('line-')) return 'crosshair';
         if (handle === 'rotate') return 'grab';
         if (handle) {
           if (handle === 'n' || handle === 's') return 'ns-resize';

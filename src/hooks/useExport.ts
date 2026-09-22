@@ -122,19 +122,31 @@ export async function exportWallpaperAsPng(): Promise<void> {
         break;
       }
       case 'line': {
-        rc.line(el.points[0].x, el.points[0].y, el.points[1].x, el.points[1].y, roughOptions(el));
+        const pts = el.points;
+        if (pts.length === 2) {
+          rc.line(pts[0].x, pts[0].y, pts[1].x, pts[1].y, roughOptions(el));
+        } else if (pts.length > 2) {
+          rc.linearPath(pts.map((p) => [p.x, p.y]), roughOptions(el));
+        }
         break;
       }
       case 'arrow': {
-        const [p0, p1] = el.points;
+        const pts = el.points;
+        if (pts.length < 2) break;
         const opts = roughOptions(el);
-        rc.line(p0.x, p0.y, p1.x, p1.y, opts);
-        const angle = Math.atan2(p1.y - p0.y, p1.x - p0.x);
+        if (pts.length === 2) {
+          rc.line(pts[0].x, pts[0].y, pts[1].x, pts[1].y, opts);
+        } else {
+          rc.linearPath(pts.map((p) => [p.x, p.y]), opts);
+        }
+        const pLast = pts[pts.length - 1];
+        const pPrev = pts[pts.length - 2];
+        const angle = Math.atan2(pLast.y - pPrev.y, pLast.x - pPrev.x);
         const headLen = 10 + el.strokeWidth * 3;
         const a1 = angle + Math.PI - 0.5;
         const a2 = angle + Math.PI + 0.5;
-        rc.line(p1.x, p1.y, p1.x + headLen * Math.cos(a1), p1.y + headLen * Math.sin(a1), opts);
-        rc.line(p1.x, p1.y, p1.x + headLen * Math.cos(a2), p1.y + headLen * Math.sin(a2), opts);
+        rc.line(pLast.x, pLast.y, pLast.x + headLen * Math.cos(a1), pLast.y + headLen * Math.sin(a1), opts);
+        rc.line(pLast.x, pLast.y, pLast.x + headLen * Math.cos(a2), pLast.y + headLen * Math.sin(a2), opts);
         break;
       }
       case 'freedraw': {
