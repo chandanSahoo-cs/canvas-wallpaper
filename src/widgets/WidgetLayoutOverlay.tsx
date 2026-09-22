@@ -3,7 +3,6 @@ import {
   GripHorizontal,
   Check,
   RotateCcw,
-  AlignCenter,
   LayoutGrid,
   Plus,
   X,
@@ -31,7 +30,6 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
   const setIsLayoutMode = useWidgetStore((s) => s.setIsLayoutMode);
   const widgetPositions = useWidgetStore((s) => s.widgetPositions);
   const setWidgetPosition = useWidgetStore((s) => s.setWidgetPosition);
-  const setAllWidgetPositions = useWidgetStore((s) => s.setAllWidgetPositions);
   const resetWidgetPositions = useWidgetStore((s) => s.resetWidgetPositions);
 
   const showClock = useWidgetStore((s) => s.showClock);
@@ -110,14 +108,6 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
     }
   };
 
-  const handleSnapCenter = () => {
-    setAllWidgetPositions({
-      clock: { x: 50, y: widgetPositions.clock.y },
-      search: { x: 50, y: widgetPositions.search.y },
-      quickLinks: { x: 50, y: widgetPositions.quickLinks.y },
-    });
-  };
-
   const handleAddQuickLink = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newUrl.trim()) return;
@@ -176,15 +166,6 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
           <span>Widgets & Links</span>
-        </button>
-
-        <button
-          onClick={handleSnapCenter}
-          title="Snap all widgets to horizontal center"
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium active:scale-95 transition-all"
-        >
-          <AlignCenter className="w-3.5 h-3.5" />
-          <span>Center X</span>
         </button>
 
         <button
