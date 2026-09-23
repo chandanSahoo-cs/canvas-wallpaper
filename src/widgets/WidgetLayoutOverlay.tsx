@@ -265,15 +265,22 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
               </div>
               <div className="flex items-center gap-2">
                 {showSearch && (
-                  <select
-                    value={searchEngine}
-                    onChange={(e) => setSearchEngine(e.target.value as any)}
-                    className="bg-neutral-100 text-neutral-700 text-[11px] py-0.5 px-2 rounded-lg outline-none cursor-pointer border border-neutral-200"
-                  >
-                    <option value="google">Google</option>
-                    <option value="duckduckgo">DuckDuckGo</option>
-                    <option value="bing">Bing</option>
-                  </select>
+                  <div className="flex items-center bg-neutral-100 p-0.5 rounded-lg text-[10px]">
+                    {(['google', 'duckduckgo', 'bing'] as const).map((eng) => (
+                      <button
+                        key={eng}
+                        onClick={() => setSearchEngine(eng)}
+                        className={cn(
+                          'px-2 py-0.5 rounded-md font-medium transition-all',
+                          searchEngine === eng
+                            ? 'bg-white text-indigo-600 shadow-xs'
+                            : 'text-neutral-600 hover:text-neutral-900'
+                        )}
+                      >
+                        {eng === 'duckduckgo' ? 'DDG' : eng === 'google' ? 'Google' : 'Bing'}
+                      </button>
+                    ))}
+                  </div>
                 )}
                 <input
                   type="checkbox"

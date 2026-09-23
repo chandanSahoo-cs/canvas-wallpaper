@@ -140,15 +140,21 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
           {showSearch && (
             <div className="ml-7 flex items-center gap-3">
               <span className="text-xs text-neutral-500 font-medium">Engine:</span>
-              <select
-                value={searchEngine}
-                onChange={(e) => setSearchEngine(e.target.value as any)}
-                className="bg-neutral-100 text-neutral-700 text-xs py-1 px-2.5 rounded-lg outline-none cursor-pointer border border-neutral-200"
-              >
-                <option value="google">Google</option>
-                <option value="duckduckgo">DuckDuckGo</option>
-                <option value="bing">Bing</option>
-              </select>
+              <div className="flex items-center gap-1 bg-neutral-100 p-0.5 rounded-lg text-xs">
+                {(['google', 'duckduckgo', 'bing'] as const).map((eng) => (
+                  <button
+                    key={eng}
+                    onClick={() => setSearchEngine(eng)}
+                    className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                      searchEngine === eng
+                        ? 'bg-white shadow-sm text-indigo-600'
+                        : 'text-neutral-600 hover:text-neutral-900'
+                    }`}
+                  >
+                    {eng === 'duckduckgo' ? 'DuckDuckGo' : eng === 'google' ? 'Google' : 'Bing'}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
