@@ -34,7 +34,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
         <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
           <div className="flex items-center gap-2.5">
             <img
-              src="/icon/light-48.png"
+              src="/icon/48.png"
               alt="Canvas Wallpaper"
               className="w-5 h-5 object-contain"
             />
