@@ -10,6 +10,7 @@ import {
 } from '../elements/types';
 import { newId, isColorLight, randomSeed } from '../lib/utils';
 import { getCenter, rotatePoint } from '../canvas/geometry';
+import { getConnectedGroupElementIds, groupElements, ungroupElements } from '../lib/groups';
 
 export const HISTORY_LIMIT = 50;
 
@@ -165,8 +166,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   setEditingText: (editingText) => set({ editingText }),
 
   setSelectedIds: (ids) => {
-    const next = ids instanceof Set ? ids : new Set(ids);
+    const raw = ids instanceof Set ? ids : new Set(ids);
     const { elements } = get();
+    const next = getConnectedGroupElementIds(elements, raw);
     const firstSelected = elements.find((e) => next.has(e.id));
     if (firstSelected) {
       set({
@@ -186,10 +188,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   toggleSelectedId: (id) => {
-    const next = new Set(get().selectedIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
-    const { elements } = get();
+    const { elements, selectedIds } = get();
+    const groupMemberIds = getConnectedGroupElementIds(elements, [id]);
+    const allIn = Array.from(groupMemberIds).every((gid) => selectedIds.has(gid));
+    const next = new Set(selectedIds);
+    groupMemberIds.forEach((gid) => (allIn ? next.delete(gid) : next.add(gid)));
     const firstSelected = elements.find((e) => next.has(e.id));
     if (firstSelected) {
       set({
@@ -213,13 +216,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     const hit = elements.find((e) => e.id === hitId);
     if (!hit) return;
 
-    const gid = hit.groupIds && hit.groupIds.length ? hit.groupIds[hit.groupIds.length - 1] : null;
-    const groupMembers = gid
-      ? elements.filter((e) => e.groupIds && e.groupIds[e.groupIds.length - 1] === gid).map((e) => e.id)
-      : [hitId];
+    // Get all elements in any connected group with hitId
+    const groupMembers = getConnectedGroupElementIds(elements, [hitId]);
 
     if (shiftKey) {
-      const allIn = groupMembers.every((id) => selectedIds.has(id));
+      const allIn = Array.from(groupMembers).every((id) => selectedIds.has(id));
       const next = new Set(selectedIds);
       groupMembers.forEach((id) => (allIn ? next.delete(id) : next.add(id)));
       const firstSelected = elements.find((e) => next.has(e.id));
@@ -239,9 +240,8 @@ export const useAppStore = create<AppState>((set, get) => ({
         set({ selectedIds: next });
       }
     } else {
-      const next = new Set(groupMembers);
       set({
-        selectedIds: next,
+        selectedIds: groupMembers,
         currentStrokeColor: hit.strokeColor ?? get().currentStrokeColor,
         currentFillColor: hit.fillColor ?? get().currentFillColor,
         currentStrokeWidth: hit.strokeWidth ?? get().currentStrokeWidth,
@@ -504,35 +504,20 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   groupSelected: () => {
-    const { selectedIds } = get();
+    const { selectedIds, elements } = get();
     if (selectedIds.size < 2) return;
     get().pushHistory();
-    const gid = newId();
-    set((state) => ({
-      elements: state.elements.map((el) => {
-        if (!selectedIds.has(el.id)) return el;
-        return {
-          ...el,
-          groupIds: [...(el.groupIds || []), gid],
-        };
-      }),
-    }));
+    const { elements: nextElements } = groupElements(elements, selectedIds);
+    set({ elements: nextElements });
     get().saveToStorage();
   },
 
   ungroupSelected: () => {
-    const { selectedIds } = get();
+    const { selectedIds, elements } = get();
     if (selectedIds.size === 0) return;
     get().pushHistory();
-    set((state) => ({
-      elements: state.elements.map((el) => {
-        if (!selectedIds.has(el.id) || !el.groupIds || el.groupIds.length === 0) return el;
-        return {
-          ...el,
-          groupIds: el.groupIds.slice(0, -1),
-        };
-      }),
-    }));
+    const nextElements = ungroupElements(elements, selectedIds);
+    set({ elements: nextElements });
     get().saveToStorage();
   },
 

@@ -349,8 +349,8 @@ export class CanvasRenderer {
       (selectedMembers.length > 1 ||
         (selectedMembers[0]?.groupIds && selectedMembers[0].groupIds.length > 0));
 
-    // Draw item outlines for multi-selection
-    if (selectedMembers.length > 1) {
+    // Draw item outlines for ungrouped multi-selection (like Excalidraw, groups act as single unit)
+    if (selectedMembers.length > 1 && !isGrouped) {
       for (const el of selectedMembers) {
         const b = getBBox(el);
         this.ctx.save();

@@ -319,11 +319,15 @@ export class SelectionTool implements Tool {
             })) as any,
           });
         } else if ('x' in snapshot && 'width' in snapshot) {
+          const rawX = anchorX + (snapshot.x - anchorX) * sx;
+          const rawY = anchorY + (snapshot.y - anchorY) * sy;
+          const rawW = snapshot.width * sx;
+          const rawH = snapshot.height * sy;
           store.updateElement(id, {
-            x: anchorX + (snapshot.x - anchorX) * sx,
-            y: anchorY + (snapshot.y - anchorY) * sy,
-            width: snapshot.width * sx,
-            height: snapshot.height * sy,
+            x: rawW < 0 ? rawX + rawW : rawX,
+            y: rawH < 0 ? rawY + rawH : rawY,
+            width: Math.abs(rawW),
+            height: Math.abs(rawH),
           });
         } else if (snapshot.type === 'text') {
           const textEl = snapshot as TextElement;
@@ -338,22 +342,12 @@ export class SelectionTool implements Tool {
           );
           const newFontSize = Math.max(8, Math.min(240, Math.round(origFontSize * scale)));
 
-          let newX = textEl.x;
-          let newY = textEl.y;
-          if (handle.includes('w')) {
-            newX = anchorX - origBBox.w * scale;
-          } else if (handle.includes('e')) {
-            newX = anchorX;
-          }
-          if (handle.includes('n')) {
-            newY = anchorY - origBBox.h * scale;
-          } else if (handle.includes('s')) {
-            newY = anchorY;
-          }
+          const rawX = anchorX + (textEl.x - anchorX) * sx;
+          const rawY = anchorY + (textEl.y - anchorY) * sy;
 
           store.updateElement(id, {
-            x: newX,
-            y: newY,
+            x: rawX,
+            y: rawY,
             fontSize: newFontSize,
           });
         }
