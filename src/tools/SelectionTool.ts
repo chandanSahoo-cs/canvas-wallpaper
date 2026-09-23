@@ -56,6 +56,7 @@ interface MoveState {
   pos: Point;
   snapshots: { id: string; snapshot: CanvasElement }[];
   historyPushed: boolean;
+  hasDuplicated?: boolean;
 }
 
 interface MarqueeState {
@@ -560,8 +561,33 @@ export class SelectionTool implements Tool {
         store.pushHistory();
         this.moveState.historyPushed = true;
       }
-      const dx = pos.x - this.moveState.pos.x;
-      const dy = pos.y - this.moveState.pos.y;
+
+      // Alt key: duplicate selection on drag (Excalidraw / vector standard)
+      if (e.altKey && !this.moveState.hasDuplicated) {
+        store.duplicateSelected();
+        this.moveState.hasDuplicated = true;
+        const updatedSelected = useAppStore.getState().selectedIds;
+        const currentSelectedMembers = useAppStore
+          .getState()
+          .elements.filter((el) => updatedSelected.has(el.id) && !el.locked);
+        this.moveState.snapshots = currentSelectedMembers.map((el) => ({
+          id: el.id,
+          snapshot: JSON.parse(JSON.stringify(el)),
+        }));
+      }
+
+      let dx = pos.x - this.moveState.pos.x;
+      let dy = pos.y - this.moveState.pos.y;
+
+      // Shift key constraint: lock to horizontal or vertical axis (Excalidraw standard)
+      if (e.shiftKey) {
+        if (Math.abs(dx) > Math.abs(dy)) {
+          dy = 0;
+        } else {
+          dx = 0;
+        }
+      }
+
       store.moveSelected(this.moveState.snapshots, dx, dy);
       return;
     }

@@ -298,7 +298,7 @@ export const App: React.FC = () => {
         return;
       }
 
-      // Tool switching shortcuts
+      // Tool switching shortcuts (letters and Excalidraw 1-9 numbers)
       const toolMap: Record<string, ToolType> = {
         v: "selection",
         r: "rectangle",
@@ -309,6 +309,16 @@ export const App: React.FC = () => {
         p: "freedraw",
         t: "text",
         e: "eraser",
+        "1": "selection",
+        "2": "rectangle",
+        "3": "diamond",
+        "4": "ellipse",
+        "5": "arrow",
+        "6": "line",
+        "7": "freedraw",
+        "8": "text",
+        "9": "eraser",
+        "0": "eraser",
       };
       if (toolMap[key]) {
         setTool(toolMap[key]);

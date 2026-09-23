@@ -46,11 +46,26 @@ export class ShapeTool implements Tool {
       height = size * Math.sign(height || 1);
     }
 
-    store.setDraft({
-      ...draft,
-      width,
-      height,
-    } as CanvasElement);
+    if (e.altKey) {
+      // Alt key: draw shape from center outward (Excalidraw standard)
+      const absW = Math.abs(width) * 2;
+      const absH = Math.abs(height) * 2;
+      store.setDraft({
+        ...draft,
+        x: this.startPos.x - absW / 2,
+        y: this.startPos.y - absH / 2,
+        width: absW,
+        height: absH,
+      } as CanvasElement);
+    } else {
+      store.setDraft({
+        ...draft,
+        x: this.startPos.x,
+        y: this.startPos.y,
+        width,
+        height,
+      } as CanvasElement);
+    }
   }
 
   onPointerUp(): void {

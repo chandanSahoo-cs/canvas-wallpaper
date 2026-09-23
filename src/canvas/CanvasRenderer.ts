@@ -172,7 +172,8 @@ export class CanvasRenderer {
     const pLast = pts[pts.length - 1];
     const pPrev = pts[pts.length - 2];
     const angle = Math.atan2(pLast.y - pPrev.y, pLast.x - pPrev.x);
-    const headLen = 10 + el.strokeWidth * 3;
+    const lineLen = Math.hypot(pLast.x - pPrev.x, pLast.y - pPrev.y);
+    const headLen = Math.min(10 + el.strokeWidth * 3, Math.max(lineLen * 0.75, 4));
     const a1 = angle + Math.PI - 0.5;
     const a2 = angle + Math.PI + 0.5;
     this.rc.line(pLast.x, pLast.y, pLast.x + headLen * Math.cos(a1), pLast.y + headLen * Math.sin(a1), opts);

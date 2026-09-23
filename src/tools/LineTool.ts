@@ -50,9 +50,20 @@ export class LineTool implements Tool {
       };
     }
 
+    let p0 = this.startPos;
+    let p1 = target;
+
+    if (e.altKey) {
+      // Alt key: draw line symmetrically from center outward (Excalidraw standard)
+      const dx = target.x - this.startPos.x;
+      const dy = target.y - this.startPos.y;
+      p0 = { x: this.startPos.x - dx, y: this.startPos.y - dy };
+      p1 = { x: this.startPos.x + dx, y: this.startPos.y + dy };
+    }
+
     store.setDraft({
       ...draft,
-      points: [draft.points[0], target],
+      points: [p0, p1],
     } as CanvasElement);
   }
 

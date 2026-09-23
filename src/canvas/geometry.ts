@@ -122,7 +122,7 @@ export function getBBox(el: CanvasElement): BoundingBox {
     if (xs.length === 0) return { x: 0, y: 0, w: 0, h: 0 };
     const minX = Math.min(...xs), maxX = Math.max(...xs);
     const minY = Math.min(...ys), maxY = Math.max(...ys);
-    return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+    return { x: minX, y: minY, w: Math.max(maxX - minX, 4), h: Math.max(maxY - minY, 4) };
   }
   if (el.type === 'text') {
     const textEl = el as TextElement;
