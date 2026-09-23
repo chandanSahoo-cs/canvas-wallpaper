@@ -25,4 +25,4 @@ Canvas Wallpaper does not communicate with any external backend servers of its o
 ---
 
 ### 4. Changes & Contact
-If you have any questions or feedback regarding this Privacy Policy, please open an issue on the [GitHub repository](https://github.com/chandanSahoo-cs/canvas-wallpaper/issues).
+If you have any questions or feedback regarding this Privacy Policy or Canvas Wallpaper, please reach out via the Chrome Web Store support page or contact the developer directly.

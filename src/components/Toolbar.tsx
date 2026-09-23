@@ -19,18 +19,26 @@ import {
   Upload,
   FileCode,
   FileJson,
+  Image as ImageIcon,
+  Keyboard,
 } from 'lucide-react';
 import { exportWallpaperAsPng } from '../hooks/useExport';
 import { exportWallpaperAsSvg } from '../hooks/useSvgExport';
 import { exportWallpaperFile, importWallpaperFile } from '../hooks/useWallpaperFile';
+import { insertImageFromFile } from '../lib/imageInsert';
 import { useAppStore } from '../store/useAppStore';
 import { useSceneStore } from '../store/useSceneStore';
 import { ToolType } from '../elements/types';
 import { cn } from '../lib/utils';
 
-export const Toolbar: React.FC = () => {
+interface ToolbarProps {
+  onOpenShortcuts?: () => void;
+}
+
+export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
   const [isExportMenuOpen, setIsExportMenuOpen] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const imageInputRef = React.useRef<HTMLInputElement>(null);
   const menuRef = React.useRef<HTMLDivElement>(null);
 
   const currentTool = useAppStore((s) => s.currentTool);
@@ -91,6 +99,29 @@ export const Toolbar: React.FC = () => {
             {t.icon}
           </button>
         ))}
+
+        {/* Insert Image Button */}
+        <button
+          title="Insert Image (or paste with Ctrl+V)"
+          onClick={() => imageInputRef.current?.click()}
+          className="w-8.5 h-8.5 rounded-xl flex items-center justify-center text-neutral-700 hover:bg-neutral-100/90 hover:text-neutral-900 active:scale-95 transition-all duration-150"
+        >
+          <ImageIcon className="w-4 h-4" />
+        </button>
+
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={async (e) => {
+            const file = e.target.files?.[0];
+            if (file) {
+              await insertImageFromFile(file);
+              e.target.value = '';
+            }
+          }}
+        />
       </div>
 
       <div className="w-px h-5 bg-neutral-200/80 mx-1 shrink-0" />
@@ -232,6 +263,17 @@ export const Toolbar: React.FC = () => {
             }
           }}
         />
+
+        {/* Keyboard Shortcuts */}
+        {onOpenShortcuts && (
+          <button
+            title="Keyboard Shortcuts (?)"
+            onClick={onOpenShortcuts}
+            className="w-8.5 h-8.5 rounded-xl flex items-center justify-center text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 transition-all duration-150 active:scale-95"
+          >
+            <Keyboard className="w-4 h-4" />
+          </button>
+        )}
 
         {/* Preview Wallpaper */}
         <button

@@ -1,8 +1,9 @@
-import { EyeOff, Pencil, LayoutGrid } from "lucide-react";
+import { EyeOff, Pencil, LayoutGrid, Keyboard } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useCanvas } from "./canvas/useCanvas";
 import { InlineTextEditor } from "./components/InlineTextEditor";
 import { SceneSwitcher } from "./components/SceneSwitcher";
+import { ShortcutsDialog } from "./components/ShortcutsDialog";
 import { StylePanel } from "./components/StylePanel";
 import { Toolbar } from "./components/Toolbar";
 import { ImageElement, TextElement, ToolType } from "./elements/types";
@@ -21,6 +22,7 @@ export const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useCanvas(canvasRef);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
   const lastPasteHandledRef = useRef(0);
 
   const mode = useAppStore((s) => s.mode);
@@ -136,17 +138,7 @@ export const App: React.FC = () => {
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Toggle drawing mode with Space or E if in wallpaper mode
-      if (mode === "wallpaper") {
-        if (e.key === "e" || e.key === "E") {
-          setMode("drawing");
-          return;
-        }
-      }
-
-      if (mode !== "drawing") return;
-
-      // Never trigger canvas shortcuts while typing into text editor
+      // Never trigger canvas shortcuts while typing into text editor or inputs
       if (useAppStore.getState().editingText) return;
 
       const target = e.target as HTMLElement | null;
@@ -160,6 +152,23 @@ export const App: React.FC = () => {
       ) {
         return;
       }
+
+      // Keyboard shortcuts modal toggle with '?'
+      if (e.key === "?" && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        setIsShortcutsOpen((prev) => !prev);
+        return;
+      }
+
+      // Toggle drawing mode with E if in wallpaper mode
+      if (mode === "wallpaper") {
+        if (e.key === "e" || e.key === "E") {
+          setMode("drawing");
+          return;
+        }
+      }
+
+      if (mode !== "drawing") return;
 
       const key = e.key.toLowerCase();
       const mod = e.metaKey || e.ctrlKey;
@@ -565,6 +574,14 @@ export const App: React.FC = () => {
           )}
         >
           <button
+            title="Keyboard Shortcuts (?)"
+            onClick={() => setIsShortcutsOpen(true)}
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 text-white active:scale-95 transition-colors"
+          >
+            <Keyboard className="w-4 h-4" />
+          </button>
+          <div className={cn("w-px h-4 mx-0.5", isLight ? "bg-white/20" : "bg-white/30")} />
+          <button
             title="Widget Layout & Accessories (Drag anywhere on grid)"
             onClick={() => setIsLayoutMode(true)}
             className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 text-white active:scale-95 transition-colors"
@@ -589,10 +606,16 @@ export const App: React.FC = () => {
         onClose={() => setIsSettingsOpen(false)}
       />
 
+      {/* Keyboard Shortcuts Dialog Modal */}
+      <ShortcutsDialog
+        isOpen={isShortcutsOpen}
+        onClose={() => setIsShortcutsOpen(false)}
+      />
+
       {/* Drawing Mode UI Overlays */}
       {mode === "drawing" && !isPreviewing && (
         <>
-          <Toolbar />
+          <Toolbar onOpenShortcuts={() => setIsShortcutsOpen(true)} />
           <StylePanel />
           <SceneSwitcher />
         </>
