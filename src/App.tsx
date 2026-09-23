@@ -133,6 +133,47 @@ export const App: React.FC = () => {
     useWidgetStore.getState().loadFromStorage();
   }, []);
 
+  // Browser theme-aware icons (Tab Favicon & Extension Toolbar Action Icon)
+  useEffect(() => {
+    const updateThemeIcons = (isDark: boolean) => {
+      // 1. Update tab favicon
+      const favicon = document.getElementById("favicon-default") as HTMLLinkElement | null;
+      if (favicon) {
+        favicon.href = isDark ? "/icon/dark-16.png" : "/icon/light-16.png";
+      }
+
+      // 2. Update Chrome Extension Toolbar Action icon
+      if (typeof chrome !== "undefined" && chrome.action && chrome.action.setIcon) {
+        try {
+          chrome.action.setIcon({
+            path: isDark
+              ? {
+                  16: "/icon/dark-16.png",
+                  48: "/icon/dark-48.png",
+                  128: "/icon/dark-128.png",
+                }
+              : {
+                  16: "/icon/light-16.png",
+                  48: "/icon/light-48.png",
+                  128: "/icon/light-128.png",
+                },
+          });
+        } catch {
+          // Ignore if action permission is restricted
+        }
+      }
+    };
+
+    if (typeof window !== "undefined" && window.matchMedia) {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      updateThemeIcons(mediaQuery.matches);
+
+      const handler = (e: MediaQueryListEvent) => updateThemeIcons(e.matches);
+      mediaQuery.addEventListener("change", handler);
+      return () => mediaQuery.removeEventListener("change", handler);
+    }
+  }, []);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
