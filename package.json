@@ -1,5 +1,5 @@
 {
-  "name": "canvas-wallpaper",
+  "name": "PaperTab",
   "version": "1.0.0",
   "description": "A drawable wallpaper for your New Tab page.",
   "type": "commonjs",
@@ -11,7 +11,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/chandanSahoo-cs/canvas-wallpaper.git"
+    "url": "git+https://github.com/chandanSahoo-cs/PaperTab.git"
   },
   "keywords": [],
   "author": "",

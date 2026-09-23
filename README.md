@@ -26,8 +26,8 @@ Canvas Wallpaper brings an Excalidraw-inspired sketching canvas directly to your
 
 1. Clone this repository:
    ```bash
-   git clone https://github.com/chandanSahoo-cs/canvas-wallpaper.git
-   cd canvas-wallpaper
+   git clone https://github.com/chandanSahoo-cs/PaperTab.git
+   cd PaperTab
    ```
 2. Install dependencies:
    ```bash
@@ -46,18 +46,18 @@ Canvas Wallpaper brings an Excalidraw-inspired sketching canvas directly to your
 
 ## Shortcuts Cheatsheet
 
-| Shortcut | Action |
-| :--- | :--- |
-| **`?`** | Open keyboard shortcuts cheatsheet |
-| **`E`** | Toggle Drawing / Wallpaper mode |
-| **`H`** | Toggle UI preview (clean view) |
-| **`Ctrl + C`** | Copy selected element(s) |
-| **`Ctrl + V`** | Paste element(s) (or images) |
-| **`Ctrl + X`** | Cut selected element(s) |
-| **`Ctrl + D`** | Duplicate selected element(s) |
-| **`Ctrl + Z` / `Ctrl + Y`** | Undo / Redo |
-| **`Arrow Keys`** | Nudge selected elements (`+ Shift` for 10px) |
-| **`V`, `R`, `D`, `O`, `A`, `L`, `P`, `T`, `E`** | Switch drawing tools |
+| Shortcut                                        | Action                                       |
+| :---------------------------------------------- | :------------------------------------------- |
+| **`?`**                                         | Open keyboard shortcuts cheatsheet           |
+| **`E`**                                         | Toggle Drawing / Wallpaper mode              |
+| **`H`**                                         | Toggle UI preview (clean view)               |
+| **`Ctrl + C`**                                  | Copy selected element(s)                     |
+| **`Ctrl + V`**                                  | Paste element(s) (or images)                 |
+| **`Ctrl + X`**                                  | Cut selected element(s)                      |
+| **`Ctrl + D`**                                  | Duplicate selected element(s)                |
+| **`Ctrl + Z` / `Ctrl + Y`**                     | Undo / Redo                                  |
+| **`Arrow Keys`**                                | Nudge selected elements (`+ Shift` for 10px) |
+| **`V`, `R`, `D`, `O`, `A`, `L`, `P`, `T`, `E`** | Switch drawing tools                         |
 
 ---
 
