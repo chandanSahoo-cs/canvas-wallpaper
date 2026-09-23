@@ -30,7 +30,7 @@ export interface WidgetSettings {
   clockFormat: '12h' | '24h';
   showDate: boolean;
   showSearch: boolean;
-  searchEngine: 'google' | 'duckduckgo' | 'bing';
+  searchEngine: 'google' | 'duckduckgo' | 'bing' | 'brave';
   showQuickLinks: boolean;
   quickLinks: QuickLink[];
 
@@ -42,7 +42,7 @@ export interface WidgetSettings {
   setClockFormat: (format: '12h' | '24h') => void;
   setShowDate: (show: boolean) => void;
   setShowSearch: (show: boolean) => void;
-  setSearchEngine: (engine: 'google' | 'duckduckgo' | 'bing') => void;
+  setSearchEngine: (engine: 'google' | 'duckduckgo' | 'bing' | 'brave') => void;
   setShowQuickLinks: (show: boolean) => void;
 
   addQuickLink: (title: string, url: string) => void;

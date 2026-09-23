@@ -47,6 +47,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({ isLight: propIsLight }) =>
       url = `https://duckduckgo.com/?q=${encodeURIComponent(q)}`;
     } else if (searchEngine === 'bing') {
       url = `https://www.bing.com/search?q=${encodeURIComponent(q)}`;
+    } else if (searchEngine === 'brave') {
+      url = `https://search.brave.com/search?q=${encodeURIComponent(q)}`;
     }
 
     window.location.href = url;
@@ -56,6 +58,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({ isLight: propIsLight }) =>
     { id: 'google', label: 'Google' },
     { id: 'duckduckgo', label: 'DuckDuckGo' },
     { id: 'bing', label: 'Bing' },
+    { id: 'brave', label: 'Brave Search' },
   ] as const;
 
   return (
@@ -119,7 +122,15 @@ export const SearchBar: React.FC<SearchBarProps> = ({ isLight: propIsLight }) =>
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder={`Search with ${searchEngine === 'duckduckgo' ? 'DuckDuckGo' : searchEngine === 'bing' ? 'Bing' : 'Google'}...`}
+        placeholder={`Search with ${
+          searchEngine === 'duckduckgo'
+            ? 'DuckDuckGo'
+            : searchEngine === 'bing'
+              ? 'Bing'
+              : searchEngine === 'brave'
+                ? 'Brave'
+                : 'Google'
+        }...`}
         className={cn(
           'w-full pl-14 pr-4 py-2.5 rounded-full backdrop-blur-xl text-sm outline-none transition-all shadow-lg focus:shadow-xl',
           isLight

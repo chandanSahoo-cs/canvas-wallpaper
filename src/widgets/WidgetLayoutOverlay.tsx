@@ -12,6 +12,7 @@ import {
   Link2,
   Trash2,
   SlidersHorizontal,
+  ChevronDown,
 } from 'lucide-react';
 import { useWidgetStore, WidgetPosition, DEFAULT_WIDGET_POSITIONS } from '../store/useWidgetStore';
 import { ClockWidget } from './ClockWidget';
@@ -52,10 +53,24 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
 
   const [activeDrag, setActiveDrag] = useState<WidgetKey | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isEngineDropdownOpen, setIsEngineDropdownOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newUrl, setNewUrl] = useState('');
 
   const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
+  const engineDropdownRef = useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (engineDropdownRef.current && !engineDropdownRef.current.contains(e.target as Node)) {
+        setIsEngineDropdownOpen(false);
+      }
+    };
+    if (isEngineDropdownOpen) {
+      document.addEventListener('pointerdown', handleOutsideClick);
+    }
+    return () => document.removeEventListener('pointerdown', handleOutsideClick);
+  }, [isEngineDropdownOpen]);
 
   if (!isLayoutMode) return null;
 
@@ -265,21 +280,57 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
               </div>
               <div className="flex items-center gap-2">
                 {showSearch && (
-                  <div className="flex items-center bg-neutral-100 p-0.5 rounded-lg text-[10px]">
-                    {(['google', 'duckduckgo', 'bing'] as const).map((eng) => (
-                      <button
-                        key={eng}
-                        onClick={() => setSearchEngine(eng)}
+                  <div ref={engineDropdownRef} className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIsEngineDropdownOpen((v) => !v)}
+                      className="flex items-center gap-1.5 px-2.5 py-1 bg-neutral-100 hover:bg-neutral-200/80 border border-neutral-200 text-neutral-700 hover:text-neutral-900 rounded-lg text-xs font-medium transition-all active:scale-95 cursor-pointer"
+                    >
+                      <span>
+                        {searchEngine === 'google'
+                          ? 'Google'
+                          : searchEngine === 'duckduckgo'
+                            ? 'DuckDuckGo'
+                            : searchEngine === 'bing'
+                              ? 'Bing'
+                              : 'Brave Search'}
+                      </span>
+                      <ChevronDown
                         className={cn(
-                          'px-2 py-0.5 rounded-md font-medium transition-all',
-                          searchEngine === eng
-                            ? 'bg-white text-indigo-600 shadow-xs'
-                            : 'text-neutral-600 hover:text-neutral-900'
+                          'w-3 h-3 text-neutral-500 transition-transform duration-150',
+                          isEngineDropdownOpen && 'rotate-180'
                         )}
-                      >
-                        {eng === 'duckduckgo' ? 'DDG' : eng === 'google' ? 'Google' : 'Bing'}
-                      </button>
-                    ))}
+                      />
+                    </button>
+
+                    {isEngineDropdownOpen && (
+                      <div className="absolute right-0 top-full mt-1.5 w-36 bg-white rounded-xl shadow-xl border border-neutral-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                        {[
+                          { id: 'google', label: 'Google' },
+                          { id: 'duckduckgo', label: 'DuckDuckGo' },
+                          { id: 'bing', label: 'Bing' },
+                          { id: 'brave', label: 'Brave Search' },
+                        ].map((eng) => (
+                          <button
+                            key={eng.id}
+                            type="button"
+                            onClick={() => {
+                              setSearchEngine(eng.id as any);
+                              setIsEngineDropdownOpen(false);
+                            }}
+                            className={cn(
+                              'w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition-colors cursor-pointer',
+                              searchEngine === eng.id
+                                ? 'bg-indigo-50 text-indigo-600 font-semibold'
+                                : 'text-neutral-700 hover:bg-neutral-100'
+                            )}
+                          >
+                            <span>{eng.label}</span>
+                            {searchEngine === eng.id && <Check className="w-3.5 h-3.5" />}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
                 <input

@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, Clock, Calendar, Search, Link2, Settings, LayoutGrid, Move, RotateCcw } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Clock, Calendar, Search, Link2, Settings, LayoutGrid, Move, RotateCcw, ChevronDown, Check } from 'lucide-react';
 import { useWidgetStore } from '../store/useWidgetStore';
 
 interface SettingsDialogProps {
@@ -8,6 +8,20 @@ interface SettingsDialogProps {
 }
 
 export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
+  const [isEngineDropdownOpen, setIsEngineDropdownOpen] = useState(false);
+  const engineDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (engineDropdownRef.current && !engineDropdownRef.current.contains(e.target as Node)) {
+        setIsEngineDropdownOpen(false);
+      }
+    };
+    if (isEngineDropdownOpen) {
+      document.addEventListener('pointerdown', handleOutsideClick);
+    }
+    return () => document.removeEventListener('pointerdown', handleOutsideClick);
+  }, [isEngineDropdownOpen]);
   const showClock = useWidgetStore((s) => s.showClock);
   const setShowClock = useWidgetStore((s) => s.setShowClock);
   const clockFormat = useWidgetStore((s) => s.clockFormat);
@@ -140,20 +154,55 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
           {showSearch && (
             <div className="ml-7 flex items-center gap-3">
               <span className="text-xs text-neutral-500 font-medium">Engine:</span>
-              <div className="flex items-center gap-1 bg-neutral-100 p-0.5 rounded-lg text-xs">
-                {(['google', 'duckduckgo', 'bing'] as const).map((eng) => (
-                  <button
-                    key={eng}
-                    onClick={() => setSearchEngine(eng)}
-                    className={`px-2.5 py-1 rounded-md font-medium transition-all ${
-                      searchEngine === eng
-                        ? 'bg-white shadow-sm text-indigo-600'
-                        : 'text-neutral-600 hover:text-neutral-900'
+              <div ref={engineDropdownRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsEngineDropdownOpen((v) => !v)}
+                  className="flex items-center gap-1.5 px-3 py-1 bg-neutral-100 hover:bg-neutral-200/80 border border-neutral-200 text-neutral-700 hover:text-neutral-900 rounded-lg text-xs font-medium transition-all active:scale-95 cursor-pointer shadow-2xs"
+                >
+                  <span>
+                    {searchEngine === 'google'
+                      ? 'Google'
+                      : searchEngine === 'duckduckgo'
+                        ? 'DuckDuckGo'
+                        : searchEngine === 'bing'
+                          ? 'Bing'
+                          : 'Brave Search'}
+                  </span>
+                  <ChevronDown
+                    className={`w-3.5 h-3.5 text-neutral-500 transition-transform duration-150 ${
+                      isEngineDropdownOpen ? 'rotate-180' : ''
                     }`}
-                  >
-                    {eng === 'duckduckgo' ? 'DuckDuckGo' : eng === 'google' ? 'Google' : 'Bing'}
-                  </button>
-                ))}
+                  />
+                </button>
+
+                {isEngineDropdownOpen && (
+                  <div className="absolute left-0 top-full mt-1.5 w-36 bg-white rounded-xl shadow-xl border border-neutral-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    {[
+                      { id: 'google', label: 'Google' },
+                      { id: 'duckduckgo', label: 'DuckDuckGo' },
+                      { id: 'bing', label: 'Bing' },
+                      { id: 'brave', label: 'Brave Search' },
+                    ].map((eng) => (
+                      <button
+                        key={eng.id}
+                        type="button"
+                        onClick={() => {
+                          setSearchEngine(eng.id as any);
+                          setIsEngineDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition-colors cursor-pointer ${
+                          searchEngine === eng.id
+                            ? 'bg-indigo-50 text-indigo-600 font-semibold'
+                            : 'text-neutral-700 hover:bg-neutral-100'
+                        }`}
+                      >
+                        <span>{eng.label}</span>
+                        {searchEngine === eng.id && <Check className="w-3.5 h-3.5" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
