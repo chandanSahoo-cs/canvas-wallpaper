@@ -42,6 +42,12 @@ export interface SelectionFrame {
   lineElement?: LineElement | ArrowElement;
 }
 
+export interface RotationOverlay {
+  frame: SelectionFrame;
+  degrees: number;
+  handlePos: Point;
+}
+
 export function distance(a: Point, b: Point): number {
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
@@ -77,6 +83,20 @@ export function rotatePoint(pos: Point, center: Point, angle: number): Point {
   const cos = Math.cos(angle), sin = Math.sin(angle);
   const dx = pos.x - center.x, dy = pos.y - center.y;
   return { x: center.x + dx * cos - dy * sin, y: center.y + dx * sin + dy * cos };
+}
+
+export function normalizeAngle(angle: number): number {
+  let a = angle % (2 * Math.PI);
+  if (a > Math.PI) a -= 2 * Math.PI;
+  if (a <= -Math.PI) a += 2 * Math.PI;
+  return a;
+}
+
+export function angleToDegrees(angle: number): number {
+  let deg = Math.round((angle * 180) / Math.PI);
+  deg = ((deg % 360) + 360) % 360;
+  if (deg > 180) deg -= 360;
+  return deg;
 }
 
 export function getBBox(el: CanvasElement): BoundingBox {

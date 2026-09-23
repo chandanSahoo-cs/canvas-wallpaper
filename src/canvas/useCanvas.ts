@@ -59,6 +59,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         zoom: isCleanView ? 1 : state.zoom,
         scrollOffset: isCleanView ? { x: 0, y: 0 } : state.scrollOffset,
         marquee: isCleanView ? null : selectionTool.marqueeState,
+        rotationOverlay: isCleanView ? null : selectionTool.getRotationOverlay(),
       });
     }
 

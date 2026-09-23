@@ -16,6 +16,9 @@ import {
   ROTATE_HANDLE_OFFSET,
   FONT_SIZE_MAP,
   getFontFamilyString,
+  SelectionFrame,
+  RotationOverlay,
+  angleToDegrees,
 } from './geometry';
 import { getRoughDrawable, roughOptions } from './rough-cache';
 
@@ -51,6 +54,7 @@ export class CanvasRenderer {
     zoom = 1,
     scrollOffset = { x: 0, y: 0 },
     marquee,
+    rotationOverlay,
   }: {
     elements: CanvasElement[];
     draft: CanvasElement | null;
@@ -58,6 +62,7 @@ export class CanvasRenderer {
     zoom?: number;
     scrollOffset?: Point;
     marquee?: { start: Point; current: Point } | null;
+    rotationOverlay?: RotationOverlay | null;
   }): void {
     const dpr = window.devicePixelRatio || 1;
     const width = this.canvas.width / dpr;
@@ -91,7 +96,7 @@ export class CanvasRenderer {
     }
 
     // Draw selection handles and outlines
-    this.drawSelectionOverlays(elements, selectedIds);
+    this.drawSelectionOverlays(elements, selectedIds, rotationOverlay);
 
     // Draw marquee box if active
     if (marquee) {
@@ -334,7 +339,11 @@ export class CanvasRenderer {
     this.drawLockMarker(tr.x, tr.y);
   }
 
-  private drawSelectionOverlays(elements: CanvasElement[], selectedIds: Set<string>): void {
+  private drawSelectionOverlays(
+    elements: CanvasElement[],
+    selectedIds: Set<string>,
+    rotationOverlay?: RotationOverlay | null
+  ): void {
     const editingText = useAppStore.getState().editingText;
     const selectedMembers = elements.filter(
       (el) => selectedIds.has(el.id) && (!editingText || el.id !== editingText.elementId)
@@ -370,7 +379,10 @@ export class CanvasRenderer {
       }
     }
 
-    const frame = computeSelectionFrame(selectedMembers);
+    const frame =
+      rotationOverlay && rotationOverlay.frame
+        ? rotationOverlay.frame
+        : computeSelectionFrame(selectedMembers);
     if (!frame) return;
 
     // Single unlocked line or arrow selected: draw clean 3 control points (start, mid, end) like Excalidraw
@@ -507,6 +519,91 @@ export class CanvasRenderer {
     if (isGrouped) {
       this.drawGroupMarker(topLeft.x, topLeft.y);
     }
+
+    // Rotation indication badge
+    if (!allLocked) {
+      if (
+        rotationOverlay &&
+        typeof rotationOverlay.degrees === 'number' &&
+        rotationOverlay.handlePos
+      ) {
+        this.drawRotationBadge(
+          rotationOverlay.handlePos,
+          rotationOverlay.degrees,
+          frame.center
+        );
+      } else if (frame.angle && Math.abs(frame.angle) > 0.001) {
+        const deg = angleToDegrees(frame.angle);
+        if (deg !== 0) {
+          const handles = getHandlePositions(frame);
+          if (handles.rotate) {
+            this.drawRotationBadge(handles.rotate, deg, frame.center);
+          }
+        }
+      }
+    }
+  }
+
+  private drawRotationBadge(pos: Point, deg: number, frameCenter?: Point): void {
+    const text = `${deg}°`;
+    this.ctx.save();
+    this.ctx.font =
+      '600 11px Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.textAlign = 'center';
+    this.ctx.textBaseline = 'middle';
+
+    const textWidth = this.ctx.measureText(text).width;
+    const paddingX = 8;
+    const badgeW = Math.max(textWidth + paddingX * 2, 34);
+    const badgeH = 20;
+    const r = 5;
+
+    // Offset badge radially outward from the rotation handle
+    let bx = pos.x;
+    let by = pos.y;
+    if (frameCenter) {
+      const dx = pos.x - frameCenter.x;
+      const dy = pos.y - frameCenter.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist > 0.001) {
+        bx += (dx / dist) * 22;
+        by += (dy / dist) * 22;
+      } else {
+        by -= 22;
+      }
+    } else {
+      by -= 22;
+    }
+
+    const x = bx - badgeW / 2;
+    const y = by - badgeH / 2;
+
+    // Drop shadow
+    this.ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+    this.ctx.shadowBlur = 6;
+    this.ctx.shadowOffsetY = 2;
+
+    // Sleek dark pill background
+    this.ctx.fillStyle = '#18181b';
+    this.drawRoundedRect(x, y, badgeW, badgeH, r);
+    this.ctx.fill();
+
+    // Reset shadow
+    this.ctx.shadowColor = 'transparent';
+    this.ctx.shadowBlur = 0;
+    this.ctx.shadowOffsetY = 0;
+
+    // Indigo border
+    this.ctx.strokeStyle = '#6366f1';
+    this.ctx.lineWidth = 1.2;
+    this.drawRoundedRect(x, y, badgeW, badgeH, r);
+    this.ctx.stroke();
+
+    // Crisp white text
+    this.ctx.fillStyle = '#f4f4f5';
+    this.ctx.fillText(text, bx, by);
+
+    this.ctx.restore();
   }
 
   private drawMarquee(marquee: { start: Point; current: Point }): void {

@@ -14,12 +14,18 @@ import {
   elementContains,
   rectsIntersect,
   rotatePoint,
+  normalizeAngle,
+  angleToDegrees,
   getCenter,
   getBBox,
   getScreenBBox,
   normBox,
   distance,
   FONT_SIZE_MAP,
+  SelectionFrame,
+  BoundingBox,
+  getHandlePositions,
+  RotationOverlay,
 } from '../canvas/geometry';
 
 interface ResizeState {
@@ -34,8 +40,15 @@ interface ResizeState {
 interface RotateState {
   center: Point;
   startPointerAngle: number;
+  lastPointerAngle: number;
+  totalDelta: number;
+  origBBox: BoundingBox;
+  origAngle: number;
   members: { id: string; startAngle: number; snapshot: CanvasElement; origCenter: Point }[];
   historyPushed: boolean;
+  activeAngleDegrees: number | null;
+  activeFrame: SelectionFrame | null;
+  activeHandlePos: Point | null;
 }
 
 interface MoveState {
@@ -69,6 +82,22 @@ export class SelectionTool implements Tool {
     this.moveState = null;
     this.lineHandleState = null;
     this.marqueeState = null;
+  }
+
+  public getRotationOverlay(): RotationOverlay | null {
+    if (
+      !this.rotateState ||
+      this.rotateState.activeAngleDegrees === null ||
+      !this.rotateState.activeHandlePos ||
+      !this.rotateState.activeFrame
+    ) {
+      return null;
+    }
+    return {
+      frame: this.rotateState.activeFrame,
+      degrees: this.rotateState.activeAngleDegrees,
+      handlePos: this.rotateState.activeHandlePos,
+    };
   }
 
   onPointerDown({ pos, e, canvas }: ToolContext): void {
@@ -165,11 +194,25 @@ export class SelectionTool implements Tool {
               origCenter: getCenter(el),
             }));
           if (members.length > 0) {
+            const startPointerAngle = Math.atan2(pos.y - frame.center.y, pos.x - frame.center.x);
+            const firstAngle = members[0].startAngle;
+            const allSameAngle = members.every(
+              (m) => Math.abs(m.startAngle - firstAngle) < 1e-4
+            );
+            const initialDegrees = angleToDegrees(allSameAngle ? firstAngle : 0);
+            const handles = getHandlePositions(frame);
             this.rotateState = {
               center: frame.center,
-              startPointerAngle: Math.atan2(pos.y - frame.center.y, pos.x - frame.center.x),
+              startPointerAngle,
+              lastPointerAngle: startPointerAngle,
+              totalDelta: 0,
+              origBBox: frame.bbox,
+              origAngle: frame.angle,
               members,
               historyPushed: false,
+              activeAngleDegrees: initialDegrees,
+              activeFrame: frame,
+              activeHandlePos: handles.rotate || pos,
             };
             return;
           }
@@ -363,25 +406,46 @@ export class SelectionTool implements Tool {
         this.rotateState.historyPushed = true;
       }
       const current = Math.atan2(pos.y - this.rotateState.center.y, pos.x - this.rotateState.center.x);
-      let delta = current - this.rotateState.startPointerAngle;
+
+      // Unwrapped step delta to avoid jumps when crossing (-PI, PI]
+      let stepDelta = current - this.rotateState.lastPointerAngle;
+      while (stepDelta > Math.PI) stepDelta -= 2 * Math.PI;
+      while (stepDelta <= -Math.PI) stepDelta += 2 * Math.PI;
+      this.rotateState.totalDelta += stepDelta;
+      this.rotateState.lastPointerAngle = current;
+
+      let delta = this.rotateState.totalDelta;
+
+      const firstAngle = this.rotateState.members[0].startAngle;
+      const allSameAngle = this.rotateState.members.every(
+        (m) => Math.abs(m.startAngle - firstAngle) < 1e-4
+      );
 
       // Shift constrain rotation to 15-degree steps
       if (e.shiftKey) {
         const step = Math.PI / 12; // 15 degrees
-        delta = Math.round(delta / step) * step;
+        if (allSameAngle) {
+          const rawTarget = firstAngle + delta;
+          const snapped = Math.round(rawTarget / step) * step;
+          delta = snapped - firstAngle;
+        } else {
+          delta = Math.round(delta / step) * step;
+        }
       }
 
       this.rotateState.members.forEach((m) => {
-        const newAngle = m.startAngle + delta;
-        const newCenter = rotatePoint(m.origCenter, this.rotateState!.center, delta);
-        const shift = { x: newCenter.x - m.origCenter.x, y: newCenter.y - m.origCenter.y };
-
         if ('points' in m.snapshot && m.snapshot.points) {
+          // Lines, arrows, freedraw: rotate points directly around the rotation center (Excalidraw model)
           store.updateElement(m.id, {
-            angle: newAngle,
-            points: m.snapshot.points.map((p) => ({ x: p.x + shift.x, y: p.y + shift.y })) as any,
+            angle: 0,
+            points: m.snapshot.points.map((p: Point) =>
+              rotatePoint(p, this.rotateState!.center, delta)
+            ) as any,
           });
         } else if ('x' in m.snapshot) {
+          const newAngle = normalizeAngle(m.startAngle + delta);
+          const newCenter = rotatePoint(m.origCenter, this.rotateState!.center, delta);
+          const shift = { x: newCenter.x - m.origCenter.x, y: newCenter.y - m.origCenter.y };
           store.updateElement(m.id, {
             angle: newAngle,
             x: m.snapshot.x + shift.x,
@@ -389,6 +453,19 @@ export class SelectionTool implements Tool {
           });
         }
       });
+
+      const activeAngle = normalizeAngle(this.rotateState.origAngle + delta);
+      const activeFrame: SelectionFrame = {
+        bbox: this.rotateState.origBBox,
+        angle: activeAngle,
+        center: this.rotateState.center,
+        isLine: false,
+      };
+      const activeHandles = getHandlePositions(activeFrame);
+
+      this.rotateState.activeAngleDegrees = angleToDegrees(allSameAngle ? firstAngle + delta : delta);
+      this.rotateState.activeFrame = activeFrame;
+      this.rotateState.activeHandlePos = activeHandles.rotate || null;
       return;
     }
 
