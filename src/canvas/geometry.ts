@@ -185,9 +185,27 @@ export function rectsIntersect(a: BoundingBox, b: BoundingBox): boolean {
 }
 
 export function elementContains(el: CanvasElement, localPos: Point): boolean {
-  if (el.type === 'rectangle' || el.type === 'diamond' || el.type === 'ellipse' || el.type === 'text' || el.type === 'image') {
+  if (el.type === 'rectangle' || el.type === 'text' || el.type === 'image') {
     const b = getBBox(el);
     return localPos.x >= b.x - 4 && localPos.x <= b.x + b.w + 4 && localPos.y >= b.y - 4 && localPos.y <= b.y + b.h + 4;
+  }
+  if (el.type === 'ellipse') {
+    const b = getBBox(el);
+    const rx = b.w / 2 + 4;
+    const ry = b.h / 2 + 4;
+    if (rx <= 0 || ry <= 0) return false;
+    const cx = b.x + b.w / 2;
+    const cy = b.y + b.h / 2;
+    return ((localPos.x - cx) / rx) ** 2 + ((localPos.y - cy) / ry) ** 2 <= 1;
+  }
+  if (el.type === 'diamond') {
+    const b = getBBox(el);
+    const rx = b.w / 2;
+    const ry = b.h / 2;
+    if (rx <= 0 || ry <= 0) return false;
+    const cx = b.x + rx;
+    const cy = b.y + ry;
+    return Math.abs(localPos.x - cx) / (rx + 4) + Math.abs(localPos.y - cy) / (ry + 4) <= 1;
   }
   if (el.type === 'line' || el.type === 'arrow') {
     for (let i = 0; i < el.points.length - 1; i++) {
@@ -284,4 +302,34 @@ export function isPointInsideSelectionFrame(pos: Point, frame: SelectionFrame): 
     local.y >= b.y - PAD &&
     local.y <= b.y + b.h + PAD
   );
+}
+
+export function getResizeCursor(handle: string, angle: number = 0): string {
+  const HANDLE_ANGLES: Record<string, number> = {
+    e: 0,
+    se: 45,
+    s: 90,
+    sw: 135,
+    w: 180,
+    nw: 225,
+    n: 270,
+    ne: 315,
+  };
+  if (!(handle in HANDLE_ANGLES)) return 'default';
+
+  const baseAngle = HANDLE_ANGLES[handle];
+  const angleDeg = (angle * 180) / Math.PI;
+  const totalDeg = ((baseAngle + angleDeg) % 360 + 360) % 360;
+
+  const mod180 = totalDeg % 180;
+  if (mod180 >= 22.5 && mod180 < 67.5) {
+    return 'nwse-resize';
+  }
+  if (mod180 >= 67.5 && mod180 < 112.5) {
+    return 'ns-resize';
+  }
+  if (mod180 >= 112.5 && mod180 < 157.5) {
+    return 'nesw-resize';
+  }
+  return 'ew-resize';
 }

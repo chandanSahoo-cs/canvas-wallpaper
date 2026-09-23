@@ -26,6 +26,7 @@ import {
   BoundingBox,
   getHandlePositions,
   RotationOverlay,
+  getResizeCursor,
 } from '../canvas/geometry';
 
 interface ResizeState {
@@ -303,10 +304,29 @@ export class SelectionTool implements Tool {
       const { handle, elementId, initialPoints } = this.lineHandleState;
       let nextPoints = [...initialPoints];
 
+      let targetPos = pos;
+      // Shift constraint: snap line angle to 15-degree steps
+      if (e.shiftKey && (handle === 'line-start' || handle === 'line-end')) {
+        const anchor =
+          handle === 'line-start'
+            ? initialPoints[initialPoints.length - 1]
+            : initialPoints[0];
+        const dx = pos.x - anchor.x;
+        const dy = pos.y - anchor.y;
+        const dist = Math.hypot(dx, dy);
+        let angle = Math.atan2(dy, dx);
+        const step = Math.PI / 12; // 15 degrees
+        angle = Math.round(angle / step) * step;
+        targetPos = {
+          x: anchor.x + dist * Math.cos(angle),
+          y: anchor.y + dist * Math.sin(angle),
+        };
+      }
+
       if (handle === 'line-start') {
-        nextPoints[0] = pos;
+        nextPoints[0] = targetPos;
       } else if (handle === 'line-end') {
-        nextPoints[nextPoints.length - 1] = pos;
+        nextPoints[nextPoints.length - 1] = targetPos;
       } else if (handle === 'line-mid') {
         if (nextPoints.length === 2) {
           nextPoints = [nextPoints[0], pos, nextPoints[1]];
@@ -328,13 +348,75 @@ export class SelectionTool implements Tool {
       const { handle, angle, center, origBBox, members } = this.resizeState;
       const localPos = rotatePoint(pos, center, -angle);
 
+      let newW = origBBox.w;
+      let newH = origBBox.h;
+
+      if (e.altKey) {
+        // Alt key: symmetric resize from center (Excalidraw / vector standard)
+        const halfW = Math.abs(localPos.x - center.x);
+        const halfH = Math.abs(localPos.y - center.y);
+
+        if (handle.includes('e') || handle.includes('w')) {
+          newW = Math.max(4, halfW * 2);
+        }
+        if (handle.includes('n') || handle.includes('s')) {
+          newH = Math.max(4, halfH * 2);
+        }
+
+        if (e.shiftKey) {
+          const maxScale = Math.max(
+            origBBox.w > 0 ? newW / origBBox.w : 1,
+            origBBox.h > 0 ? newH / origBBox.h : 1
+          );
+          newW = Math.max(4, origBBox.w * maxScale);
+          newH = Math.max(4, origBBox.h * maxScale);
+        }
+
+        const sx = origBBox.w !== 0 ? newW / origBBox.w : 1;
+        const sy = origBBox.h !== 0 ? newH / origBBox.h : 1;
+
+        members.forEach(({ id, snapshot }) => {
+          if ('points' in snapshot && snapshot.points) {
+            store.updateElement(id, {
+              points: snapshot.points.map((p) => ({
+                x: center.x + (p.x - center.x) * sx,
+                y: center.y + (p.y - center.y) * sy,
+              })) as any,
+            });
+          } else if ('x' in snapshot && 'width' in snapshot) {
+            const rawW = snapshot.width * sx;
+            const rawH = snapshot.height * sy;
+            const elemCenterX = center.x + (snapshot.x + snapshot.width / 2 - center.x) * sx;
+            const elemCenterY = center.y + (snapshot.y + snapshot.height / 2 - center.y) * sy;
+            store.updateElement(id, {
+              x: elemCenterX - Math.abs(rawW) / 2,
+              y: elemCenterY - Math.abs(rawH) / 2,
+              width: Math.abs(rawW),
+              height: Math.abs(rawH),
+            });
+          } else if (snapshot.type === 'text') {
+            const textEl = snapshot as TextElement;
+            const origFontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
+            const scale = Math.max(0.2, Math.max(Math.abs(sx), Math.abs(sy)));
+            const newFontSize = Math.max(8, Math.min(240, Math.round(origFontSize * scale)));
+            const elemCenterX = center.x + (textEl.x - center.x) * sx;
+            const elemCenterY = center.y + (textEl.y - center.y) * sy;
+            store.updateElement(id, {
+              x: elemCenterX,
+              y: elemCenterY,
+              fontSize: newFontSize,
+            });
+          }
+        });
+        return;
+      }
+
+      // Normal resize anchored at opposite edge/corner
       let anchorX = origBBox.x,
         anchorY = origBBox.y;
       if (handle.includes('w')) anchorX = origBBox.x + origBBox.w;
       if (handle.includes('n')) anchorY = origBBox.y + origBBox.h;
 
-      let newW = origBBox.w,
-        newH = origBBox.h;
       if (handle.includes('e')) newW = localPos.x - anchorX;
       if (handle.includes('w')) newW = anchorX - localPos.x;
       if (handle.includes('s')) newH = localPos.y - anchorY;
@@ -342,7 +424,10 @@ export class SelectionTool implements Tool {
 
       // Shift constraint for proportional aspect ratio
       if (e.shiftKey) {
-        const maxScale = Math.max(Math.abs(newW / (origBBox.w || 1)), Math.abs(newH / (origBBox.h || 1)));
+        const maxScale = Math.max(
+          Math.abs(newW / (origBBox.w || 1)),
+          Math.abs(newH / (origBBox.h || 1))
+        );
         newW = origBBox.w * maxScale * Math.sign(newW);
         newH = origBBox.h * maxScale * Math.sign(newH);
       }
@@ -528,12 +613,7 @@ export class SelectionTool implements Tool {
     if (this.lineHandleState) return 'crosshair';
     if (this.rotateState) return 'grabbing';
     if (this.resizeState) {
-      const h = this.resizeState.handle;
-      if (h === 'n' || h === 's') return 'ns-resize';
-      if (h === 'e' || h === 'w') return 'ew-resize';
-      if (h === 'nw' || h === 'se') return 'nwse-resize';
-      if (h === 'ne' || h === 'sw') return 'nesw-resize';
-      return 'default';
+      return getResizeCursor(this.resizeState.handle, this.resizeState.angle);
     }
     if (!pos) return 'default';
     const store = useAppStore.getState();
@@ -581,10 +661,7 @@ export class SelectionTool implements Tool {
           if (handle && handle.startsWith('line-')) return 'crosshair';
           if (handle === 'rotate') return 'grab';
           if (handle) {
-            if (handle === 'n' || handle === 's') return 'ns-resize';
-            if (handle === 'e' || handle === 'w') return 'ew-resize';
-            if (handle === 'nw' || handle === 'se') return 'nwse-resize';
-            if (handle === 'ne' || handle === 'sw') return 'nesw-resize';
+            return getResizeCursor(handle, frame.angle);
           }
           if (
             isPointInsideSelectionFrame(pos, frame) ||
