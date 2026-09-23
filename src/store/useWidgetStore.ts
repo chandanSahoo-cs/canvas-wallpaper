@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { newId } from '../lib/utils';
+import { newId, sanitizeWebUrl } from '../lib/utils';
 
 export interface QuickLink {
   id: string;
@@ -108,14 +108,12 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
   },
 
   addQuickLink: (title, url) => {
-    let normalizedUrl = url.trim();
-    if (!/^https?:\/\//i.test(normalizedUrl)) {
-      normalizedUrl = `https://${normalizedUrl}`;
-    }
+    const validUrl = sanitizeWebUrl(url);
+    if (!validUrl) return;
     const newLink: QuickLink = {
       id: newId(),
-      title: title.trim() || normalizedUrl.replace(/^https?:\/\/(www\.)?/i, ''),
-      url: normalizedUrl,
+      title: title.trim() || validUrl.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, ''),
+      url: validUrl,
     };
     set((state) => ({ quickLinks: [...state.quickLinks, newLink] }));
     get().saveToStorage();
@@ -127,13 +125,11 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
   },
 
   updateQuickLink: (id, title, url) => {
-    let normalizedUrl = url.trim();
-    if (!/^https?:\/\//i.test(normalizedUrl)) {
-      normalizedUrl = `https://${normalizedUrl}`;
-    }
+    const validUrl = sanitizeWebUrl(url);
+    if (!validUrl) return;
     set((state) => ({
       quickLinks: state.quickLinks.map((l) =>
-        l.id === id ? { ...l, title: title.trim() || l.title, url: normalizedUrl } : l
+        l.id === id ? { ...l, title: title.trim() || l.title, url: validUrl } : l
       ),
     }));
     get().saveToStorage();
@@ -204,6 +200,15 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
       if (!raw) return;
       try {
         const data = JSON.parse(raw);
+        if (Array.isArray(data.quickLinks)) {
+          data.quickLinks = data.quickLinks
+            .map((l: any) => ({
+              id: String(l.id || newId()),
+              title: String(l.title || 'Link'),
+              url: sanitizeWebUrl(l.url),
+            }))
+            .filter((l: any) => Boolean(l.url));
+        }
         set((state) => ({
           ...state,
           ...data,

@@ -1,6 +1,7 @@
 import { useAppStore } from '../store/useAppStore';
 import { CanvasElement, TextElement, ImageElement } from '../elements/types';
 import { getCenter, normBox, diamondPoints, FONT_SIZE_MAP, getFontFamilyString } from '../canvas/geometry';
+import { escapeXml } from '../lib/utils';
 
 export function exportWallpaperAsSvg(): void {
   const { elements, background } = useAppStore.getState();
@@ -13,7 +14,7 @@ export function exportWallpaperAsSvg(): void {
   );
 
   // Background
-  const bgColor = background.type === 'color' ? background.color : '#14141a';
+  const bgColor = escapeXml(background.type === 'color' ? background.color : '#14141a');
   svgParts.push(`<rect width="100%" height="100%" fill="${bgColor}" />`);
 
   for (const el of elements) {
@@ -29,9 +30,9 @@ export function exportWallpaperAsSvg(): void {
         ? ` stroke-dasharray="${el.strokeWidth},${el.strokeWidth * 2.5}"`
         : '';
 
-    const commonAttr = `stroke="${el.strokeColor}" stroke-width="${el.strokeWidth}" fill="${
-      el.fillColor === 'transparent' ? 'none' : el.fillColor
-    }" opacity="${opacity}"${dashAttr}${rotateAttr}`;
+    const strokeColor = escapeXml(el.strokeColor || '#ffffff');
+    const fillColor = el.fillColor === 'transparent' ? 'none' : escapeXml(el.fillColor);
+    const commonAttr = `stroke="${strokeColor}" stroke-width="${el.strokeWidth}" fill="${fillColor}" opacity="${opacity}"${dashAttr}${rotateAttr}`;
 
     switch (el.type) {
       case 'rectangle': {
@@ -113,7 +114,7 @@ export function exportWallpaperAsSvg(): void {
             d += ` L ${pts[i].x} ${pts[i].y}`;
           }
           svgParts.push(
-            `<path d="${d}" fill="none" stroke="${el.strokeColor}" stroke-width="${
+            `<path d="${d}" fill="none" stroke="${strokeColor}" stroke-width="${
               el.strokeWidth * 2
             }" stroke-linecap="round" stroke-linejoin="round" opacity="${opacity}"${rotateAttr} />`
           );
@@ -130,25 +131,23 @@ export function exportWallpaperAsSvg(): void {
 
         let textSpans = '';
         for (let i = 0; i < lines.length; i++) {
-          textSpans += `<tspan x="${textEl.x ?? 0}" dy="${i === 0 ? 0 : lineHeight}">${lines[
-            i
-          ].replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</tspan>`;
+          textSpans += `<tspan x="${textEl.x ?? 0}" dy="${i === 0 ? 0 : lineHeight}">${escapeXml(lines[i])}</tspan>`;
         }
 
-        const fontFamily = getFontFamilyString(textEl.fontFamily).replace(/"/g, "'");
+        const fontFamily = escapeXml(getFontFamilyString(textEl.fontFamily).replace(/"/g, "'"));
+        const textColor = escapeXml(textEl.strokeColor || '#1e1e1e');
         svgParts.push(
           `<text x="${textEl.x ?? 0}" y="${
             (textEl.y ?? 0) + fontSize
-          }" font-family="${fontFamily}" font-size="${fontSize}" fill="${
-            textEl.strokeColor || '#1e1e1e'
-          }" opacity="${opacity}"${rotateAttr}>${textSpans}</text>`
+          }" font-family="${fontFamily}" font-size="${fontSize}" fill="${textColor}" opacity="${opacity}"${rotateAttr}>${textSpans}</text>`
         );
         break;
       }
       case 'image': {
         const imgEl = el as ImageElement;
+        const safeDataUrl = escapeXml(imgEl.dataUrl);
         svgParts.push(
-          `<image href="${imgEl.dataUrl}" x="${imgEl.x}" y="${imgEl.y}" width="${imgEl.width}" height="${imgEl.height}" opacity="${opacity}"${rotateAttr} />`
+          `<image href="${safeDataUrl}" x="${imgEl.x}" y="${imgEl.y}" width="${imgEl.width}" height="${imgEl.height}" opacity="${opacity}"${rotateAttr} />`
         );
         break;
       }

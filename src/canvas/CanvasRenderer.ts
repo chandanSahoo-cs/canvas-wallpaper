@@ -215,6 +215,10 @@ export class CanvasRenderer {
   private drawImage(el: ImageElement): void {
     let img = imageElementCache.get(el.dataUrl);
     if (!img) {
+      if (imageElementCache.size >= 50) {
+        const oldestKey = imageElementCache.keys().next().value;
+        if (oldestKey) imageElementCache.delete(oldestKey);
+      }
       img = new Image();
       img.src = el.dataUrl;
       img.onload = () => {

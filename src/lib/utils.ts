@@ -55,3 +55,35 @@ export function isColorLight(colorStr?: string): boolean {
 export function getDefaultStrokeColor(bgColor?: string): string {
   return isColorLight(bgColor || '#14141a') ? '#1e1e1e' : '#ffffff';
 }
+
+export function sanitizeWebUrl(raw?: string): string {
+  if (!raw || typeof raw !== 'string') return '';
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  if (/^(javascript|data|file|vbscript|about):/i.test(trimmed)) {
+    return '';
+  }
+  let url = trimmed;
+  if (!/^https?:\/\//i.test(url)) {
+    url = `https://${url}`;
+  }
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return parsed.href;
+    }
+  } catch {
+    return '';
+  }
+  return '';
+}
+
+export function escapeXml(str?: string): string {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}

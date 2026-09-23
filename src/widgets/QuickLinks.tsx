@@ -40,7 +40,7 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
     try {
       return new URL(url).hostname;
     } catch {
-      return url;
+      return '';
     }
   };
 
@@ -48,7 +48,9 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
     <div className="flex items-center justify-center gap-3 flex-wrap max-w-xl mx-auto select-none">
       {quickLinks.map((link) => {
         const domain = getDomain(link.url);
-        const faviconUrl = `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
+        const faviconUrl = domain
+          ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`
+          : '';
 
         return (
           <div key={link.id} className="relative group">
