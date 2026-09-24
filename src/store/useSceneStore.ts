@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { CanvasElement, BackgroundConfig } from '../elements/types';
 import { newId } from '../lib/utils';
 import { useAppStore } from './useAppStore';
-import { createPaperTabCalligraphyElements } from '../lib/calligraphyPreset';
+import { create3DBlockDoodleElements } from '../lib/doodle3dPreset';
 
 export interface Scene {
   id: string;
@@ -27,8 +27,8 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   scenes: [
     {
       id: 'default',
-      name: 'PaperTab',
-      elements: createPaperTabCalligraphyElements(),
+      name: 'PaperTab 3D Doodle',
+      elements: create3DBlockDoodleElements(),
       background: { type: 'color', color: '#14141a' },
       createdAt: Date.now(),
     },
@@ -195,7 +195,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
           elementsToLoad = fallbackElements;
           currentScene.elements = fallbackElements;
         } else if ((!elementsToLoad || elementsToLoad.length === 0) && scenes.length === 1 && scenes[0].id === 'default') {
-          elementsToLoad = createPaperTabCalligraphyElements();
+          elementsToLoad = create3DBlockDoodleElements();
           currentScene.elements = elementsToLoad;
         }
 

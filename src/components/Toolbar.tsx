@@ -28,10 +28,11 @@ import { exportWallpaperAsSvg } from '../hooks/useSvgExport';
 import { exportWallpaperFile, importWallpaperFile } from '../hooks/useWallpaperFile';
 import { insertImageFromFile } from '../lib/imageInsert';
 import { createPaperTabCalligraphyElements } from '../lib/calligraphyPreset';
+import { create3DBlockDoodleElements } from '../lib/doodle3dPreset';
 import { useAppStore } from '../store/useAppStore';
 import { useSceneStore } from '../store/useSceneStore';
 import { ToolType } from '../elements/types';
-import { cn } from '../lib/utils';
+import { cn, isColorLight } from '../lib/utils';
 
 interface ToolbarProps {
   onOpenShortcuts?: () => void;
@@ -59,6 +60,16 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
   const zoom = useAppStore((s) => s.zoom);
   const setZoom = useAppStore((s) => s.setZoom);
   const resetZoom = useAppStore((s) => s.resetZoom);
+
+  const handleInsert3DDoodle = () => {
+    const isLight = isColorLight(useAppStore.getState().background?.color || '#14141a');
+    const doodle = create3DBlockDoodleElements({ isLightBg: isLight });
+    pushHistory();
+    setElements([...elements, ...doodle]);
+    setSelectedIds(new Set(doodle.map((s) => s.id)));
+    setTool('selection');
+    saveToStorage();
+  };
 
   const handleInsertCalligraphy = () => {
     const signature = createPaperTabCalligraphyElements({
@@ -127,11 +138,11 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
           <ImageIcon className="w-4 h-4" />
         </button>
 
-        {/* Insert 'PaperTab' Calligraphy Signature */}
+        {/* Insert 'PaperTab' 3D Block Doodle */}
         <button
-          title="Insert 'PaperTab' Calligraphy Signature"
-          aria-label="Insert 'PaperTab' Calligraphy Signature"
-          onClick={handleInsertCalligraphy}
+          title="Insert 'PaperTab' 3D Block Doodle"
+          aria-label="Insert 'PaperTab' 3D Block Doodle"
+          onClick={handleInsert3DDoodle}
           className="w-8.5 h-8.5 rounded-xl flex items-center justify-center text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 active:scale-95 transition-all duration-150 cursor-pointer"
         >
           <Sparkles className="w-4 h-4" />
