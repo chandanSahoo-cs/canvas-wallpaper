@@ -63,9 +63,8 @@ export const SceneSwitcher: React.FC = () => {
   };
 
   const handleCreate = () => {
-    const newId = createScene();
-    setEditingId(newId);
-    setEditName(`Wallpaper ${scenes.length + 1}`);
+    setEditingId(null);
+    createScene();
   };
 
   return (

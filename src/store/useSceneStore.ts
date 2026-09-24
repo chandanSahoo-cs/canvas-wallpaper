@@ -36,7 +36,11 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
   createScene: (name) => {
     const id = newId();
-    const sceneNumber = get().scenes.length + 1;
+    const existingNames = new Set(get().scenes.map((s) => s.name));
+    let sceneNumber = get().scenes.length + 1;
+    while (existingNames.has(`Wallpaper ${sceneNumber}`)) {
+      sceneNumber++;
+    }
     const newScene: Scene = {
       id,
       name: name || `Wallpaper ${sceneNumber}`,
