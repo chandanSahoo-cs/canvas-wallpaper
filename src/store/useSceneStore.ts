@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { CanvasElement, BackgroundConfig } from '../elements/types';
 import { newId } from '../lib/utils';
 import { useAppStore } from './useAppStore';
-import { create3DBlockDoodleElements } from '../lib/doodle3dPreset';
 
 export interface Scene {
   id: string;
@@ -15,7 +14,7 @@ export interface Scene {
 export interface SceneState {
   scenes: Scene[];
   activeSceneId: string;
-  createScene: (name?: string, initialElements?: CanvasElement[]) => string;
+  createScene: (name?: string) => string;
   switchScene: (id: string) => void;
   deleteScene: (id: string) => void;
   renameScene: (id: string, name: string) => void;
@@ -27,22 +26,21 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   scenes: [
     {
       id: 'default',
-      name: 'PaperTab 3D Doodle',
-      elements: create3DBlockDoodleElements(),
+      name: 'Wallpaper 1',
+      elements: [],
       background: { type: 'color', color: '#14141a' },
       createdAt: Date.now(),
     },
   ],
   activeSceneId: 'default',
 
-  createScene: (name, initialElements) => {
+  createScene: (name) => {
     const id = newId();
     const sceneNumber = get().scenes.length + 1;
-    const elementsToSet = initialElements || [];
     const newScene: Scene = {
       id,
       name: name || `Wallpaper ${sceneNumber}`,
-      elements: elementsToSet,
+      elements: [],
       background: { type: 'color', color: '#14141a' },
       createdAt: Date.now(),
     };
@@ -50,7 +48,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       scenes: [...state.scenes, newScene],
       activeSceneId: id,
     }));
-    useAppStore.getState().setElements(elementsToSet);
+    useAppStore.getState().setElements([]);
     useAppStore.getState().setBackground({ type: 'color', color: '#14141a' });
     get().saveScenesToStorage();
     return id;
@@ -194,9 +192,6 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         if ((!elementsToLoad || elementsToLoad.length === 0) && fallbackElements.length > 0) {
           elementsToLoad = fallbackElements;
           currentScene.elements = fallbackElements;
-        } else if ((!elementsToLoad || elementsToLoad.length === 0) && scenes.length === 1 && scenes[0].id === 'default') {
-          elementsToLoad = create3DBlockDoodleElements();
-          currentScene.elements = elementsToLoad;
         }
 
         useAppStore.getState().setElements(elementsToLoad || []);
