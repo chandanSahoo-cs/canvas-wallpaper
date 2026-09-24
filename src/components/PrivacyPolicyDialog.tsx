@@ -76,7 +76,7 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
               <span>Zero Personal Data Collected</span>
             </div>
             <p className="leading-relaxed text-neutral-600">
-              PaperTab (PaperTab) does <strong>not</strong> collect, track,
+              PaperTab does <strong>not</strong> collect, track,
               store, or sell any personal data, browsing history, or analytics.
               Everything you draw, sketch, or configure is saved strictly on
               your local device via{" "}

@@ -223,7 +223,7 @@ export const StylePanel: React.FC = () => {
         </button>
       </div>
 
-      {/* VIEW A: PaperTab SETTINGS */}
+      {/* VIEW A: WALLPAPER SETTINGS */}
       {activeTab === "wallpaper" ? (
         <div className="flex flex-col gap-4">
           {/* Background Color */}

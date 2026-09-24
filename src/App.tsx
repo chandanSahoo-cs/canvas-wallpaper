@@ -50,7 +50,6 @@ export const App: React.FC = () => {
   const pushHistory = useAppStore((s) => s.pushHistory);
   const setElements = useAppStore((s) => s.setElements);
   const saveToStorage = useAppStore((s) => s.saveToStorage);
-  const loadFromStorage = useAppStore((s) => s.loadFromStorage);
   const updateElement = useAppStore((s) => s.updateElement);
   const editingText = useAppStore((s) => s.editingText);
   const setEditingText = useAppStore((s) => s.setEditingText);
@@ -253,7 +252,11 @@ export const App: React.FC = () => {
         return;
       }
       if (e.key === "Escape") {
-        setSelectedIds([]);
+        if (selectedIds.size > 0) {
+          setSelectedIds([]);
+        } else {
+          setMode("wallpaper");
+        }
         return;
       }
 
@@ -390,14 +393,20 @@ export const App: React.FC = () => {
                 const w = img.width * scale;
                 const h = img.height * scale;
 
+                const store = useAppStore.getState();
+                const screenCenterX = window.innerWidth / 2;
+                const screenCenterY = window.innerHeight / 2;
+                const cx = Math.round(screenCenterX / store.zoom + store.scrollOffset.x - w / 2);
+                const cy = Math.round(screenCenterY / store.zoom + store.scrollOffset.y - h / 2);
+
                 const imageEl: ImageElement = {
                   id: newId(),
                   type: "image",
                   angle: 0,
                   locked: false,
                   groupIds: [],
-                  x: window.innerWidth / 2 - w / 2,
-                  y: window.innerHeight / 2 - h / 2,
+                  x: cx,
+                  y: cy,
                   width: w,
                   height: h,
                   dataUrl,

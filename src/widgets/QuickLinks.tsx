@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, X } from 'lucide-react';
 import { useWidgetStore, MAX_QUICK_LINKS } from '../store/useWidgetStore';
 import { useAppStore } from '../store/useAppStore';
@@ -20,6 +20,18 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
   const [newUrl, setNewUrl] = useState('');
 
   const canAddMore = quickLinks.length < MAX_QUICK_LINKS;
+
+  useEffect(() => {
+    if (!isAdding) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setIsAdding(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isAdding]);
 
   const isLight =
     propIsLight !== undefined
@@ -140,8 +152,14 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
 
       {/* Add Shortcut Modal */}
       {isAdding && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border border-neutral-200 animate-in fade-in zoom-in-95 duration-150">
+        <div
+          onClick={() => setIsAdding(false)}
+          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border border-neutral-200 animate-in fade-in zoom-in-95 duration-150"
+          >
             <h3 className="text-sm font-semibold text-neutral-800 mb-3">Add Shortcut</h3>
             <form onSubmit={handleAdd} className="flex flex-col gap-3">
               <div>

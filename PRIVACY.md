@@ -1,8 +1,8 @@
-# Privacy Policy for PaperTab (PaperTab)
+# Privacy Policy for PaperTab
 
 **Last updated:** September 24, 2026
 
-PaperTab (PaperTab) is committed to respecting and protecting your privacy. This browser extension is designed from the ground up to be private, local-first, and secure.
+PaperTab is committed to respecting and protecting your privacy. This browser extension is designed from the ground up to be private, local-first, and secure.
 
 ---
 

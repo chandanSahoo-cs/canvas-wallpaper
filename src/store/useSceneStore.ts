@@ -41,9 +41,24 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     if (get().scenes.length >= MAX_SCENES) {
       return get().activeSceneId;
     }
+    const { scenes, activeSceneId } = get();
+    const appStore = useAppStore.getState();
+
+    // Preserve current scene state before switching to new scene
+    const updatedScenes = scenes.map((s) => {
+      if (s.id === activeSceneId) {
+        return {
+          ...s,
+          elements: appStore.elements,
+          background: appStore.background,
+        };
+      }
+      return s;
+    });
+
     const id = newId();
-    const existingNames = new Set(get().scenes.map((s) => s.name));
-    let sceneNumber = get().scenes.length + 1;
+    const existingNames = new Set(updatedScenes.map((s) => s.name));
+    let sceneNumber = updatedScenes.length + 1;
     while (existingNames.has(`Wallpaper ${sceneNumber}`)) {
       sceneNumber++;
     }
@@ -54,12 +69,12 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       background: { type: 'color', color: '#14141a' },
       createdAt: Date.now(),
     };
-    set((state) => ({
-      scenes: [...state.scenes, newScene],
+    set({
+      scenes: [...updatedScenes, newScene],
       activeSceneId: id,
-    }));
-    useAppStore.getState().setElements([]);
-    useAppStore.getState().setBackground({ type: 'color', color: '#14141a' });
+    });
+    appStore.setElements([]);
+    appStore.setBackground({ type: 'color', color: '#14141a' });
     get().saveScenesToStorage();
     return id;
   },
@@ -181,7 +196,8 @@ export const useSceneStore = create<SceneState>((set, get) => ({
           }
         }
 
-        if (!Array.isArray(scenes) || scenes.length === 0) {
+        const isFirstRun = !Array.isArray(scenes) || scenes.length === 0;
+        if (isFirstRun) {
           scenes = [
             {
               id: 'default',
@@ -199,11 +215,11 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
         const currentScene = scenes.find((s) => s.id === activeId) || scenes[0];
         let elementsToLoad = currentScene.elements;
-        if ((!elementsToLoad || elementsToLoad.length === 0) && fallbackElements.length > 0) {
+        if ((!elementsToLoad || elementsToLoad.length === 0) && fallbackElements.length > 0 && isFirstRun) {
           elementsToLoad = fallbackElements;
           currentScene.elements = fallbackElements;
-        } else if (!elementsToLoad || elementsToLoad.length === 0) {
-          elementsToLoad = getDefaultWallpaperElements();
+        } else if (!elementsToLoad) {
+          elementsToLoad = [];
           currentScene.elements = elementsToLoad;
         }
 

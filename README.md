@@ -44,7 +44,8 @@ PaperTab brings an Excalidraw-inspired sketching canvas directly to your New Tab
 | Shortcut                                        | Action                                       |
 | :---------------------------------------------- | :------------------------------------------- |
 | **`?`**                                         | Open keyboard shortcuts cheatsheet           |
-| **`E`**                                         | Toggle Drawing / Wallpaper mode              |
+| **`E`**                                         | Enter Drawing mode (when in Wallpaper mode)  |
+| **`Esc`**                                       | Exit Drawing mode / Deselect selection       |
 | **`H`**                                         | Toggle UI preview (clean view)               |
 | **`Ctrl + C`**                                  | Copy selected element(s)                     |
 | **`Ctrl + V`**                                  | Paste element(s) (or images)                 |
