@@ -22,6 +22,18 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
     }
     return () => document.removeEventListener('pointerdown', handleOutsideClick);
   }, [isEngineDropdownOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
   const showClock = useWidgetStore((s) => s.showClock);
   const setShowClock = useWidgetStore((s) => s.setShowClock);
   const clockFormat = useWidgetStore((s) => s.clockFormat);
@@ -44,19 +56,26 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-neutral-200 text-neutral-800 animate-in fade-in zoom-in-95 duration-150">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="settings-dialog-title"
+        className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-neutral-200 text-neutral-800 animate-in fade-in zoom-in-95 duration-150"
+      >
         <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
           <div className="flex items-center gap-2.5">
             <img
               src="/icon/48.png"
-              alt="Canvas Wallpaper"
+              alt=""
+              aria-hidden="true"
               className="w-5 h-5 object-contain"
             />
-            <h2 className="text-base font-semibold">New Tab Widgets</h2>
+            <h2 id="settings-dialog-title" className="text-base font-semibold">New Tab Widgets</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+            aria-label="Close settings"
+            className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -259,10 +278,18 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
           </div>
         </div>
 
-        <div className="pt-4 border-t border-neutral-100 flex justify-end">
+        <div className="pt-4 border-t border-neutral-100 flex items-center justify-between">
+          <a
+            href="https://github.com/chandanSahoo-cs/canvas-wallpaper/blob/main/PRIVACY.md"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-neutral-400 hover:text-indigo-600 transition-colors"
+          >
+            Privacy Policy
+          </a>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-medium active:scale-95 transition-all shadow-sm"
+            className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-medium active:scale-95 transition-all shadow-sm cursor-pointer"
           >
             Done
           </button>

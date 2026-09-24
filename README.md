@@ -16,7 +16,7 @@ Canvas Wallpaper brings an Excalidraw-inspired sketching canvas directly to your
 - **Multi-Scene Switcher**: Maintain multiple wallpapers/canvases and switch between them anytime.
 - **Keyboard Shortcuts & Modal**: Press `?` anytime to view the complete shortcuts cheatsheet. Full support for `Ctrl+C`, `Ctrl+V`, `Ctrl+X`, `Ctrl+Z`, `Ctrl+Y`, `Ctrl+D`, nudge with arrow keys, and quick tool keys (`V`, `R`, `D`, `O`, `A`, `L`, `P`, `T`, `E`).
 - **Export & Import**: Export artwork as high-resolution PNG or vector SVG, or backup/restore entire scenes as `.canvaswallpaper` files.
-- **100% Offline & Private**: No tracking, no external accounts, no telemetry. Everything is stored locally on your device.
+- **Local-First & Private**: No tracking, no user accounts, no telemetry. Your drawings, scenes, and preferences are stored strictly on your local device.
 
 ---
 
@@ -67,6 +67,6 @@ Canvas Wallpaper does not track, collect, or transmit any user data. All sketche
 
 ---
 
-## License
+## Copyright & License
 
-[ISC License](LICENSE)
+Copyright © 2026 PaperTab. All rights reserved. Proprietary software.
