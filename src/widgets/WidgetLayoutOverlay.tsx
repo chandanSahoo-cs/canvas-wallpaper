@@ -410,6 +410,25 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
               </div>
             </form>
           </div>
+
+          {/* Footer: Privacy Policy */}
+          <div className="pt-3 mt-3 border-t border-neutral-100 flex items-center justify-between text-xs">
+            <a
+              href="https://github.com/chandanSahoo-cs/canvas-wallpaper/blob/main/PRIVACY.md"
+              target="_blank"
+              rel="noreferrer"
+              className="text-[11px] text-neutral-400 hover:text-indigo-600 transition-colors"
+            >
+              Privacy Policy
+            </a>
+            <button
+              type="button"
+              onClick={() => setIsConfigOpen(false)}
+              className="px-3 py-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-medium rounded-xl text-xs transition-colors cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
 

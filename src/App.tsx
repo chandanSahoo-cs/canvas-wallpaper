@@ -1,4 +1,4 @@
-import { EyeOff, Pencil, LayoutGrid, Keyboard } from "lucide-react";
+import { EyeOff, Pencil, LayoutGrid, Keyboard, Settings } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useCanvas } from "./canvas/useCanvas";
 import { InlineTextEditor } from "./components/InlineTextEditor";
@@ -585,10 +585,20 @@ export const App: React.FC = () => {
         >
           <button
             title="Keyboard Shortcuts (?)"
+            aria-label="Keyboard Shortcuts"
             onClick={() => setIsShortcutsOpen(true)}
-            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 text-white active:scale-95 transition-colors"
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 text-white active:scale-95 transition-colors cursor-pointer"
           >
             <Keyboard className="w-4 h-4" />
+          </button>
+          <div className={cn("w-px h-4 mx-0.5", isLight ? "bg-white/20" : "bg-white/30")} />
+          <button
+            title="Settings & Privacy"
+            aria-label="Settings and Privacy"
+            onClick={() => setIsSettingsOpen(true)}
+            className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 text-white active:scale-95 transition-colors cursor-pointer"
+          >
+            <Settings className="w-4 h-4" />
           </button>
           <div className={cn("w-px h-4 mx-0.5", isLight ? "bg-white/20" : "bg-white/30")} />
           <button
