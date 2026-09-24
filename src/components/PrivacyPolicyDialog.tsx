@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, ShieldCheck, Database, Globe, KeyRound, CreditCard, ExternalLink } from 'lucide-react';
+import { X, ShieldCheck, Database, Globe, KeyRound, CreditCard } from 'lucide-react';
 
 interface PrivacyPolicyDialogProps {
   isOpen: boolean;
@@ -118,15 +118,9 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({ isOpen
 
         {/* Footer */}
         <div className="pt-3 border-t border-neutral-100 flex items-center justify-between shrink-0">
-          <a
-            href="https://github.com/chandanSahoo-cs/canvas-wallpaper"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-1 text-[11px] text-neutral-400 hover:text-indigo-600 transition-colors"
-          >
-            <span>GitHub Repository</span>
-            <ExternalLink className="w-3 h-3" />
-          </a>
+          <span className="text-[11px] text-neutral-400">
+            PaperTab &bull; Proprietary &amp; Confidential
+          </span>
           <button
             onClick={onClose}
             className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition-all shadow-sm active:scale-95 cursor-pointer"

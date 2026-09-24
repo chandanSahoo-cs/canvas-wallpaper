@@ -9,10 +9,6 @@
     "zip": "wxt zip",
     "compile": "tsc --noEmit"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/chandanSahoo-cs/canvas-wallpaper.git"
-  },
   "keywords": [],
   "author": "",
   "private": true,

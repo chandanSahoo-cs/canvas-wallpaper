@@ -31,6 +31,4 @@ If you choose to purchase optional premium features or upgrades in the future, t
 ---
 
 ### 5. Contact & Support
-If you have any questions or feedback regarding this Privacy Policy or Canvas Wallpaper, please reach out via:
-- **GitHub Repository:** [https://github.com/chandanSahoo-cs/canvas-wallpaper](https://github.com/chandanSahoo-cs/canvas-wallpaper)
-- **Support:** Via the official Chrome Web Store listing support tab or repository issues.
+If you have any questions or feedback regarding this Privacy Policy or PaperTab, please reach out via the official Chrome Web Store listing support tab.

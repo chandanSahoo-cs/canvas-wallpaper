@@ -22,14 +22,9 @@ Canvas Wallpaper brings an Excalidraw-inspired sketching canvas directly to your
 
 ## Installation
 
-### From Source (Developer Mode)
+### Development Setup
 
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/chandanSahoo-cs/PaperTab.git
-   cd PaperTab
-   ```
-2. Install dependencies:
+1. Install dependencies:
    ```bash
    npm install
    ```
