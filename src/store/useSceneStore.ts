@@ -22,6 +22,8 @@ export interface SceneState {
   loadScenesFromStorage: () => void;
 }
 
+export const MAX_SCENES = 5;
+
 export const useSceneStore = create<SceneState>((set, get) => ({
   scenes: [
     {
@@ -35,6 +37,9 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   activeSceneId: 'default',
 
   createScene: (name) => {
+    if (get().scenes.length >= MAX_SCENES) {
+      return get().activeSceneId;
+    }
     const id = newId();
     const existingNames = new Set(get().scenes.map((s) => s.name));
     let sceneNumber = get().scenes.length + 1;

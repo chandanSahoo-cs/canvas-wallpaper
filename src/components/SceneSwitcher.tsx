@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Plus, Trash2, Check, Edit2 } from 'lucide-react';
-import { useSceneStore } from '../store/useSceneStore';
+import { useSceneStore, MAX_SCENES } from '../store/useSceneStore';
 import { cn } from '../lib/utils';
 
 export const SceneSwitcher: React.FC = () => {
@@ -10,6 +10,8 @@ export const SceneSwitcher: React.FC = () => {
   const createScene = useSceneStore((s) => s.createScene);
   const deleteScene = useSceneStore((s) => s.deleteScene);
   const renameScene = useSceneStore((s) => s.renameScene);
+
+  const isAtLimit = scenes.length >= MAX_SCENES;
 
   const [isOpen, setIsOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -63,6 +65,7 @@ export const SceneSwitcher: React.FC = () => {
   };
 
   const handleCreate = () => {
+    if (isAtLimit) return;
     setEditingId(null);
     createScene();
   };
@@ -95,8 +98,14 @@ export const SceneSwitcher: React.FC = () => {
         {/* Quick New Scene Button */}
         <button
           onClick={handleCreate}
-          title="Add New Wallpaper Scene"
-          className="w-7 h-7 rounded-xl flex items-center justify-center text-indigo-600 hover:bg-indigo-50 active:scale-95 transition-all"
+          disabled={isAtLimit}
+          title={isAtLimit ? `Maximum ${MAX_SCENES} wallpapers reached` : 'Add New Wallpaper Scene'}
+          className={cn(
+            'w-7 h-7 rounded-xl flex items-center justify-center transition-all',
+            isAtLimit
+              ? 'text-neutral-300 cursor-not-allowed opacity-50'
+              : 'text-indigo-600 hover:bg-indigo-50 active:scale-95 cursor-pointer'
+          )}
         >
           <Plus className="w-4 h-4" />
         </button>
@@ -107,8 +116,15 @@ export const SceneSwitcher: React.FC = () => {
         <div className="absolute top-12 left-0 w-64 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-2xl rounded-2xl p-2 flex flex-col gap-1 text-xs animate-in fade-in zoom-in-95 duration-150">
           <div className="px-2 py-1 flex items-center justify-between text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">
             <span>Wallpapers</span>
-            <span className="bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded-full font-mono text-[9px]">
-              {scenes.length}
+            <span
+              className={cn(
+                'px-1.5 py-0.5 rounded-full font-mono text-[9px] transition-colors',
+                isAtLimit
+                  ? 'bg-amber-100 text-amber-800 font-semibold'
+                  : 'bg-neutral-100 text-neutral-600'
+              )}
+            >
+              {scenes.length}/{MAX_SCENES}
             </span>
           </div>
 
@@ -197,12 +213,18 @@ export const SceneSwitcher: React.FC = () => {
           </div>
 
           <div className="pt-1.5 mt-1 border-t border-neutral-100">
-            <button
-              onClick={handleCreate}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" /> Blank Wallpaper
-            </button>
+            {isAtLimit ? (
+              <div className="w-full py-2 px-3 rounded-xl bg-neutral-100 text-neutral-400 text-center font-medium text-[11px] select-none">
+                Maximum {MAX_SCENES} wallpapers reached
+              </div>
+            ) : (
+              <button
+                onClick={handleCreate}
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" /> Blank Wallpaper
+              </button>
+            )}
           </div>
         </div>
       )}
