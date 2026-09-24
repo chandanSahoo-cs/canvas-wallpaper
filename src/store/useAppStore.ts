@@ -11,6 +11,7 @@ import {
 import { newId, isColorLight, randomSeed } from '../lib/utils';
 import { getCenter, rotatePoint } from '../canvas/geometry';
 import { getConnectedGroupElementIds, groupElements, ungroupElements } from '../lib/groups';
+import { getDefaultWallpaperElements } from '../lib/defaultWallpaperPreset';
 
 export const HISTORY_LIMIT = 50;
 
@@ -114,7 +115,7 @@ let pasteOffsetMultiplier = 1;
 export const useAppStore = create<AppState>((set, get) => ({
   mode: 'wallpaper',
   currentTool: 'selection',
-  elements: [],
+  elements: getDefaultWallpaperElements(),
   selectedIds: new Set<string>(),
   clipboard: [],
   draft: null,

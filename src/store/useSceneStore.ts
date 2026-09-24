@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { CanvasElement, BackgroundConfig } from '../elements/types';
 import { newId } from '../lib/utils';
 import { useAppStore } from './useAppStore';
+import { getDefaultWallpaperElements } from '../lib/defaultWallpaperPreset';
 
 export interface Scene {
   id: string;
@@ -29,7 +30,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     {
       id: 'default',
       name: 'Wallpaper 1',
-      elements: [],
+      elements: getDefaultWallpaperElements(),
       background: { type: 'color', color: '#14141a' },
       createdAt: Date.now(),
     },
@@ -185,7 +186,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
             {
               id: 'default',
               name: 'Wallpaper 1',
-              elements: fallbackElements,
+              elements: fallbackElements.length > 0 ? fallbackElements : getDefaultWallpaperElements(),
               background: fallbackBg,
               createdAt: Date.now(),
             },
@@ -201,6 +202,9 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         if ((!elementsToLoad || elementsToLoad.length === 0) && fallbackElements.length > 0) {
           elementsToLoad = fallbackElements;
           currentScene.elements = fallbackElements;
+        } else if (!elementsToLoad || elementsToLoad.length === 0) {
+          elementsToLoad = getDefaultWallpaperElements();
+          currentScene.elements = elementsToLoad;
         }
 
         useAppStore.getState().setElements(elementsToLoad || []);
