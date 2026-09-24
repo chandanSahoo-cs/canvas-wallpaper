@@ -27,7 +27,6 @@ import { exportWallpaperAsPng } from '../hooks/useExport';
 import { exportWallpaperAsSvg } from '../hooks/useSvgExport';
 import { exportWallpaperFile, importWallpaperFile } from '../hooks/useWallpaperFile';
 import { insertImageFromFile } from '../lib/imageInsert';
-import { createPaperTabCalligraphyElements } from '../lib/calligraphyPreset';
 import { create3DBlockDoodleElements } from '../lib/doodle3dPreset';
 import { useAppStore } from '../store/useAppStore';
 import { useSceneStore } from '../store/useSceneStore';
@@ -67,17 +66,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
     pushHistory();
     setElements([...elements, ...doodle]);
     setSelectedIds(new Set(doodle.map((s) => s.id)));
-    setTool('selection');
-    saveToStorage();
-  };
-
-  const handleInsertCalligraphy = () => {
-    const signature = createPaperTabCalligraphyElements({
-      primaryColor: useAppStore.getState().currentStrokeColor || '#818cf8',
-    });
-    pushHistory();
-    setElements([...elements, ...signature]);
-    setSelectedIds(new Set(signature.map((s) => s.id)));
     setTool('selection');
     saveToStorage();
   };

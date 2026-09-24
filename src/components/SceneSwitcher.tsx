@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Plus, Trash2, Check, Edit2, Sparkles } from 'lucide-react';
 import { useSceneStore } from '../store/useSceneStore';
 import { cn } from '../lib/utils';
-import { createPaperTabCalligraphyElements } from '../lib/calligraphyPreset';
 import { create3DBlockDoodleElements } from '../lib/doodle3dPreset';
 
 export const SceneSwitcher: React.FC = () => {
@@ -68,12 +67,6 @@ export const SceneSwitcher: React.FC = () => {
     const newId = createScene();
     setEditingId(newId);
     setEditName(`Wallpaper ${scenes.length + 1}`);
-  };
-
-  const handleAddCalligraphyScene = () => {
-    const signatureElements = createPaperTabCalligraphyElements();
-    createScene('PaperTab Signature', signatureElements);
-    setIsOpen(false);
   };
 
   const handleAdd3DDoodleScene = () => {
@@ -223,12 +216,6 @@ export const SceneSwitcher: React.FC = () => {
               className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium text-xs transition-all active:scale-95 cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" /> + 3D Block Doodle ("PaperTab")
-            </button>
-            <button
-              onClick={handleAddCalligraphyScene}
-              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl hover:bg-neutral-100 text-neutral-600 font-medium text-xs transition-all active:scale-95 cursor-pointer"
-            >
-              <span>✍️</span> + Cursive Signature
             </button>
           </div>
         </div>
