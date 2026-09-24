@@ -19,6 +19,7 @@ import { ClockWidget } from './ClockWidget';
 import { SearchBar } from './SearchBar';
 import { QuickLinks } from './QuickLinks';
 import { cn } from '../lib/utils';
+import { PrivacyPolicyDialog } from '../components/PrivacyPolicyDialog';
 
 interface WidgetLayoutOverlayProps {
   isLight?: boolean;
@@ -53,6 +54,7 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
 
   const [activeDrag, setActiveDrag] = useState<WidgetKey | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isEngineDropdownOpen, setIsEngineDropdownOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newUrl, setNewUrl] = useState('');
@@ -413,14 +415,13 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
 
           {/* Footer: Privacy Policy */}
           <div className="pt-3 mt-3 border-t border-neutral-100 flex items-center justify-between text-xs">
-            <a
-              href="https://github.com/chandanSahoo-cs/canvas-wallpaper/blob/main/PRIVACY.md"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[11px] text-neutral-400 hover:text-indigo-600 transition-colors"
+            <button
+              type="button"
+              onClick={() => setIsPrivacyOpen(true)}
+              className="text-[11px] text-neutral-400 hover:text-indigo-600 transition-colors cursor-pointer"
             >
               Privacy Policy
-            </a>
+            </button>
             <button
               type="button"
               onClick={() => setIsConfigOpen(false)}
@@ -527,6 +528,12 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
           </div>
         </div>
       )}
+
+      {/* Privacy Policy In-App Modal */}
+      <PrivacyPolicyDialog
+        isOpen={isPrivacyOpen}
+        onClose={() => setIsPrivacyOpen(false)}
+      />
     </div>
   );
 };

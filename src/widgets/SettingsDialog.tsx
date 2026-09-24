@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Clock, Calendar, Search, Link2, Settings, LayoutGrid, Move, RotateCcw, ChevronDown, Check } from 'lucide-react';
 import { useWidgetStore } from '../store/useWidgetStore';
+import { PrivacyPolicyDialog } from '../components/PrivacyPolicyDialog';
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface SettingsDialogProps {
 }
 
 export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isEngineDropdownOpen, setIsEngineDropdownOpen] = useState(false);
   const engineDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -279,14 +281,13 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
         </div>
 
         <div className="pt-4 border-t border-neutral-100 flex items-center justify-between">
-          <a
-            href="https://github.com/chandanSahoo-cs/canvas-wallpaper/blob/main/PRIVACY.md"
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs text-neutral-400 hover:text-indigo-600 transition-colors"
+          <button
+            type="button"
+            onClick={() => setIsPrivacyOpen(true)}
+            className="text-xs text-neutral-400 hover:text-indigo-600 transition-colors cursor-pointer"
           >
             Privacy Policy
-          </a>
+          </button>
           <button
             onClick={onClose}
             className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-medium active:scale-95 transition-all shadow-sm cursor-pointer"
@@ -295,6 +296,11 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
           </button>
         </div>
       </div>
+
+      <PrivacyPolicyDialog
+        isOpen={isPrivacyOpen}
+        onClose={() => setIsPrivacyOpen(false)}
+      />
     </div>
   );
 };
