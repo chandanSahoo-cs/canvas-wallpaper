@@ -1,8 +1,8 @@
-# Canvas Wallpaper
+# PaperTab
 
 > Turn your browser's New Tab into a creative, customizable whiteboard and wallpaper.
 
-Canvas Wallpaper brings an Excalidraw-inspired sketching canvas directly to your New Tab page. Sketch diagrams, take quick notes, brainstorm ideas, or doodle freely—then switch to Wallpaper Mode to keep your drawing as your clean everyday desktop.
+PaperTab brings an Excalidraw-inspired sketching canvas directly to your New Tab page. Sketch diagrams, take quick notes, brainstorm ideas, or doodle freely—then switch to Wallpaper Mode to keep your drawing as your clean everyday desktop.
 
 ---
 
@@ -28,11 +28,11 @@ Canvas Wallpaper brings an Excalidraw-inspired sketching canvas directly to your
    ```bash
    npm install
    ```
-3. Build the extension:
+2. Build the extension:
    ```bash
    npm run build
    ```
-4. Load into Chrome:
+3. Load into Chrome:
    - Open Chrome and navigate to `chrome://extensions`.
    - Enable **Developer mode** in the top-right corner.
    - Click **Load unpacked** and select the `.output/chrome-mv3` folder.
@@ -58,7 +58,7 @@ Canvas Wallpaper brings an Excalidraw-inspired sketching canvas directly to your
 
 ## Privacy
 
-Canvas Wallpaper does not track, collect, or transmit any user data. All sketches and settings are stored locally in your browser. Read our full [Privacy Policy](PRIVACY.md).
+PaperTab does not track, collect, or transmit any user data. All sketches and settings are stored locally in your browser. Read our full [Privacy Policy](PRIVACY.md).
 
 ---
 
