@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, X } from 'lucide-react';
-import { useWidgetStore } from '../store/useWidgetStore';
+import { useWidgetStore, MAX_QUICK_LINKS } from '../store/useWidgetStore';
 import { useAppStore } from '../store/useAppStore';
 import { isColorLight, cn } from '../lib/utils';
 
@@ -19,6 +19,8 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
   const [newTitle, setNewTitle] = useState('');
   const [newUrl, setNewUrl] = useState('');
 
+  const canAddMore = quickLinks.length < MAX_QUICK_LINKS;
+
   const isLight =
     propIsLight !== undefined
       ? propIsLight
@@ -29,7 +31,7 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUrl.trim()) return;
+    if (!newUrl.trim() || !canAddMore) return;
     addQuickLink(newTitle, newUrl);
     setNewTitle('');
     setNewUrl('');
@@ -105,34 +107,36 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
         );
       })}
 
-      {/* Add new link button */}
-      <button
-        onClick={() => setIsAdding(true)}
-        title="Add Shortcut"
-        className={cn(
-          'flex flex-col items-center justify-center w-18 h-[76px] p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md',
-          isLight
-            ? 'bg-white/80 hover:bg-white/95 border border-neutral-200/90 text-neutral-700 hover:text-neutral-900 shadow-sm hover:shadow-md'
-            : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white/80 hover:text-white'
-        )}
-      >
-        <div
+      {/* Add new link button (shown when below limit) */}
+      {canAddMore && (
+        <button
+          onClick={() => setIsAdding(true)}
+          title="Add Shortcut"
           className={cn(
-            'w-10 h-10 rounded-xl flex items-center justify-center',
-            isLight ? 'bg-neutral-100 border border-neutral-200/60' : 'bg-white/15'
+            'flex flex-col items-center justify-center w-18 h-[76px] p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md cursor-pointer',
+            isLight
+              ? 'bg-white/80 hover:bg-white/95 border border-neutral-200/90 text-neutral-700 hover:text-neutral-900 shadow-sm hover:shadow-md'
+              : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white/80 hover:text-white'
           )}
         >
-          <Plus className="w-5 h-5" />
-        </div>
-        <span
-          className={cn(
-            'text-[11px] font-semibold mt-1',
-            isLight ? 'text-neutral-700' : 'text-white/80'
-          )}
-        >
-          Add
-        </span>
-      </button>
+          <div
+            className={cn(
+              'w-10 h-10 rounded-xl flex items-center justify-center',
+              isLight ? 'bg-neutral-100 border border-neutral-200/60' : 'bg-white/15'
+            )}
+          >
+            <Plus className="w-5 h-5" />
+          </div>
+          <span
+            className={cn(
+              'text-[11px] font-semibold mt-1',
+              isLight ? 'text-neutral-700' : 'text-white/80'
+            )}
+          >
+            Add
+          </span>
+        </button>
+      )}
 
       {/* Add Shortcut Modal */}
       {isAdding && (

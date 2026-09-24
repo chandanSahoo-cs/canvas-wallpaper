@@ -25,6 +25,8 @@ export const DEFAULT_WIDGET_POSITIONS: WidgetPositions = {
   quickLinks: { x: 50, y: 64 },
 };
 
+export const MAX_QUICK_LINKS = 10;
+
 export interface WidgetSettings {
   showClock: boolean;
   clockFormat: '12h' | '24h';
@@ -108,6 +110,7 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
   },
 
   addQuickLink: (title, url) => {
+    if (get().quickLinks.length >= MAX_QUICK_LINKS) return;
     const validUrl = sanitizeWebUrl(url);
     if (!validUrl) return;
     const newLink: QuickLink = {
@@ -207,7 +210,8 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
               title: String(l.title || 'Link'),
               url: sanitizeWebUrl(l.url),
             }))
-            .filter((l: any) => Boolean(l.url));
+            .filter((l: any) => Boolean(l.url))
+            .slice(0, MAX_QUICK_LINKS);
         }
         set((state) => ({
           ...state,

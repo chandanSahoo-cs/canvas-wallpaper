@@ -14,7 +14,7 @@ import {
   SlidersHorizontal,
   ChevronDown,
 } from 'lucide-react';
-import { useWidgetStore, WidgetPosition, DEFAULT_WIDGET_POSITIONS } from '../store/useWidgetStore';
+import { useWidgetStore, WidgetPosition, DEFAULT_WIDGET_POSITIONS, MAX_QUICK_LINKS } from '../store/useWidgetStore';
 import { ClockWidget } from './ClockWidget';
 import { SearchBar } from './SearchBar';
 import { QuickLinks } from './QuickLinks';
@@ -127,7 +127,7 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
 
   const handleAddQuickLink = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUrl.trim()) return;
+    if (!newUrl.trim() || quickLinks.length >= MAX_QUICK_LINKS) return;
     addQuickLink(newTitle, newUrl);
     setNewTitle('');
     setNewUrl('');
@@ -361,8 +361,13 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
 
           {/* Section 2: Quick Links Manager & Addition */}
           <div className="pt-3 flex flex-col gap-3">
-            <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
-              Manage Quick Links ({quickLinks.length})
+            <div className="flex items-center justify-between">
+              <div className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                Manage Quick Links
+              </div>
+              <span className="text-[11px] font-medium text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
+                {quickLinks.length}/{MAX_QUICK_LINKS}
+              </span>
             </div>
 
             {/* Links List */}
@@ -385,32 +390,38 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
             </div>
 
             {/* Add New Quick Link Form */}
-            <form onSubmit={handleAddQuickLink} className="pt-2 border-t border-neutral-100 flex flex-col gap-2">
-              <div className="text-xs font-semibold text-neutral-700">Add New Shortcut</div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="Title (e.g. GitHub)"
-                  className="flex-1 px-2.5 py-1.5 text-xs rounded-xl border border-neutral-200 outline-none focus:border-indigo-600"
-                />
-                <input
-                  type="url"
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
-                  placeholder="https://..."
-                  required
-                  className="flex-1 px-2.5 py-1.5 text-xs rounded-xl border border-neutral-200 outline-none focus:border-indigo-600"
-                />
-                <button
-                  type="submit"
-                  className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-xl shadow-xs active:scale-95 transition-all flex items-center gap-1 shrink-0"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Add
-                </button>
+            {quickLinks.length >= MAX_QUICK_LINKS ? (
+              <div className="pt-2 border-t border-neutral-100 text-center py-2.5 px-3 bg-neutral-50 rounded-xl text-xs text-neutral-500 border border-neutral-200/60 font-medium">
+                Maximum {MAX_QUICK_LINKS} quick links reached
               </div>
-            </form>
+            ) : (
+              <form onSubmit={handleAddQuickLink} className="pt-2 border-t border-neutral-100 flex flex-col gap-2">
+                <div className="text-xs font-semibold text-neutral-700">Add New Shortcut</div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    placeholder="Title (e.g. GitHub)"
+                    className="flex-1 px-2.5 py-1.5 text-xs rounded-xl border border-neutral-200 outline-none focus:border-indigo-600"
+                  />
+                  <input
+                    type="url"
+                    value={newUrl}
+                    onChange={(e) => setNewUrl(e.target.value)}
+                    placeholder="https://..."
+                    required
+                    className="flex-1 px-2.5 py-1.5 text-xs rounded-xl border border-neutral-200 outline-none focus:border-indigo-600"
+                  />
+                  <button
+                    type="submit"
+                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium text-xs rounded-xl shadow-xs active:scale-95 transition-all flex items-center gap-1 shrink-0"
+                  >
+                    <Plus className="w-3.5 h-3.5" /> Add
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
 
           {/* Footer: Privacy Policy */}
