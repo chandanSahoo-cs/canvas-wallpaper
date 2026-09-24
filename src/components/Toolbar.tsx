@@ -21,11 +21,13 @@ import {
   FileJson,
   Image as ImageIcon,
   Keyboard,
+  Sparkles,
 } from 'lucide-react';
 import { exportWallpaperAsPng } from '../hooks/useExport';
 import { exportWallpaperAsSvg } from '../hooks/useSvgExport';
 import { exportWallpaperFile, importWallpaperFile } from '../hooks/useWallpaperFile';
 import { insertImageFromFile } from '../lib/imageInsert';
+import { createPaperTabCalligraphyElements } from '../lib/calligraphyPreset';
 import { useAppStore } from '../store/useAppStore';
 import { useSceneStore } from '../store/useSceneStore';
 import { ToolType } from '../elements/types';
@@ -49,9 +51,25 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
   const redo = useAppStore((s) => s.redo);
   const history = useAppStore((s) => s.history);
   const future = useAppStore((s) => s.future);
+  const elements = useAppStore((s) => s.elements);
+  const setElements = useAppStore((s) => s.setElements);
+  const setSelectedIds = useAppStore((s) => s.setSelectedIds);
+  const pushHistory = useAppStore((s) => s.pushHistory);
+  const saveToStorage = useAppStore((s) => s.saveToStorage);
   const zoom = useAppStore((s) => s.zoom);
   const setZoom = useAppStore((s) => s.setZoom);
   const resetZoom = useAppStore((s) => s.resetZoom);
+
+  const handleInsertCalligraphy = () => {
+    const signature = createPaperTabCalligraphyElements({
+      primaryColor: useAppStore.getState().currentStrokeColor || '#818cf8',
+    });
+    pushHistory();
+    setElements([...elements, ...signature]);
+    setSelectedIds(new Set(signature.map((s) => s.id)));
+    setTool('selection');
+    saveToStorage();
+  };
 
   // Close export menu when clicking outside
   React.useEffect(() => {
@@ -104,9 +122,19 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
         <button
           title="Insert Image (or paste with Ctrl+V)"
           onClick={() => imageInputRef.current?.click()}
-          className="w-8.5 h-8.5 rounded-xl flex items-center justify-center text-neutral-700 hover:bg-neutral-100/90 hover:text-neutral-900 active:scale-95 transition-all duration-150"
+          className="w-8.5 h-8.5 rounded-xl flex items-center justify-center text-neutral-700 hover:bg-neutral-100/90 hover:text-neutral-900 active:scale-95 transition-all duration-150 cursor-pointer"
         >
           <ImageIcon className="w-4 h-4" />
+        </button>
+
+        {/* Insert 'PaperTab' Calligraphy Signature */}
+        <button
+          title="Insert 'PaperTab' Calligraphy Signature"
+          aria-label="Insert 'PaperTab' Calligraphy Signature"
+          onClick={handleInsertCalligraphy}
+          className="w-8.5 h-8.5 rounded-xl flex items-center justify-center text-indigo-600 hover:bg-indigo-50 hover:text-indigo-700 active:scale-95 transition-all duration-150 cursor-pointer"
+        >
+          <Sparkles className="w-4 h-4" />
         </button>
 
         <input

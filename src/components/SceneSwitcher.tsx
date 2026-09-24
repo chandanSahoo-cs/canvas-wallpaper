@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Plus, Trash2, Check, Edit2, Sparkles } from 'lucide-react';
 import { useSceneStore } from '../store/useSceneStore';
 import { cn } from '../lib/utils';
+import { createPaperTabCalligraphyElements } from '../lib/calligraphyPreset';
 
 export const SceneSwitcher: React.FC = () => {
   const scenes = useSceneStore((s) => s.scenes);
@@ -66,6 +67,12 @@ export const SceneSwitcher: React.FC = () => {
     const newId = createScene();
     setEditingId(newId);
     setEditName(`Wallpaper ${scenes.length + 1}`);
+  };
+
+  const handleAddCalligraphyScene = () => {
+    const signatureElements = createPaperTabCalligraphyElements();
+    createScene('PaperTab Signature', signatureElements);
+    setIsOpen(false);
   };
 
   return (
@@ -197,12 +204,18 @@ export const SceneSwitcher: React.FC = () => {
             })}
           </div>
 
-          <div className="pt-1.5 mt-1 border-t border-neutral-100">
+          <div className="pt-1.5 mt-1 border-t border-neutral-100 flex flex-col gap-1">
             <button
               onClick={handleCreate}
-              className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition-all shadow-sm active:scale-95"
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
             >
-              <Plus className="w-3.5 h-3.5" /> New Wallpaper
+              <Plus className="w-3.5 h-3.5" /> Blank Wallpaper
+            </button>
+            <button
+              onClick={handleAddCalligraphyScene}
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium text-xs transition-all active:scale-95 cursor-pointer"
+            >
+              <Sparkles className="w-3.5 h-3.5" /> + "PaperTab" Calligraphy
             </button>
           </div>
         </div>
