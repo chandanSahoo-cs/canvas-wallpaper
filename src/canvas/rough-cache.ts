@@ -83,6 +83,11 @@ export function getRoughDrawable(el: CanvasElement): Drawable | null {
     drawable = gen.ellipse(nb.x + nb.w / 2, nb.y + nb.h / 2, nb.w, nb.h, opts);
   }
 
+  if (cache.size >= 500) {
+    const oldestKey = cache.keys().next().value;
+    if (oldestKey) cache.delete(oldestKey);
+  }
+
   cache.set(el.id, { key, drawable });
   return drawable;
 }

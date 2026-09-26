@@ -97,10 +97,13 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
   const editorWidth = Math.max(minWidth, Math.ceil(maxLineWidth + 16));
   const editorHeight = Math.max(lineHeight, lines.length * lineHeight + 4);
 
+  const screenCenterX = screenX + editorWidth / 2;
+  const screenCenterY = screenY + editorHeight / 2;
+
   const style: React.CSSProperties = {
     position: 'fixed',
-    left: `${screenX}px`,
-    top: `${screenY}px`,
+    left: `${screenCenterX}px`,
+    top: `${screenCenterY}px`,
     width: `${editorWidth}px`,
     height: `${editorHeight}px`,
     font: `${scaledFontSize}px ${fontFamily}`,
@@ -121,8 +124,8 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
     wordBreak: 'normal',
     boxSizing: 'content-box',
     zIndex: 50,
-    transformOrigin: 'top left',
-    transform: data.angle ? `rotate(${data.angle}rad)` : 'none',
+    transformOrigin: 'center center',
+    transform: `translate(-50%, -50%) ${data.angle ? `rotate(${data.angle}rad)` : ''}`.trim(),
   };
 
   return (

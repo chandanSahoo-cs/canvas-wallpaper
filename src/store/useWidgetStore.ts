@@ -51,7 +51,7 @@ export interface WidgetSettings {
   removeQuickLink: (id: string) => void;
   updateQuickLink: (id: string, title: string, url: string) => void;
 
-  setWidgetPosition: (widget: keyof WidgetPositions, pos: WidgetPosition) => void;
+  setWidgetPosition: (widget: keyof WidgetPositions, pos: WidgetPosition, shouldSave?: boolean) => void;
   setAllWidgetPositions: (positions: WidgetPositions) => void;
   resetWidgetPositions: () => void;
   setIsLayoutMode: (enabled: boolean) => void;
@@ -138,7 +138,7 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
     get().saveToStorage();
   },
 
-  setWidgetPosition: (widget, pos) => {
+  setWidgetPosition: (widget, pos, shouldSave = true) => {
     // Clamp coordinates safely within [5, 95] to prevent off-screen loss
     const clampedX = Math.min(95, Math.max(5, Math.round(pos.x * 10) / 10));
     const clampedY = Math.min(95, Math.max(5, Math.round(pos.y * 10) / 10));
@@ -149,7 +149,9 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
         [widget]: { x: clampedX, y: clampedY },
       },
     }));
-    get().saveToStorage();
+    if (shouldSave) {
+      get().saveToStorage();
+    }
   },
 
   setAllWidgetPositions: (positions) => {
@@ -237,3 +239,13 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
     }
   },
 }));
+
+// Cross-tab synchronization for widget settings
+if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== 'local') return;
+    if (changes.wallpaperWidgets) {
+      useWidgetStore.getState().loadFromStorage();
+    }
+  });
+}

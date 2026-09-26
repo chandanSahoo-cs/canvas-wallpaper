@@ -1,6 +1,7 @@
 import { EyeOff, Pencil, LayoutGrid, Keyboard, Settings } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useCanvas } from "./canvas/useCanvas";
+import { FONT_SIZE_MAP } from "./canvas/geometry";
 import { InlineTextEditor } from "./components/InlineTextEditor";
 import { SceneSwitcher } from "./components/SceneSwitcher";
 import { ShortcutsDialog } from "./components/ShortcutsDialog";
@@ -214,12 +215,7 @@ export const App: React.FC = () => {
         }
       }
       if (mod && key === "v") {
-        // Fallback for Ctrl+V in case browser paste event doesn't fire
-        setTimeout(() => {
-          if (Date.now() - lastPasteHandledRef.current > 50) {
-            pasteClipboard();
-          }
-        }, 40);
+        return;
       }
       if (mod && key === "a") {
         e.preventDefault();
@@ -278,7 +274,9 @@ export const App: React.FC = () => {
         const dy =
           e.key === "ArrowUp" ? -step : e.key === "ArrowDown" ? step : 0;
 
-        pushHistory();
+        if (!e.repeat) {
+          pushHistory();
+        }
         setElements(
           elements.map((el) => {
             if (!selectedIds.has(el.id) || el.locked) return el;
@@ -323,7 +321,7 @@ export const App: React.FC = () => {
         "9": "eraser",
         "0": "eraser",
       };
-      if (toolMap[key]) {
+      if (!mod && !e.altKey && toolMap[key]) {
         setTool(toolMap[key]);
         return;
       }
@@ -410,7 +408,7 @@ export const App: React.FC = () => {
                   width: w,
                   height: h,
                   dataUrl,
-                  strokeColor: "#1e1e1e",
+                  strokeColor: store.currentStrokeColor || "#1e1e1e",
                   fillColor: "transparent",
                   strokeWidth: 1.5,
                   opacity: 100,
@@ -431,7 +429,42 @@ export const App: React.FC = () => {
         }
       }
 
-      // 3. Fallback: if internal store has copied elements, paste them
+      // 3. Check for plain text to paste as a new TextElement
+      if (text && text.trim()) {
+        e.preventDefault();
+        const store = useAppStore.getState();
+        const screenCenterX = window.innerWidth / 2;
+        const screenCenterY = window.innerHeight / 2;
+        const cx = Math.round(screenCenterX / store.zoom + store.scrollOffset.x - 50);
+        const cy = Math.round(screenCenterY / store.zoom + store.scrollOffset.y - 15);
+
+        const textEl: TextElement = {
+          id: newId(),
+          type: "text",
+          angle: 0,
+          locked: false,
+          groupIds: [],
+          x: cx,
+          y: cy,
+          text: text.slice(0, 10000),
+          fontSize: FONT_SIZE_MAP[store.currentStrokeWidth] || 20,
+          fontFamily: store.currentFontFamily || "handwritten",
+          strokeColor: store.currentStrokeColor,
+          fillColor: "transparent",
+          strokeWidth: store.currentStrokeWidth,
+          opacity: store.currentOpacity,
+          seed: randomSeed(),
+        };
+
+        pushHistory();
+        setElements([...useAppStore.getState().elements, textEl]);
+        setSelectedIds([textEl.id]);
+        setTool("selection");
+        saveToStorage();
+        return;
+      }
+
+      // 4. Fallback: if internal store has copied elements, paste them
       if (!hasImage) {
         const state = useAppStore.getState();
         if (state.clipboard && state.clipboard.length > 0) {

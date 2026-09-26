@@ -84,7 +84,7 @@ export interface AppState {
   }>) => void;
 
   // Manipulation on selected
-  updateElement: (id: string, updates: Partial<CanvasElement>) => void;
+  updateElement: (id: string, updates: Partial<CanvasElement>, shouldSave?: boolean) => void;
   updateSelectedElements: (updates: Partial<CanvasElement>) => void;
   moveSelected: (snapshots: { id: string; snapshot: CanvasElement }[], dx: number, dy: number) => void;
   deleteSelected: () => void;
@@ -102,6 +102,7 @@ export interface AppState {
 
   // History actions
   pushHistory: () => void;
+  resetHistory: () => void;
   undo: () => void;
   redo: () => void;
 
@@ -314,11 +315,13 @@ export const useAppStore = create<AppState>((set, get) => ({
     }));
   },
 
-  updateElement: (id, updates) => {
+  updateElement: (id, updates, shouldSave = true) => {
     set((state) => ({
       elements: state.elements.map((el) => (el.id === id ? { ...el, ...updates } as CanvasElement : el)),
     }));
-    get().saveToStorage();
+    if (shouldSave) {
+      get().saveToStorage();
+    }
   },
 
   updateSelectedElements: (updates) => {
@@ -571,6 +574,10 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (history.length > HISTORY_LIMIT) history.shift();
       return { history, future: [] };
     });
+  },
+
+  resetHistory: () => {
+    set({ history: [], future: [], selectedIds: new Set(), draft: null });
   },
 
   undo: () => {

@@ -336,7 +336,7 @@ export class SelectionTool implements Tool {
         }
       }
 
-      store.updateElement(elementId, { points: nextPoints });
+      store.updateElement(elementId, { points: nextPoints }, false);
       return;
     }
 
@@ -383,7 +383,7 @@ export class SelectionTool implements Tool {
                 x: center.x + (p.x - center.x) * sx,
                 y: center.y + (p.y - center.y) * sy,
               })) as any,
-            });
+            }, false);
           } else if ('x' in snapshot && 'width' in snapshot) {
             const rawW = snapshot.width * sx;
             const rawH = snapshot.height * sy;
@@ -394,7 +394,7 @@ export class SelectionTool implements Tool {
               y: elemCenterY - Math.abs(rawH) / 2,
               width: Math.abs(rawW),
               height: Math.abs(rawH),
-            });
+            }, false);
           } else if (snapshot.type === 'text') {
             const textEl = snapshot as TextElement;
             const origFontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
@@ -406,7 +406,7 @@ export class SelectionTool implements Tool {
               x: elemCenterX,
               y: elemCenterY,
               fontSize: newFontSize,
-            });
+            }, false);
           }
         });
         return;
@@ -446,7 +446,7 @@ export class SelectionTool implements Tool {
               x: anchorX + (p.x - anchorX) * sx,
               y: anchorY + (p.y - anchorY) * sy,
             })) as any,
-          });
+          }, false);
         } else if ('x' in snapshot && 'width' in snapshot) {
           const rawX = anchorX + (snapshot.x - anchorX) * sx;
           const rawY = anchorY + (snapshot.y - anchorY) * sy;
@@ -457,7 +457,7 @@ export class SelectionTool implements Tool {
             y: rawH < 0 ? rawY + rawH : rawY,
             width: Math.abs(rawW),
             height: Math.abs(rawH),
-          });
+          }, false);
         } else if (snapshot.type === 'text') {
           const textEl = snapshot as TextElement;
           const origFontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
@@ -478,7 +478,7 @@ export class SelectionTool implements Tool {
             x: rawX,
             y: rawY,
             fontSize: newFontSize,
-          });
+          }, false);
         }
       });
       return;
@@ -527,7 +527,7 @@ export class SelectionTool implements Tool {
             points: m.snapshot.points.map((p: Point) =>
               rotatePoint(p, this.rotateState!.center, delta)
             ) as any,
-          });
+          }, false);
         } else if ('x' in m.snapshot) {
           const newAngle = normalizeAngle(m.startAngle + delta);
           const newCenter = rotatePoint(m.origCenter, this.rotateState!.center, delta);
@@ -536,7 +536,7 @@ export class SelectionTool implements Tool {
             angle: newAngle,
             x: m.snapshot.x + shift.x,
             y: m.snapshot.y + shift.y,
-          });
+          }, false);
         }
       });
 

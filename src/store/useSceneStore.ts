@@ -73,6 +73,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       scenes: [...updatedScenes, newScene],
       activeSceneId: id,
     });
+    appStore.resetHistory();
     appStore.setElements([]);
     appStore.setBackground({ type: 'color', color: '#14141a' });
     get().saveScenesToStorage();
@@ -99,6 +100,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     if (!targetScene) return;
 
     set({ scenes: updatedScenes, activeSceneId: id });
+    appStore.resetHistory();
     appStore.setElements(targetScene.elements);
     appStore.setBackground(targetScene.background);
     get().saveScenesToStorage();
@@ -113,8 +115,10 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
     if (activeSceneId === id) {
       const nextScene = remaining[0];
-      useAppStore.getState().setElements(nextScene.elements);
-      useAppStore.getState().setBackground(nextScene.background);
+      const appStore = useAppStore.getState();
+      appStore.resetHistory();
+      appStore.setElements(nextScene.elements);
+      appStore.setBackground(nextScene.background);
     }
     get().saveScenesToStorage();
   },
@@ -223,8 +227,13 @@ export const useSceneStore = create<SceneState>((set, get) => ({
           currentScene.elements = elementsToLoad;
         }
 
+        isHydrating = true;
+        useAppStore.getState().resetHistory();
         useAppStore.getState().setElements(elementsToLoad || []);
         useAppStore.getState().setBackground(currentScene.background || fallbackBg);
+        setTimeout(() => {
+          isHydrating = false;
+        }, 50);
       };
 
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
@@ -253,9 +262,22 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   },
 }));
 
+// Cross-tab synchronization via chrome.storage.onChanged
+if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== 'local') return;
+    if (changes.wallpaperScenes || changes.wallpaperActiveSceneId) {
+      useSceneStore.getState().loadScenesFromStorage();
+    }
+  });
+}
+
 // Automatically sync any canvas element and background changes to the active scene & storage
 let syncTimeout: any = null;
+let isHydrating = false;
+
 useAppStore.subscribe((state, prevState) => {
+  if (isHydrating) return;
   if (state.elements !== prevState.elements || state.background !== prevState.background) {
     const sceneState = useSceneStore.getState();
     const updatedScenes = sceneState.scenes.map((s) =>
@@ -270,6 +292,21 @@ useAppStore.subscribe((state, prevState) => {
     syncTimeout = setTimeout(() => {
       sceneState.saveScenesToStorage();
       useAppStore.getState().saveToStorage();
+      syncTimeout = null;
     }, 150);
   }
 });
+
+// Flush any pending debounced writes before tab close or navigation
+if (typeof window !== 'undefined') {
+  const flushSync = () => {
+    if (syncTimeout) {
+      clearTimeout(syncTimeout);
+      syncTimeout = null;
+      useSceneStore.getState().saveScenesToStorage();
+      useAppStore.getState().saveToStorage();
+    }
+  };
+  window.addEventListener('beforeunload', flushSync);
+  window.addEventListener('pagehide', flushSync);
+}

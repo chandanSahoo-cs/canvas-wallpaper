@@ -113,7 +113,7 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
     const clampedX = Math.min(92, Math.max(8, targetX));
     const clampedY = Math.min(92, Math.max(8, targetY));
 
-    setWidgetPosition(key, { x: clampedX, y: clampedY });
+    setWidgetPosition(key, { x: clampedX, y: clampedY }, false);
   };
 
   const handlePointerUp = (e: React.PointerEvent) => {
@@ -122,6 +122,7 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
         (e.target as HTMLElement).releasePointerCapture(e.pointerId);
       } catch {}
       setActiveDrag(null);
+      useWidgetStore.getState().saveToStorage();
     }
   };
 

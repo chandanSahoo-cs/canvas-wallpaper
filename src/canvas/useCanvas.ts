@@ -146,6 +146,9 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     };
 
     const onPointerUp = (e: PointerEvent) => {
+      try {
+        canvas!.releasePointerCapture(e.pointerId);
+      } catch {}
       if (isPanningRef.current) {
         isPanningRef.current = false;
         return;
@@ -163,6 +166,9 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     };
 
     const onPointerCancel = (e: PointerEvent) => {
+      try {
+        canvas!.releasePointerCapture(e.pointerId);
+      } catch {}
       isPanningRef.current = false;
       const state = useAppStore.getState();
       if (state.mode !== 'drawing' || state.isPreviewing) return;
@@ -202,7 +208,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       openTextEditor(pos);
     };
 
-    // Wheel event for zoom with Ctrl or touchpad pinch
+    // Wheel event for zoom with Ctrl or touchpad pinch, and 2-finger panning
     const onWheel = (e: WheelEvent) => {
       const state = useAppStore.getState();
       if (state.mode !== 'drawing' || state.isPreviewing) return;
@@ -228,9 +234,17 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         });
       } else if (e.shiftKey) {
         // Pan horizontally
+        e.preventDefault();
         state.setScrollOffset((prev) => ({
-          x: prev.x + e.deltaY / state.zoom,
+          x: prev.x + (e.deltaX || e.deltaY) / state.zoom,
           y: prev.y,
+        }));
+      } else {
+        // Default 2-finger trackpad or mouse wheel pan
+        e.preventDefault();
+        state.setScrollOffset((prev) => ({
+          x: prev.x + (e.deltaX || 0) / state.zoom,
+          y: prev.y + (e.deltaY || 0) / state.zoom,
         }));
       }
     };
