@@ -30,6 +30,7 @@ export class CanvasRenderer {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private rc: RoughCanvas;
+  public onNeedRender?: () => void;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -228,7 +229,7 @@ export class CanvasRenderer {
       img = new Image();
       img.src = el.dataUrl;
       img.onload = () => {
-        // Redraw will pick it up on next frame
+        this.onNeedRender?.();
       };
       imageElementCache.set(el.dataUrl, img);
     }

@@ -67,6 +67,8 @@ const DEFAULT_QUICK_LINKS: QuickLink[] = [
   { id: '4', title: 'X', url: 'https://x.com' },
 ];
 
+let lastWidgetLocalSaveTime = 0;
+
 export const useWidgetStore = create<WidgetSettings>((set, get) => ({
   showClock: true,
   clockFormat: '12h',
@@ -189,6 +191,7 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
       quickLinks,
       widgetPositions,
     };
+    lastWidgetLocalSaveTime = Date.now();
     try {
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         chrome.storage.local.set({ wallpaperWidgets: JSON.stringify(data) });
@@ -244,6 +247,8 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
 if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'local') return;
+    // Ignore storage change notifications originated by this tab's own recent save
+    if (Date.now() - lastWidgetLocalSaveTime < 350) return;
     if (changes.wallpaperWidgets) {
       useWidgetStore.getState().loadFromStorage();
     }

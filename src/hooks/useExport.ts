@@ -25,8 +25,20 @@ export async function exportWallpaperAsPng(): Promise<void> {
     const bgImg = new Image();
     bgImg.src = background.imageUrl;
     await new Promise((resolve) => {
-      if (bgImg.complete) resolve(true);
-      else bgImg.onload = () => resolve(true);
+      let settled = false;
+      const done = () => {
+        if (!settled) {
+          settled = true;
+          resolve(true);
+        }
+      };
+      if (bgImg.complete) {
+        done();
+      } else {
+        bgImg.onload = done;
+        bgImg.onerror = done;
+        setTimeout(done, 3000);
+      }
     });
     ctx.drawImage(bgImg, 0, 0, width, height);
   } else {

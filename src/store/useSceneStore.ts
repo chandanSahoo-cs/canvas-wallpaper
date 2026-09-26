@@ -25,6 +25,8 @@ export interface SceneState {
 
 export const MAX_SCENES = 5;
 
+let lastLocalSaveTime = 0;
+
 export const useSceneStore = create<SceneState>((set, get) => ({
   scenes: [
     {
@@ -132,6 +134,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
   saveScenesToStorage: () => {
     const { scenes, activeSceneId } = get();
+    lastLocalSaveTime = Date.now();
     try {
       if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         chrome.storage.local.set({
@@ -213,8 +216,15 @@ export const useSceneStore = create<SceneState>((set, get) => ({
           ];
         }
 
+        const prevActiveId = get().activeSceneId;
         const activeId =
           rawActiveId && scenes.some((s) => s.id === rawActiveId) ? rawActiveId : scenes[0].id;
+
+        // If another tab switched the active scene, reset undo/redo history to prevent cross-scene bleed
+        if (activeId !== prevActiveId) {
+          useAppStore.getState().resetHistory();
+        }
+
         set({ scenes, activeSceneId: activeId });
 
         const currentScene = scenes.find((s) => s.id === activeId) || scenes[0];
@@ -228,9 +238,15 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         }
 
         isHydrating = true;
-        useAppStore.getState().resetHistory();
-        useAppStore.getState().setElements(elementsToLoad || []);
-        useAppStore.getState().setBackground(currentScene.background || fallbackBg);
+        const appStore = useAppStore.getState();
+        const validSelected = new Set(
+          [...appStore.selectedIds].filter((id) =>
+            (elementsToLoad || []).some((el) => el.id === id)
+          )
+        );
+        appStore.setSelectedIds(validSelected);
+        appStore.setElements(elementsToLoad || []);
+        appStore.setBackground(currentScene.background || fallbackBg);
         setTimeout(() => {
           isHydrating = false;
         }, 50);
@@ -266,6 +282,8 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== 'local') return;
+    // Ignore storage change notifications originated by this tab's own recent save
+    if (Date.now() - lastLocalSaveTime < 350) return;
     if (changes.wallpaperScenes || changes.wallpaperActiveSceneId) {
       useSceneStore.getState().loadScenesFromStorage();
     }
@@ -291,7 +309,6 @@ useAppStore.subscribe((state, prevState) => {
     clearTimeout(syncTimeout);
     syncTimeout = setTimeout(() => {
       sceneState.saveScenesToStorage();
-      useAppStore.getState().saveToStorage();
       syncTimeout = null;
     }, 150);
   }
@@ -304,7 +321,6 @@ if (typeof window !== 'undefined') {
       clearTimeout(syncTimeout);
       syncTimeout = null;
       useSceneStore.getState().saveScenesToStorage();
-      useAppStore.getState().saveToStorage();
     }
   };
   window.addEventListener('beforeunload', flushSync);

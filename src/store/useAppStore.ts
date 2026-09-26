@@ -327,6 +327,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   updateSelectedElements: (updates) => {
     const { selectedIds } = get();
     if (selectedIds.size === 0) return;
+    get().pushHistory();
     set((state) => ({
       elements: state.elements.map((el) =>
         selectedIds.has(el.id) && !el.locked ? ({ ...el, ...updates } as CanvasElement) : el

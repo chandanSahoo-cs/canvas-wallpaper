@@ -10,6 +10,7 @@ import { Toolbar } from "./components/Toolbar";
 import { ImageElement, TextElement, ToolType } from "./elements/types";
 import { openTextEditor } from "./tools/TextTool";
 import { cn, newId, randomSeed, isColorLight } from "./lib/utils";
+import { optimizeImageDataUrl } from "./lib/imageInsert";
 import { useAppStore } from "./store/useAppStore";
 import { useSceneStore } from "./store/useSceneStore";
 import { useWidgetStore } from "./store/useWidgetStore";
@@ -162,7 +163,7 @@ export const App: React.FC = () => {
 
       // Toggle drawing mode with E if in wallpaper mode
       if (mode === "wallpaper") {
-        if (e.key === "e" || e.key === "E") {
+        if ((e.key === "e" || e.key === "E") && !e.ctrlKey && !e.metaKey && !e.altKey) {
           setMode("drawing");
           return;
         }
@@ -174,7 +175,7 @@ export const App: React.FC = () => {
       const mod = e.metaKey || e.ctrlKey;
 
       // Enter on single selected text element -> edit it like Excalidraw
-      if (e.key === "Enter" && !mod && selectedIds.size === 1) {
+      if (e.key === "Enter" && !mod && !e.altKey && selectedIds.size === 1) {
         const selectedId = Array.from(selectedIds)[0];
         const selectedEl = elements.find((el) => el.id === selectedId);
         if (selectedEl && selectedEl.type === "text" && !selectedEl.locked) {
@@ -256,7 +257,7 @@ export const App: React.FC = () => {
         return;
       }
 
-      if (key === "h" && !mod) {
+      if (key === "h" && !mod && !e.altKey) {
         e.preventDefault();
         togglePreview();
         return;
@@ -295,7 +296,9 @@ export const App: React.FC = () => {
             return el;
           }),
         );
-        saveToStorage();
+        if (!e.repeat) {
+          saveToStorage();
+        }
         return;
       }
 
@@ -407,7 +410,7 @@ export const App: React.FC = () => {
                   y: cy,
                   width: w,
                   height: h,
-                  dataUrl,
+                  dataUrl: optimizeImageDataUrl(img),
                   strokeColor: store.currentStrokeColor || "#1e1e1e",
                   fillColor: "transparent",
                   strokeWidth: 1.5,

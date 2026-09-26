@@ -68,6 +68,10 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       triggerRender();
     });
 
+    renderer.onNeedRender = () => {
+      triggerRender();
+    };
+
     // Helper: Screen to canvas coordinates (accounting for zoom and scroll offset)
     function screenToCanvas(screenX: number, screenY: number): Point {
       const rect = canvas!.getBoundingClientRect();
