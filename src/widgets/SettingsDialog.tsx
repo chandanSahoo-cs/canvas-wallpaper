@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { X, Clock, Calendar, Search, Link2, Settings, LayoutGrid, Move, RotateCcw, ChevronDown, Check } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Clock, Calendar, Search, Link2, LayoutGrid, Move, RotateCcw } from 'lucide-react';
 import { useWidgetStore } from '../store/useWidgetStore';
 import { PrivacyPolicyDialog } from '../components/PrivacyPolicyDialog';
+import { SearchEngineDropdown } from './settings/SearchEngineDropdown';
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -10,20 +11,6 @@ interface SettingsDialogProps {
 
 export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
-  const [isEngineDropdownOpen, setIsEngineDropdownOpen] = useState(false);
-  const engineDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleOutsideClick = (e: MouseEvent) => {
-      if (engineDropdownRef.current && !engineDropdownRef.current.contains(e.target as Node)) {
-        setIsEngineDropdownOpen(false);
-      }
-    };
-    if (isEngineDropdownOpen) {
-      document.addEventListener('pointerdown', handleOutsideClick);
-    }
-    return () => document.removeEventListener('pointerdown', handleOutsideClick);
-  }, [isEngineDropdownOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -36,6 +23,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
+
   const showClock = useWidgetStore((s) => s.showClock);
   const setShowClock = useWidgetStore((s) => s.setShowClock);
   const clockFormat = useWidgetStore((s) => s.clockFormat);
@@ -45,8 +33,6 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
 
   const showSearch = useWidgetStore((s) => s.showSearch);
   const setShowSearch = useWidgetStore((s) => s.setShowSearch);
-  const searchEngine = useWidgetStore((s) => s.searchEngine);
-  const setSearchEngine = useWidgetStore((s) => s.setSearchEngine);
 
   const showQuickLinks = useWidgetStore((s) => s.showQuickLinks);
   const setShowQuickLinks = useWidgetStore((s) => s.setShowQuickLinks);
@@ -110,7 +96,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
               <div className="flex items-center gap-1 bg-neutral-100 p-0.5 rounded-lg text-xs">
                 <button
                   onClick={() => setClockFormat('12h')}
-                  className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                  className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
                     clockFormat === '12h'
                       ? 'bg-white shadow-sm text-indigo-600'
                       : 'text-neutral-600 hover:text-neutral-900'
@@ -120,7 +106,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
                 </button>
                 <button
                   onClick={() => setClockFormat('24h')}
-                  className={`px-2.5 py-1 rounded-md font-medium transition-all ${
+                  className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
                     clockFormat === '24h'
                       ? 'bg-white shadow-sm text-indigo-600'
                       : 'text-neutral-600 hover:text-neutral-900'
@@ -175,56 +161,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
           {showSearch && (
             <div className="ml-7 flex items-center gap-3">
               <span className="text-xs text-neutral-500 font-medium">Engine:</span>
-              <div ref={engineDropdownRef} className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsEngineDropdownOpen((v) => !v)}
-                  className="flex items-center gap-1.5 px-3 py-1 bg-neutral-100 hover:bg-neutral-200/80 border border-neutral-200 text-neutral-700 hover:text-neutral-900 rounded-lg text-xs font-medium transition-all active:scale-95 cursor-pointer shadow-2xs"
-                >
-                  <span>
-                    {searchEngine === 'google'
-                      ? 'Google'
-                      : searchEngine === 'duckduckgo'
-                        ? 'DuckDuckGo'
-                        : searchEngine === 'bing'
-                          ? 'Bing'
-                          : 'Brave Search'}
-                  </span>
-                  <ChevronDown
-                    className={`w-3.5 h-3.5 text-neutral-500 transition-transform duration-150 ${
-                      isEngineDropdownOpen ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-
-                {isEngineDropdownOpen && (
-                  <div className="absolute left-0 top-full mt-1.5 w-36 bg-white rounded-xl shadow-xl border border-neutral-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
-                    {[
-                      { id: 'google', label: 'Google' },
-                      { id: 'duckduckgo', label: 'DuckDuckGo' },
-                      { id: 'bing', label: 'Bing' },
-                      { id: 'brave', label: 'Brave Search' },
-                    ].map((eng) => (
-                      <button
-                        key={eng.id}
-                        type="button"
-                        onClick={() => {
-                          setSearchEngine(eng.id as any);
-                          setIsEngineDropdownOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition-colors cursor-pointer ${
-                          searchEngine === eng.id
-                            ? 'bg-indigo-50 text-indigo-600 font-semibold'
-                            : 'text-neutral-700 hover:bg-neutral-100'
-                        }`}
-                      >
-                        <span>{eng.label}</span>
-                        {searchEngine === eng.id && <Check className="w-3.5 h-3.5" />}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <SearchEngineDropdown />
             </div>
           )}
 
@@ -265,14 +202,14 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
                   onClose();
                   setIsLayoutMode(true);
                 }}
-                className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium text-xs flex items-center justify-center gap-2 border border-indigo-200/80 active:scale-95 transition-all"
+                className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium text-xs flex items-center justify-center gap-2 border border-indigo-200/80 active:scale-95 transition-all cursor-pointer"
               >
                 <Move className="w-3.5 h-3.5" /> Customize Layout (Drag Anywhere)
               </button>
               <button
                 onClick={resetWidgetPositions}
                 title="Reset widgets to default center stack"
-                className="p-2 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-600 active:scale-95 transition-all"
+                className="p-2 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-600 active:scale-95 transition-all cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>

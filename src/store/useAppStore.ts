@@ -12,6 +12,8 @@ import { newId, isColorLight, randomSeed } from '../lib/utils';
 import { getCenter, rotatePoint } from '../canvas/geometry';
 import { getConnectedGroupElementIds, groupElements, ungroupElements } from '../lib/groups';
 import { getDefaultWallpaperElements } from '../lib/defaultWallpaperPreset';
+import { duplicateElements, preparePastedElements } from './clipboardHelpers';
+import { saveAppStoreToStorage, loadAppStoreFromStorage } from './storagePersistence';
 
 export const HISTORY_LIMIT = 50;
 
@@ -375,29 +377,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (selectedIds.size === 0) return;
     get().pushHistory();
 
-    const groupIdMap = new Map<string, string>();
-    const newElements: CanvasElement[] = [];
-    const newIds: string[] = [];
-
-    elements.forEach((el) => {
-      if (!selectedIds.has(el.id) || el.locked) return;
-      const clone = JSON.parse(JSON.stringify(el)) as CanvasElement;
-      clone.id = newId();
-      if (clone.groupIds && clone.groupIds.length) {
-        clone.groupIds = clone.groupIds.map((gid) => {
-          if (!groupIdMap.has(gid)) groupIdMap.set(gid, newId());
-          return groupIdMap.get(gid)!;
-        });
-      }
-      if ('points' in clone && clone.points) {
-        clone.points = clone.points.map((p) => ({ x: p.x + 12, y: p.y + 12 })) as [Point, Point] & Point[];
-      } else if ('x' in clone && 'y' in clone) {
-        clone.x += 12;
-        clone.y += 12;
-      }
-      newElements.push(clone);
-      newIds.push(clone.id);
-    });
+    const { newElements, newIds } = duplicateElements(elements, selectedIds);
 
     set((state) => ({
       elements: [...state.elements, ...newElements],
@@ -448,44 +428,8 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     get().pushHistory();
 
-    const offset = 20 * pasteOffsetMultiplier;
-    pasteOffsetMultiplier = (pasteOffsetMultiplier % 15) + 1;
-
-    const groupIdMap = new Map<string, string>();
-    const newElements: CanvasElement[] = [];
-    const newIds: string[] = [];
-
-    source.forEach((el) => {
-      const clone = JSON.parse(JSON.stringify(el)) as CanvasElement;
-      clone.id = newId();
-      clone.locked = false;
-      clone.seed = randomSeed();
-
-      if (clone.groupIds && clone.groupIds.length) {
-        clone.groupIds = clone.groupIds.map((gid) => {
-          if (!groupIdMap.has(gid)) groupIdMap.set(gid, newId());
-          return groupIdMap.get(gid)!;
-        });
-      }
-
-      if ('points' in clone && Array.isArray(clone.points)) {
-        clone.points = clone.points.map((p) => ({
-          x: p.x + offset,
-          y: p.y + offset,
-        })) as [Point, Point] & Point[];
-      } else if (
-        'x' in clone &&
-        'y' in clone &&
-        typeof clone.x === 'number' &&
-        typeof clone.y === 'number'
-      ) {
-        clone.x += offset;
-        clone.y += offset;
-      }
-
-      newElements.push(clone);
-      newIds.push(clone.id);
-    });
+    const { newElements, newIds, nextMultiplier } = preparePastedElements(source, pasteOffsetMultiplier);
+    pasteOffsetMultiplier = nextMultiplier;
 
     set((state) => ({
       elements: [...state.elements, ...newElements],
@@ -611,87 +555,16 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   saveToStorage: () => {
     const { elements, background } = get();
-    try {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.set({
-          wallpaperElements: JSON.stringify(elements),
-          wallpaperBackground: JSON.stringify(background),
-        });
-      } else {
-        localStorage.setItem('wallpaperElements', JSON.stringify(elements));
-        localStorage.setItem('wallpaperBackground', JSON.stringify(background));
-      }
-    } catch (e) {
-      console.error('Storage save error', e);
-    }
+    saveAppStoreToStorage(elements, background);
   },
 
   loadFromStorage: () => {
-    try {
-      const sanitize = (raw: any): CanvasElement[] => {
-        if (!Array.isArray(raw)) return [];
-        return raw
-          .filter((el) => el && typeof el === 'object' && typeof el.type === 'string')
-          .map((el) => {
-            if (el.type === 'text') {
-              return {
-                ...el,
-                text: typeof el.text === 'string' ? el.text : '',
-              };
-            }
-            return el;
-          });
-      };
-
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(['wallpaperElements', 'wallpaperBackground'], (result: Record<string, any>) => {
-          if (result.wallpaperElements) {
-            try {
-              set({ elements: sanitize(JSON.parse(result.wallpaperElements as string)) });
-            } catch (e) {}
-          }
-          if (result.wallpaperBackground) {
-            try {
-              const bg = JSON.parse(result.wallpaperBackground as string);
-              const bgObj = typeof bg === 'string' ? { type: 'color' as const, color: bg } : bg;
-              const isLight = isColorLight(bgObj.color || '#14141a');
-              const curStroke = get().currentStrokeColor;
-              let nextStroke = curStroke;
-              if (isLight && curStroke === '#ffffff') nextStroke = '#1e1e1e';
-              else if (!isLight && (curStroke === '#1e1e1e' || curStroke === '#000000')) nextStroke = '#ffffff';
-              set({ background: bgObj, currentStrokeColor: nextStroke });
-            } catch (e) {
-              const bgObj = { type: 'color' as const, color: String(result.wallpaperBackground) };
-              set({ background: bgObj, currentStrokeColor: isColorLight(bgObj.color) ? '#1e1e1e' : '#ffffff' });
-            }
-          }
-        });
-      } else {
-        const rawEl = localStorage.getItem('wallpaperElements');
-        if (rawEl) {
-          try {
-            set({ elements: sanitize(JSON.parse(rawEl)) });
-          } catch (e) {}
-        }
-        const rawBg = localStorage.getItem('wallpaperBackground');
-        if (rawBg) {
-          try {
-            const bg = JSON.parse(rawBg);
-            const bgObj = typeof bg === 'string' ? { type: 'color' as const, color: bg } : bg;
-            const isLight = isColorLight(bgObj.color || '#14141a');
-            const curStroke = get().currentStrokeColor;
-            let nextStroke = curStroke;
-            if (isLight && curStroke === '#ffffff') nextStroke = '#1e1e1e';
-            else if (!isLight && (curStroke === '#1e1e1e' || curStroke === '#000000')) nextStroke = '#ffffff';
-            set({ background: bgObj, currentStrokeColor: nextStroke });
-          } catch (e) {
-            const bgObj = { type: 'color' as const, color: rawBg };
-            set({ background: bgObj, currentStrokeColor: isColorLight(bgObj.color) ? '#1e1e1e' : '#ffffff' });
-          }
-        }
-      }
-    } catch (e) {
-      console.error('Storage load error', e);
-    }
+    loadAppStoreFromStorage(get().currentStrokeColor, (data) => {
+      const stateUpdate: Partial<AppState> = {};
+      if (data.elements) stateUpdate.elements = data.elements;
+      if (data.background) stateUpdate.background = data.background;
+      if (data.nextStroke) stateUpdate.currentStrokeColor = data.nextStroke;
+      set(stateUpdate);
+    });
   },
 }));

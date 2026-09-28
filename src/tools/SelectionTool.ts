@@ -2,8 +2,6 @@ import { Tool, ToolContext } from './types';
 import { useAppStore } from '../store/useAppStore';
 import {
   Point,
-  CanvasElement,
-  TextElement,
   LineElement,
   ArrowElement,
 } from '../elements/types';
@@ -14,62 +12,26 @@ import {
   elementContains,
   rectsIntersect,
   rotatePoint,
-  normalizeAngle,
   angleToDegrees,
   getCenter,
   getBBox,
   getScreenBBox,
-  normBox,
   distance,
-  FONT_SIZE_MAP,
   SelectionFrame,
-  BoundingBox,
   getHandlePositions,
   RotationOverlay,
   getResizeCursor,
 } from '../canvas/geometry';
-
-interface ResizeState {
-  handle: string;
-  angle: number;
-  center: Point;
-  origBBox: { x: number; y: number; w: number; h: number };
-  members: { id: string; snapshot: CanvasElement }[];
-  historyPushed: boolean;
-}
-
-interface RotateState {
-  center: Point;
-  startPointerAngle: number;
-  lastPointerAngle: number;
-  totalDelta: number;
-  origBBox: BoundingBox;
-  origAngle: number;
-  members: { id: string; startAngle: number; snapshot: CanvasElement; origCenter: Point }[];
-  historyPushed: boolean;
-  activeAngleDegrees: number | null;
-  activeFrame: SelectionFrame | null;
-  activeHandlePos: Point | null;
-}
-
-interface MoveState {
-  pos: Point;
-  snapshots: { id: string; snapshot: CanvasElement }[];
-  historyPushed: boolean;
-  hasDuplicated?: boolean;
-}
-
-interface MarqueeState {
-  start: Point;
-  current: Point;
-}
-
-interface LineHandleState {
-  handle: 'line-start' | 'line-mid' | 'line-end';
-  elementId: string;
-  initialPoints: Point[];
-  historyPushed: boolean;
-}
+import {
+  ResizeState,
+  RotateState,
+  MoveState,
+  MarqueeState,
+  LineHandleState,
+} from './selection/types';
+import { handleResizePointerMove } from './selection/resizeHandlers';
+import { handleRotatePointerMove } from './selection/rotateHandlers';
+import { handleLineHandlePointerMove } from './selection/lineHandlers';
 
 export class SelectionTool implements Tool {
   private resizeState: ResizeState | null = null;
@@ -104,7 +66,7 @@ export class SelectionTool implements Tool {
 
   onPointerDown({ pos, e, canvas }: ToolContext): void {
     const store = useAppStore.getState();
-    const { elements, selectedIds, selectGroupMembers, pushHistory } = store;
+    const { elements, selectedIds, selectGroupMembers } = store;
 
     canvas.setPointerCapture(e.pointerId);
 
@@ -260,83 +222,47 @@ export class SelectionTool implements Tool {
       }
     }
 
-    // 3. Click was outside current selection frame (or shift key was pressed):
-    // Hit test elements (top to bottom)
-    let hit: CanvasElement | null = null;
+    // 3. Hit-test elements (top-to-bottom in z-order)
     for (let i = elements.length - 1; i >= 0; i--) {
       const el = elements[i];
       const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
       if (elementContains(el, local)) {
-        hit = el;
-        break;
+        if (el.locked) {
+          store.setSelectedIds(new Set([el.id]));
+          return;
+        }
+
+        selectGroupMembers(el.id, e.shiftKey);
+
+        const currentSelectedMembers = useAppStore
+          .getState()
+          .elements.filter((m) => useAppStore.getState().selectedIds.has(m.id) && !m.locked);
+        const snaps = currentSelectedMembers.map((m) => ({
+          id: m.id,
+          snapshot: JSON.parse(JSON.stringify(m)),
+        }));
+        this.moveState = snaps.length ? { pos, snapshots: snaps, historyPushed: false } : null;
+        return;
       }
     }
 
-    if (hit) {
-      selectGroupMembers(hit.id, e.shiftKey);
-      const updatedSelected = useAppStore.getState().selectedIds;
-      if (updatedSelected.has(hit.id)) {
-        const currentSelectedMembers = useAppStore
-          .getState()
-          .elements.filter((el) => updatedSelected.has(el.id) && !el.locked);
-        const snaps = currentSelectedMembers.map((el) => ({
-          id: el.id,
-          snapshot: JSON.parse(JSON.stringify(el)),
-        }));
-        this.moveState = snaps.length ? { pos, snapshots: snaps, historyPushed: false } : null;
-      }
-    } else {
-      if (!e.shiftKey) {
-        store.setSelectedIds(new Set());
-      }
-      this.marqueeState = { start: pos, current: pos };
+    // 4. Clicked on empty space: clear selection unless Shift is held, and start marquee
+    if (!e.shiftKey) {
+      store.setSelectedIds(new Set());
     }
+    this.marqueeState = { start: pos, current: pos };
   }
 
   onPointerMove({ pos, e }: ToolContext): void {
     const store = useAppStore.getState();
 
-    // 0. Line handle drag (start, mid, end)
+    // 0. Line Control Points
     if (this.lineHandleState) {
       if (!this.lineHandleState.historyPushed) {
         store.pushHistory();
         this.lineHandleState.historyPushed = true;
       }
-      const { handle, elementId, initialPoints } = this.lineHandleState;
-      let nextPoints = [...initialPoints];
-
-      let targetPos = pos;
-      // Shift constraint: snap line angle to 15-degree steps
-      if (e.shiftKey && (handle === 'line-start' || handle === 'line-end')) {
-        const anchor =
-          handle === 'line-start'
-            ? initialPoints[initialPoints.length - 1]
-            : initialPoints[0];
-        const dx = pos.x - anchor.x;
-        const dy = pos.y - anchor.y;
-        const dist = Math.hypot(dx, dy);
-        let angle = Math.atan2(dy, dx);
-        const step = Math.PI / 12; // 15 degrees
-        angle = Math.round(angle / step) * step;
-        targetPos = {
-          x: anchor.x + dist * Math.cos(angle),
-          y: anchor.y + dist * Math.sin(angle),
-        };
-      }
-
-      if (handle === 'line-start') {
-        nextPoints[0] = targetPos;
-      } else if (handle === 'line-end') {
-        nextPoints[nextPoints.length - 1] = targetPos;
-      } else if (handle === 'line-mid') {
-        if (nextPoints.length === 2) {
-          nextPoints = [nextPoints[0], pos, nextPoints[1]];
-        } else {
-          nextPoints[1] = pos;
-        }
-      }
-
-      store.updateElement(elementId, { points: nextPoints }, false);
+      handleLineHandlePointerMove(pos, this.lineHandleState, e, store.updateElement);
       return;
     }
 
@@ -346,212 +272,17 @@ export class SelectionTool implements Tool {
         store.pushHistory();
         this.resizeState.historyPushed = true;
       }
-      const { handle, angle, center, origBBox, members } = this.resizeState;
-      const localPos = rotatePoint(pos, center, -angle);
-
-      let newW = origBBox.w;
-      let newH = origBBox.h;
-
-      if (e.altKey) {
-        // Alt key: symmetric resize from center (Excalidraw / vector standard)
-        const halfW = Math.abs(localPos.x - center.x);
-        const halfH = Math.abs(localPos.y - center.y);
-
-        if (handle.includes('e') || handle.includes('w')) {
-          newW = Math.max(4, halfW * 2);
-        }
-        if (handle.includes('n') || handle.includes('s')) {
-          newH = Math.max(4, halfH * 2);
-        }
-
-        if (e.shiftKey) {
-          const maxScale = Math.max(
-            origBBox.w > 0 ? newW / origBBox.w : 1,
-            origBBox.h > 0 ? newH / origBBox.h : 1
-          );
-          newW = Math.max(4, origBBox.w * maxScale);
-          newH = Math.max(4, origBBox.h * maxScale);
-        }
-
-        const sx = origBBox.w !== 0 ? newW / origBBox.w : 1;
-        const sy = origBBox.h !== 0 ? newH / origBBox.h : 1;
-
-        members.forEach(({ id, snapshot }) => {
-          if ('points' in snapshot && snapshot.points) {
-            store.updateElement(id, {
-              points: snapshot.points.map((p) => ({
-                x: center.x + (p.x - center.x) * sx,
-                y: center.y + (p.y - center.y) * sy,
-              })) as any,
-            }, false);
-          } else if ('x' in snapshot && 'width' in snapshot) {
-            const rawW = snapshot.width * sx;
-            const rawH = snapshot.height * sy;
-            const elemCenterX = center.x + (snapshot.x + snapshot.width / 2 - center.x) * sx;
-            const elemCenterY = center.y + (snapshot.y + snapshot.height / 2 - center.y) * sy;
-            store.updateElement(id, {
-              x: elemCenterX - Math.abs(rawW) / 2,
-              y: elemCenterY - Math.abs(rawH) / 2,
-              width: Math.abs(rawW),
-              height: Math.abs(rawH),
-            }, false);
-          } else if (snapshot.type === 'text') {
-            const textEl = snapshot as TextElement;
-            const origFontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
-            const scale = Math.max(0.2, Math.max(Math.abs(sx), Math.abs(sy)));
-            const newFontSize = Math.max(8, Math.min(240, Math.round(origFontSize * scale)));
-            const elemCenterX = center.x + (textEl.x - center.x) * sx;
-            const elemCenterY = center.y + (textEl.y - center.y) * sy;
-            store.updateElement(id, {
-              x: elemCenterX,
-              y: elemCenterY,
-              fontSize: newFontSize,
-            }, false);
-          }
-        });
-        return;
-      }
-
-      // Normal resize anchored at opposite edge/corner
-      let anchorX = origBBox.x,
-        anchorY = origBBox.y;
-      if (handle.includes('w')) anchorX = origBBox.x + origBBox.w;
-      if (handle.includes('n')) anchorY = origBBox.y + origBBox.h;
-
-      if (handle.includes('e')) newW = localPos.x - anchorX;
-      if (handle.includes('w')) newW = anchorX - localPos.x;
-      if (handle.includes('s')) newH = localPos.y - anchorY;
-      if (handle.includes('n')) newH = anchorY - localPos.y;
-
-      // Shift constraint for proportional aspect ratio
-      if (e.shiftKey) {
-        const maxScale = Math.max(
-          Math.abs(newW / (origBBox.w || 1)),
-          Math.abs(newH / (origBBox.h || 1))
-        );
-        newW = origBBox.w * maxScale * Math.sign(newW);
-        newH = origBBox.h * maxScale * Math.sign(newH);
-      }
-
-      if (Math.abs(newW) < 4) newW = 4 * (Math.sign(newW) || 1);
-      if (Math.abs(newH) < 4) newH = 4 * (Math.sign(newH) || 1);
-
-      const sx = origBBox.w !== 0 ? newW / origBBox.w : 1;
-      const sy = origBBox.h !== 0 ? newH / origBBox.h : 1;
-
-      members.forEach(({ id, snapshot }) => {
-        if ('points' in snapshot && snapshot.points) {
-          store.updateElement(id, {
-            points: snapshot.points.map((p) => ({
-              x: anchorX + (p.x - anchorX) * sx,
-              y: anchorY + (p.y - anchorY) * sy,
-            })) as any,
-          }, false);
-        } else if ('x' in snapshot && 'width' in snapshot) {
-          const rawX = anchorX + (snapshot.x - anchorX) * sx;
-          const rawY = anchorY + (snapshot.y - anchorY) * sy;
-          const rawW = snapshot.width * sx;
-          const rawH = snapshot.height * sy;
-          store.updateElement(id, {
-            x: rawW < 0 ? rawX + rawW : rawX,
-            y: rawH < 0 ? rawY + rawH : rawY,
-            width: Math.abs(rawW),
-            height: Math.abs(rawH),
-          }, false);
-        } else if (snapshot.type === 'text') {
-          const textEl = snapshot as TextElement;
-          const origFontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
-          const scale = Math.max(
-            0.2,
-            handle === 'e' || handle === 'w'
-              ? Math.abs(sx)
-              : handle === 'n' || handle === 's'
-              ? Math.abs(sy)
-              : Math.max(Math.abs(sx), Math.abs(sy))
-          );
-          const newFontSize = Math.max(8, Math.min(240, Math.round(origFontSize * scale)));
-
-          const rawX = anchorX + (textEl.x - anchorX) * sx;
-          const rawY = anchorY + (textEl.y - anchorY) * sy;
-
-          store.updateElement(id, {
-            x: rawX,
-            y: rawY,
-            fontSize: newFontSize,
-          }, false);
-        }
-      });
+      handleResizePointerMove(pos, this.resizeState, e, store.updateElement);
       return;
     }
 
     // 2. Rotate
     if (this.rotateState) {
-      if (distance(pos, this.rotateState.center) < 5) return;
       if (!this.rotateState.historyPushed) {
         store.pushHistory();
         this.rotateState.historyPushed = true;
       }
-      const current = Math.atan2(pos.y - this.rotateState.center.y, pos.x - this.rotateState.center.x);
-
-      // Unwrapped step delta to avoid jumps when crossing (-PI, PI]
-      let stepDelta = current - this.rotateState.lastPointerAngle;
-      while (stepDelta > Math.PI) stepDelta -= 2 * Math.PI;
-      while (stepDelta <= -Math.PI) stepDelta += 2 * Math.PI;
-      this.rotateState.totalDelta += stepDelta;
-      this.rotateState.lastPointerAngle = current;
-
-      let delta = this.rotateState.totalDelta;
-
-      const firstAngle = this.rotateState.members[0].startAngle;
-      const allSameAngle = this.rotateState.members.every(
-        (m) => Math.abs(m.startAngle - firstAngle) < 1e-4
-      );
-
-      // Shift constrain rotation to 15-degree steps
-      if (e.shiftKey) {
-        const step = Math.PI / 12; // 15 degrees
-        if (allSameAngle) {
-          const rawTarget = firstAngle + delta;
-          const snapped = Math.round(rawTarget / step) * step;
-          delta = snapped - firstAngle;
-        } else {
-          delta = Math.round(delta / step) * step;
-        }
-      }
-
-      this.rotateState.members.forEach((m) => {
-        if ('points' in m.snapshot && m.snapshot.points) {
-          // Lines, arrows, freedraw: rotate points directly around the rotation center (Excalidraw model)
-          store.updateElement(m.id, {
-            angle: 0,
-            points: m.snapshot.points.map((p: Point) =>
-              rotatePoint(p, this.rotateState!.center, delta)
-            ) as any,
-          }, false);
-        } else if ('x' in m.snapshot) {
-          const newAngle = normalizeAngle(m.startAngle + delta);
-          const newCenter = rotatePoint(m.origCenter, this.rotateState!.center, delta);
-          const shift = { x: newCenter.x - m.origCenter.x, y: newCenter.y - m.origCenter.y };
-          store.updateElement(m.id, {
-            angle: newAngle,
-            x: m.snapshot.x + shift.x,
-            y: m.snapshot.y + shift.y,
-          }, false);
-        }
-      });
-
-      const activeAngle = normalizeAngle(this.rotateState.origAngle + delta);
-      const activeFrame: SelectionFrame = {
-        bbox: this.rotateState.origBBox,
-        angle: activeAngle,
-        center: this.rotateState.center,
-        isLine: false,
-      };
-      const activeHandles = getHandlePositions(activeFrame);
-
-      this.rotateState.activeAngleDegrees = angleToDegrees(allSameAngle ? firstAngle + delta : delta);
-      this.rotateState.activeFrame = activeFrame;
-      this.rotateState.activeHandlePos = activeHandles.rotate || null;
+      handleRotatePointerMove(pos, this.rotateState, e, store.updateElement);
       return;
     }
 
@@ -562,7 +293,7 @@ export class SelectionTool implements Tool {
         this.moveState.historyPushed = true;
       }
 
-      // Alt key: duplicate selection on drag (Excalidraw / vector standard)
+      // Alt key: duplicate selection on drag
       if (e.altKey && !this.moveState.hasDuplicated) {
         store.duplicateSelected();
         this.moveState.hasDuplicated = true;
@@ -579,7 +310,7 @@ export class SelectionTool implements Tool {
       let dx = pos.x - this.moveState.pos.x;
       let dy = pos.y - this.moveState.pos.y;
 
-      // Shift key constraint: lock to horizontal or vertical axis (Excalidraw standard)
+      // Shift key constraint: lock to horizontal or vertical axis
       if (e.shiftKey) {
         if (Math.abs(dx) > Math.abs(dy)) {
           dy = 0;
