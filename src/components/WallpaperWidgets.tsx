@@ -1,29 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import { useWidgetStore } from '../store/useWidgetStore';
-import { ClockWidget } from '../widgets/ClockWidget';
-import { SearchBar } from '../widgets/SearchBar';
-import { QuickLinks } from '../widgets/QuickLinks';
+import React, { useEffect, useState } from "react";
+import { useWidgetStore } from "../store/useWidgetStore";
+import { ClockWidget } from "../widgets/ClockWidget";
+import { SearchBar } from "../widgets/SearchBar";
+import { QuickLinks } from "../widgets/QuickLinks";
 
 interface WallpaperWidgetsProps {
   isLight: boolean;
 }
 
-export const WallpaperWidgets: React.FC<WallpaperWidgetsProps> = ({ isLight }) => {
+export const WallpaperWidgets: React.FC<WallpaperWidgetsProps> = ({
+  isLight,
+}) => {
   const widgetPositions = useWidgetStore((s) => s.widgetPositions);
   const showClock = useWidgetStore((s) => s.showClock);
   const showSearch = useWidgetStore((s) => s.showSearch);
   const showQuickLinks = useWidgetStore((s) => s.showQuickLinks);
 
   const [isNarrowScreen, setIsNarrowScreen] = useState(
-    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
 
   useEffect(() => {
     const handleResize = () => {
       setIsNarrowScreen(window.innerWidth < 768);
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   return (
@@ -46,7 +48,7 @@ export const WallpaperWidgets: React.FC<WallpaperWidgetsProps> = ({ isLight }) =
               style={{
                 left: `${widgetPositions.clock.x}%`,
                 top: `${widgetPositions.clock.y}%`,
-                transform: 'translate(-50%, -50%)',
+                transform: "translate(-50%, -50%)",
               }}
             >
               <ClockWidget isLight={isLight} />
@@ -59,7 +61,7 @@ export const WallpaperWidgets: React.FC<WallpaperWidgetsProps> = ({ isLight }) =
               style={{
                 left: `${widgetPositions.search.x}%`,
                 top: `${widgetPositions.search.y}%`,
-                transform: 'translate(-50%, -50%)',
+                transform: "translate(-50%, -50%)",
               }}
             >
               <SearchBar isLight={isLight} />
@@ -72,7 +74,7 @@ export const WallpaperWidgets: React.FC<WallpaperWidgetsProps> = ({ isLight }) =
               style={{
                 left: `${widgetPositions.quickLinks.x}%`,
                 top: `${widgetPositions.quickLinks.y}%`,
-                transform: 'translate(-50%, -50%)',
+                transform: "translate(-50%, -50%)",
               }}
             >
               <QuickLinks isLight={isLight} />

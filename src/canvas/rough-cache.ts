@@ -1,6 +1,6 @@
-import rough from 'roughjs';
-import { CanvasElement, FillStyle, StrokeStyle } from '../elements/types';
-import { normBox, diamondPoints } from './geometry';
+import rough from "roughjs";
+import { CanvasElement } from "../elements/types";
+import { normBox, diamondPoints } from "./geometry";
 
 type RoughGenerator = ReturnType<typeof rough.generator>;
 type Drawable = any;
@@ -21,7 +21,11 @@ function getGenerator(): RoughGenerator {
 }
 
 function cacheKey(el: CanvasElement): string {
-  if (el.type === 'rectangle' || el.type === 'diamond' || el.type === 'ellipse') {
+  if (
+    el.type === "rectangle" ||
+    el.type === "diamond" ||
+    el.type === "ellipse"
+  ) {
     return [
       el.type,
       el.x,
@@ -30,37 +34,41 @@ function cacheKey(el: CanvasElement): string {
       el.height,
       el.strokeColor,
       el.fillColor,
-      el.fillStyle || 'solid',
+      el.fillStyle || "solid",
       el.strokeWidth,
-      el.strokeStyle || 'solid',
+      el.strokeStyle || "solid",
       el.roughness || 1.4,
       el.seed,
-    ].join(',');
+    ].join(",");
   }
-  return '';
+  return "";
 }
 
 export function roughOptions(el: CanvasElement) {
   const strokeLineDash =
-    el.strokeStyle === 'dashed'
+    el.strokeStyle === "dashed"
       ? [el.strokeWidth * 4, el.strokeWidth * 3]
-      : el.strokeStyle === 'dotted'
-      ? [el.strokeWidth, el.strokeWidth * 2.5]
-      : undefined;
+      : el.strokeStyle === "dotted"
+        ? [el.strokeWidth, el.strokeWidth * 2.5]
+        : undefined;
 
   return {
     stroke: el.strokeColor,
     strokeWidth: el.strokeWidth,
     roughness: el.roughness ?? 1.4,
-    fill: el.fillColor === 'transparent' ? undefined : el.fillColor,
-    fillStyle: el.fillStyle ?? 'solid',
+    fill: el.fillColor === "transparent" ? undefined : el.fillColor,
+    fillStyle: el.fillStyle ?? "solid",
     seed: el.seed,
     strokeLineDash,
   };
 }
 
 export function getRoughDrawable(el: CanvasElement): Drawable | null {
-  if (el.type !== 'rectangle' && el.type !== 'diamond' && el.type !== 'ellipse') {
+  if (
+    el.type !== "rectangle" &&
+    el.type !== "diamond" &&
+    el.type !== "ellipse"
+  ) {
     return null;
   }
 
@@ -75,11 +83,11 @@ export function getRoughDrawable(el: CanvasElement): Drawable | null {
   const nb = normBox(el);
   let drawable: Drawable = null;
 
-  if (el.type === 'rectangle') {
+  if (el.type === "rectangle") {
     drawable = gen.rectangle(nb.x, nb.y, nb.w, nb.h, opts);
-  } else if (el.type === 'diamond') {
+  } else if (el.type === "diamond") {
     drawable = gen.polygon(diamondPoints(nb.x, nb.y, nb.w, nb.h), opts);
-  } else if (el.type === 'ellipse') {
+  } else if (el.type === "ellipse") {
     drawable = gen.ellipse(nb.x + nb.w / 2, nb.y + nb.h / 2, nb.w, nb.h, opts);
   }
 

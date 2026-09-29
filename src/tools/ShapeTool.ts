@@ -1,8 +1,8 @@
-import { Tool, ToolContext } from './types';
-import { useAppStore } from '../store/useAppStore';
-import { createElement } from '../elements/factory';
-import { CanvasElement, ToolType, Point } from '../elements/types';
-import { normBox } from '../canvas/geometry';
+import { Tool, ToolContext } from "./types";
+import { useAppStore } from "../store/useAppStore";
+import { createElement } from "../elements/factory";
+import { CanvasElement, ToolType, Point } from "../elements/types";
+import { normBox } from "../canvas/geometry";
 
 export class ShapeTool implements Tool {
   private type: ToolType;
@@ -34,7 +34,7 @@ export class ShapeTool implements Tool {
     if (!this.startPos) return;
     const store = useAppStore.getState();
     const draft = store.draft;
-    if (!draft || !('width' in draft)) return;
+    if (!draft || !("width" in draft)) return;
 
     let width = pos.x - this.startPos.x;
     let height = pos.y - this.startPos.y;
@@ -73,7 +73,7 @@ export class ShapeTool implements Tool {
     const draft = store.draft;
     this.startPos = null;
 
-    if (!draft || !('width' in draft)) {
+    if (!draft || !("width" in draft)) {
       store.setDraft(null);
       return;
     }
@@ -96,7 +96,7 @@ export class ShapeTool implements Tool {
     store.pushHistory();
     store.setElements([...store.elements, finalized]);
     store.setSelectedIds(new Set([finalized.id]));
-    store.setTool('selection');
+    store.setTool("selection");
     store.setDraft(null);
     store.saveToStorage();
   }
@@ -106,6 +106,6 @@ export class ShapeTool implements Tool {
   }
 
   getCursor(): string {
-    return 'crosshair';
+    return "crosshair";
   }
 }

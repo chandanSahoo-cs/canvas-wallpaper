@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   X,
   SlidersHorizontal,
@@ -8,11 +8,11 @@ import {
   Link2,
   Trash2,
   Plus,
-} from 'lucide-react';
-import { useWidgetStore, MAX_QUICK_LINKS } from '../store/useWidgetStore';
-import { PrivacyPolicyDialog } from '../components/PrivacyPolicyDialog';
-import { SearchEngineDropdown } from './settings/SearchEngineDropdown';
-import { cn } from '../lib/utils';
+} from "lucide-react";
+import { useWidgetStore, MAX_QUICK_LINKS } from "../store/useWidgetStore";
+import { PrivacyPolicyDialog } from "../components/PrivacyPolicyDialog";
+import { SearchEngineDropdown } from "./settings/SearchEngineDropdown";
+import { cn } from "../lib/utils";
 
 interface WidgetConfigDrawerProps {
   isOpen: boolean;
@@ -40,8 +40,8 @@ export const WidgetConfigDrawer: React.FC<WidgetConfigDrawerProps> = ({
   const removeQuickLink = useWidgetStore((s) => s.removeQuickLink);
 
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newUrl, setNewUrl] = useState('');
+  const [newTitle, setNewTitle] = useState("");
+  const [newUrl, setNewUrl] = useState("");
 
   if (!isOpen) return null;
 
@@ -49,8 +49,8 @@ export const WidgetConfigDrawer: React.FC<WidgetConfigDrawerProps> = ({
     e.preventDefault();
     if (!newUrl.trim() || quickLinks.length >= MAX_QUICK_LINKS) return;
     addQuickLink(newTitle, newUrl);
-    setNewTitle('');
-    setNewUrl('');
+    setNewTitle("");
+    setNewUrl("");
   };
 
   return (
@@ -81,23 +81,23 @@ export const WidgetConfigDrawer: React.FC<WidgetConfigDrawerProps> = ({
               {showClock && (
                 <div className="flex items-center bg-neutral-100 p-0.5 rounded-lg text-[10px]">
                   <button
-                    onClick={() => setClockFormat('12h')}
+                    onClick={() => setClockFormat("12h")}
                     className={cn(
-                      'px-2 py-0.5 rounded-md font-medium transition-all cursor-pointer',
-                      clockFormat === '12h'
-                        ? 'bg-white text-indigo-600 shadow-xs'
-                        : 'text-neutral-600'
+                      "px-2 py-0.5 rounded-md font-medium transition-all cursor-pointer",
+                      clockFormat === "12h"
+                        ? "bg-white text-indigo-600 shadow-xs"
+                        : "text-neutral-600",
                     )}
                   >
                     12h
                   </button>
                   <button
-                    onClick={() => setClockFormat('24h')}
+                    onClick={() => setClockFormat("24h")}
                     className={cn(
-                      'px-2 py-0.5 rounded-md font-medium transition-all cursor-pointer',
-                      clockFormat === '24h'
-                        ? 'bg-white text-indigo-600 shadow-xs'
-                        : 'text-neutral-600'
+                      "px-2 py-0.5 rounded-md font-medium transition-all cursor-pointer",
+                      clockFormat === "24h"
+                        ? "bg-white text-indigo-600 shadow-xs"
+                        : "text-neutral-600",
                     )}
                   >
                     24h
@@ -177,7 +177,9 @@ export const WidgetConfigDrawer: React.FC<WidgetConfigDrawerProps> = ({
                 key={link.id}
                 className="flex items-center justify-between p-2 rounded-xl bg-neutral-50 border border-neutral-200/80 hover:bg-neutral-100 transition-colors"
               >
-                <span className="font-medium truncate max-w-[260px]">{link.title}</span>
+                <span className="font-medium truncate max-w-[260px]">
+                  {link.title}
+                </span>
                 <button
                   onClick={() => removeQuickLink(link.id)}
                   className="p-1 rounded-lg hover:bg-rose-100 text-neutral-400 hover:text-rose-600 transition-colors cursor-pointer"
@@ -195,8 +197,13 @@ export const WidgetConfigDrawer: React.FC<WidgetConfigDrawerProps> = ({
               Maximum {MAX_QUICK_LINKS} quick links reached
             </div>
           ) : (
-            <form onSubmit={handleAddQuickLink} className="pt-2 border-t border-neutral-100 flex flex-col gap-2">
-              <div className="text-xs font-semibold text-neutral-700">Add New Shortcut</div>
+            <form
+              onSubmit={handleAddQuickLink}
+              className="pt-2 border-t border-neutral-100 flex flex-col gap-2"
+            >
+              <div className="text-xs font-semibold text-neutral-700">
+                Add New Shortcut
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"

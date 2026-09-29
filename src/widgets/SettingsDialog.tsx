@@ -1,27 +1,39 @@
-import React, { useState, useEffect } from 'react';
-import { X, Clock, Calendar, Search, Link2, LayoutGrid, Move, RotateCcw } from 'lucide-react';
-import { useWidgetStore } from '../store/useWidgetStore';
-import { PrivacyPolicyDialog } from '../components/PrivacyPolicyDialog';
-import { SearchEngineDropdown } from './settings/SearchEngineDropdown';
+import React, { useState, useEffect } from "react";
+import {
+  X,
+  Clock,
+  Calendar,
+  Search,
+  Link2,
+  LayoutGrid,
+  Move,
+  RotateCcw,
+} from "lucide-react";
+import { useWidgetStore } from "../store/useWidgetStore";
+import { PrivacyPolicyDialog } from "../components/PrivacyPolicyDialog";
+import { SearchEngineDropdown } from "./settings/SearchEngineDropdown";
 
 interface SettingsDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose }) => {
+export const SettingsDialog: React.FC<SettingsDialogProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         e.preventDefault();
         onClose();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
   const showClock = useWidgetStore((s) => s.showClock);
@@ -58,7 +70,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
               aria-hidden="true"
               className="w-5 h-5 object-contain"
             />
-            <h2 id="settings-dialog-title" className="text-base font-semibold">New Tab Widgets</h2>
+            <h2 id="settings-dialog-title" className="text-base font-semibold">
+              New Tab Widgets
+            </h2>
           </div>
           <button
             onClick={onClose}
@@ -76,7 +90,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
               <Clock className="w-4 h-4 text-neutral-500 mt-0.5" />
               <div>
                 <div className="text-sm font-medium">Digital Clock</div>
-                <div className="text-xs text-neutral-500">Show time on wallpaper</div>
+                <div className="text-xs text-neutral-500">
+                  Show time on wallpaper
+                </div>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -92,24 +108,26 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
 
           {showClock && (
             <div className="ml-7 flex items-center gap-3">
-              <span className="text-xs text-neutral-500 font-medium">Format:</span>
+              <span className="text-xs text-neutral-500 font-medium">
+                Format:
+              </span>
               <div className="flex items-center gap-1 bg-neutral-100 p-0.5 rounded-lg text-xs">
                 <button
-                  onClick={() => setClockFormat('12h')}
+                  onClick={() => setClockFormat("12h")}
                   className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
-                    clockFormat === '12h'
-                      ? 'bg-white shadow-sm text-indigo-600'
-                      : 'text-neutral-600 hover:text-neutral-900'
+                    clockFormat === "12h"
+                      ? "bg-white shadow-sm text-indigo-600"
+                      : "text-neutral-600 hover:text-neutral-900"
                   }`}
                 >
                   12-Hour
                 </button>
                 <button
-                  onClick={() => setClockFormat('24h')}
+                  onClick={() => setClockFormat("24h")}
                   className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
-                    clockFormat === '24h'
-                      ? 'bg-white shadow-sm text-indigo-600'
-                      : 'text-neutral-600 hover:text-neutral-900'
+                    clockFormat === "24h"
+                      ? "bg-white shadow-sm text-indigo-600"
+                      : "text-neutral-600 hover:text-neutral-900"
                   }`}
                 >
                   24-Hour
@@ -124,7 +142,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
               <Calendar className="w-4 h-4 text-neutral-500 mt-0.5" />
               <div>
                 <div className="text-sm font-medium">Date & Day</div>
-                <div className="text-xs text-neutral-500">Show day and date below clock</div>
+                <div className="text-xs text-neutral-500">
+                  Show day and date below clock
+                </div>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -144,7 +164,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
               <Search className="w-4 h-4 text-neutral-500 mt-0.5" />
               <div>
                 <div className="text-sm font-medium">Search Bar</div>
-                <div className="text-xs text-neutral-500">Quick search overlay</div>
+                <div className="text-xs text-neutral-500">
+                  Quick search overlay
+                </div>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -160,7 +182,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
 
           {showSearch && (
             <div className="ml-7 flex items-center gap-3">
-              <span className="text-xs text-neutral-500 font-medium">Engine:</span>
+              <span className="text-xs text-neutral-500 font-medium">
+                Engine:
+              </span>
               <SearchEngineDropdown />
             </div>
           )}
@@ -171,7 +195,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
               <Link2 className="w-4 h-4 text-neutral-500 mt-0.5" />
               <div>
                 <div className="text-sm font-medium">Quick Links</div>
-                <div className="text-xs text-neutral-500">Shortcut bookmark tiles</div>
+                <div className="text-xs text-neutral-500">
+                  Shortcut bookmark tiles
+                </div>
               </div>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -192,7 +218,9 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
                 <LayoutGrid className="w-4 h-4 text-indigo-600" />
                 <div>
                   <div className="text-sm font-medium">Widget Layout</div>
-                  <div className="text-xs text-neutral-500">Align accessories anywhere on full screen</div>
+                  <div className="text-xs text-neutral-500">
+                    Align accessories anywhere on full screen
+                  </div>
                 </div>
               </div>
             </div>
@@ -204,7 +232,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({ isOpen, onClose 
                 }}
                 className="flex-1 py-2 px-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-medium text-xs flex items-center justify-center gap-2 border border-indigo-200/80 active:scale-95 transition-all cursor-pointer"
               >
-                <Move className="w-3.5 h-3.5" /> Customize Layout (Drag Anywhere)
+                <Move className="w-3.5 h-3.5" /> Customize Layout (Drag
+                Anywhere)
               </button>
               <button
                 onClick={resetWidgetPositions}

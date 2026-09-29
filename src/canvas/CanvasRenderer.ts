@@ -1,25 +1,19 @@
-import rough from 'roughjs';
-import { useAppStore } from '../store/useAppStore';
-import {
-  CanvasElement,
-  Point,
-} from '../elements/types';
-import {
-  getCenter,
-  RotationOverlay,
-} from './geometry';
-import { getRoughDrawable, roughOptions } from './rough-cache';
+import rough from "roughjs";
+import { useAppStore } from "../store/useAppStore";
+import { CanvasElement, Point } from "../elements/types";
+import { getCenter, RotationOverlay } from "./geometry";
+import { getRoughDrawable, roughOptions } from "./rough-cache";
 import {
   drawArrow,
   drawFreedraw,
   drawText,
   drawImage,
-} from './renderer/elementDrawing';
+} from "./renderer/elementDrawing";
 import {
   drawLockBadge,
   drawSelectionOverlays,
   drawMarquee,
-} from './renderer/overlayDrawing';
+} from "./renderer/overlayDrawing";
 
 type RoughCanvas = ReturnType<typeof rough.canvas>;
 
@@ -31,8 +25,8 @@ export class CanvasRenderer {
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
-    const context = canvas.getContext('2d');
-    if (!context) throw new Error('Could not get 2D context');
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("Could not get 2D context");
     this.ctx = context;
     this.rc = rough.canvas(canvas);
   }
@@ -75,7 +69,7 @@ export class CanvasRenderer {
       0,
       dpr * zoom,
       -scrollOffset.x * zoom * dpr,
-      -scrollOffset.y * zoom * dpr
+      -scrollOffset.y * zoom * dpr,
     );
 
     // Draw all elements and draft
@@ -117,37 +111,46 @@ export class CanvasRenderer {
     }
 
     switch (el.type) {
-      case 'rectangle':
-      case 'diamond':
-      case 'ellipse': {
+      case "rectangle":
+      case "diamond":
+      case "ellipse": {
         const drawable = getRoughDrawable(el);
         if (drawable) {
           this.rc.draw(drawable);
         }
         break;
       }
-      case 'line': {
+      case "line": {
         const pts = el.points;
         if (pts.length === 2) {
-          this.rc.line(pts[0].x, pts[0].y, pts[1].x, pts[1].y, roughOptions(el));
+          this.rc.line(
+            pts[0].x,
+            pts[0].y,
+            pts[1].x,
+            pts[1].y,
+            roughOptions(el),
+          );
         } else if (pts.length > 2) {
-          this.rc.linearPath(pts.map((p) => [p.x, p.y]), roughOptions(el));
+          this.rc.linearPath(
+            pts.map((p) => [p.x, p.y]),
+            roughOptions(el),
+          );
         }
         break;
       }
-      case 'arrow': {
+      case "arrow": {
         drawArrow(this.rc, el as CanvasElement & { points: Point[] });
         break;
       }
-      case 'freedraw': {
+      case "freedraw": {
         drawFreedraw(this.ctx, el as CanvasElement & { points: Point[] });
         break;
       }
-      case 'text': {
+      case "text": {
         drawText(this.ctx, el);
         break;
       }
-      case 'image': {
+      case "image": {
         drawImage(this.ctx, el, this.onNeedRender);
         break;
       }

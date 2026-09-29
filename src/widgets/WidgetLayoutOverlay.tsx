@@ -1,25 +1,27 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef } from "react";
 import {
   GripHorizontal,
   Check,
   RotateCcw,
   LayoutGrid,
   SlidersHorizontal,
-} from 'lucide-react';
-import { useWidgetStore } from '../store/useWidgetStore';
-import { ClockWidget } from './ClockWidget';
-import { SearchBar } from './SearchBar';
-import { QuickLinks } from './QuickLinks';
-import { WidgetConfigDrawer } from './WidgetConfigDrawer';
-import { cn } from '../lib/utils';
+} from "lucide-react";
+import { useWidgetStore } from "../store/useWidgetStore";
+import { ClockWidget } from "./ClockWidget";
+import { SearchBar } from "./SearchBar";
+import { QuickLinks } from "./QuickLinks";
+import { WidgetConfigDrawer } from "./WidgetConfigDrawer";
+import { cn } from "../lib/utils";
 
 interface WidgetLayoutOverlayProps {
   isLight?: boolean;
 }
 
-type WidgetKey = 'clock' | 'search' | 'quickLinks';
+type WidgetKey = "clock" | "search" | "quickLinks";
 
-export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLight }) => {
+export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({
+  isLight,
+}) => {
   const isLayoutMode = useWidgetStore((s) => s.isLayoutMode);
   const setIsLayoutMode = useWidgetStore((s) => s.setIsLayoutMode);
   const widgetPositions = useWidgetStore((s) => s.widgetPositions);
@@ -33,7 +35,10 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
   const [activeDrag, setActiveDrag] = useState<WidgetKey | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
 
-  const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({ offsetX: 0, offsetY: 0 });
+  const dragOffsetRef = useRef<{ offsetX: number; offsetY: number }>({
+    offsetX: 0,
+    offsetY: 0,
+  });
 
   if (!isLayoutMode) return null;
 
@@ -92,7 +97,7 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
       className="fixed inset-0 z-50 select-none overflow-hidden touch-none"
       onPointerUp={handlePointerUp}
       onKeyDown={(e) => {
-        if (e.key === 'Escape') {
+        if (e.key === "Escape") {
           if (isConfigOpen) setIsConfigOpen(false);
           else setIsLayoutMode(false);
         }
@@ -106,7 +111,7 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
             linear-gradient(to right, rgba(99, 102, 241, 0.4) 1px, transparent 1px),
             linear-gradient(to bottom, rgba(99, 102, 241, 0.4) 1px, transparent 1px)
           `,
-          backgroundSize: '4% 4%',
+          backgroundSize: "4% 4%",
         }}
       />
 
@@ -128,10 +133,10 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
         <button
           onClick={() => setIsConfigOpen((v) => !v)}
           className={cn(
-            'flex items-center gap-1.5 px-3 py-1 rounded-xl font-medium active:scale-95 transition-all cursor-pointer',
+            "flex items-center gap-1.5 px-3 py-1 rounded-xl font-medium active:scale-95 transition-all cursor-pointer",
             isConfigOpen
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'bg-white/10 hover:bg-white/20 text-white'
+              ? "bg-indigo-600 text-white shadow-sm"
+              : "bg-white/10 hover:bg-white/20 text-white",
           )}
           title="Toggle widgets on/off and add quick links"
         >
@@ -167,18 +172,18 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
       {/* DRAGGABLE WIDGET 1: CLOCK */}
       {showClock && (
         <div
-          onPointerDown={(e) => handlePointerDown(e, 'clock')}
-          onPointerMove={(e) => handlePointerMove(e, 'clock')}
+          onPointerDown={(e) => handlePointerDown(e, "clock")}
+          onPointerMove={(e) => handlePointerMove(e, "clock")}
           style={{
             left: `${widgetPositions.clock.x}%`,
             top: `${widgetPositions.clock.y}%`,
-            transform: 'translate(-50%, -50%)',
+            transform: "translate(-50%, -50%)",
           }}
           className={cn(
-            'absolute cursor-grab active:cursor-grabbing p-4 rounded-3xl border-2 border-dashed transition-shadow flex flex-col items-center group',
-            activeDrag === 'clock'
-              ? 'border-indigo-500 bg-indigo-500/20 shadow-2xl scale-102 z-40'
-              : 'border-indigo-400/80 bg-indigo-500/10 hover:bg-indigo-500/15 hover:border-indigo-500 z-30'
+            "absolute cursor-grab active:cursor-grabbing p-4 rounded-3xl border-2 border-dashed transition-shadow flex flex-col items-center group",
+            activeDrag === "clock"
+              ? "border-indigo-500 bg-indigo-500/20 shadow-2xl scale-102 z-40"
+              : "border-indigo-400/80 bg-indigo-500/10 hover:bg-indigo-500/15 hover:border-indigo-500 z-30",
           )}
         >
           {/* Drag Handle Label Badge */}
@@ -186,7 +191,8 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
             <GripHorizontal className="w-3 h-3" />
             <span>Clock</span>
             <span className="font-mono opacity-80">
-              {Math.round(widgetPositions.clock.x)}%, {Math.round(widgetPositions.clock.y)}%
+              {Math.round(widgetPositions.clock.x)}%,{" "}
+              {Math.round(widgetPositions.clock.y)}%
             </span>
           </div>
 
@@ -199,18 +205,18 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
       {/* DRAGGABLE WIDGET 2: SEARCH BAR */}
       {showSearch && (
         <div
-          onPointerDown={(e) => handlePointerDown(e, 'search')}
-          onPointerMove={(e) => handlePointerMove(e, 'search')}
+          onPointerDown={(e) => handlePointerDown(e, "search")}
+          onPointerMove={(e) => handlePointerMove(e, "search")}
           style={{
             left: `${widgetPositions.search.x}%`,
             top: `${widgetPositions.search.y}%`,
-            transform: 'translate(-50%, -50%)',
+            transform: "translate(-50%, -50%)",
           }}
           className={cn(
-            'absolute cursor-grab active:cursor-grabbing p-3 rounded-3xl border-2 border-dashed transition-shadow flex flex-col items-center group w-full max-w-md',
-            activeDrag === 'search'
-              ? 'border-indigo-500 bg-indigo-500/20 shadow-2xl scale-102 z-40'
-              : 'border-indigo-400/80 bg-indigo-500/10 hover:bg-indigo-500/15 hover:border-indigo-500 z-30'
+            "absolute cursor-grab active:cursor-grabbing p-3 rounded-3xl border-2 border-dashed transition-shadow flex flex-col items-center group w-full max-w-md",
+            activeDrag === "search"
+              ? "border-indigo-500 bg-indigo-500/20 shadow-2xl scale-102 z-40"
+              : "border-indigo-400/80 bg-indigo-500/10 hover:bg-indigo-500/15 hover:border-indigo-500 z-30",
           )}
         >
           {/* Drag Handle Label Badge */}
@@ -218,7 +224,8 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
             <GripHorizontal className="w-3 h-3" />
             <span>Search Bar</span>
             <span className="font-mono opacity-80">
-              {Math.round(widgetPositions.search.x)}%, {Math.round(widgetPositions.search.y)}%
+              {Math.round(widgetPositions.search.x)}%,{" "}
+              {Math.round(widgetPositions.search.y)}%
             </span>
           </div>
 
@@ -231,18 +238,18 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
       {/* DRAGGABLE WIDGET 3: QUICK LINKS */}
       {showQuickLinks && (
         <div
-          onPointerDown={(e) => handlePointerDown(e, 'quickLinks')}
-          onPointerMove={(e) => handlePointerMove(e, 'quickLinks')}
+          onPointerDown={(e) => handlePointerDown(e, "quickLinks")}
+          onPointerMove={(e) => handlePointerMove(e, "quickLinks")}
           style={{
             left: `${widgetPositions.quickLinks.x}%`,
             top: `${widgetPositions.quickLinks.y}%`,
-            transform: 'translate(-50%, -50%)',
+            transform: "translate(-50%, -50%)",
           }}
           className={cn(
-            'absolute cursor-grab active:cursor-grabbing p-3 rounded-3xl border-2 border-dashed transition-shadow flex flex-col items-center group max-w-xl',
-            activeDrag === 'quickLinks'
-              ? 'border-indigo-500 bg-indigo-500/20 shadow-2xl scale-102 z-40'
-              : 'border-indigo-400/80 bg-indigo-500/10 hover:bg-indigo-500/15 hover:border-indigo-500 z-30'
+            "absolute cursor-grab active:cursor-grabbing p-3 rounded-3xl border-2 border-dashed transition-shadow flex flex-col items-center group max-w-xl",
+            activeDrag === "quickLinks"
+              ? "border-indigo-500 bg-indigo-500/20 shadow-2xl scale-102 z-40"
+              : "border-indigo-400/80 bg-indigo-500/10 hover:bg-indigo-500/15 hover:border-indigo-500 z-30",
           )}
         >
           {/* Drag Handle Label Badge */}
@@ -250,7 +257,8 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({ isLigh
             <GripHorizontal className="w-3 h-3" />
             <span>Quick Links</span>
             <span className="font-mono opacity-80">
-              {Math.round(widgetPositions.quickLinks.x)}%, {Math.round(widgetPositions.quickLinks.y)}%
+              {Math.round(widgetPositions.quickLinks.x)}%,{" "}
+              {Math.round(widgetPositions.quickLinks.y)}%
             </span>
           </div>
 

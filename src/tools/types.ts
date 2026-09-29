@@ -1,4 +1,4 @@
-import { Point } from '../elements/types';
+import { Point } from "../elements/types";
 
 export interface ToolContext {
   pos: Point; // Screen to canvas transformed position (accounts for camera zoom & offset)

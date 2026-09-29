@@ -35,13 +35,15 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-60 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150 select-none">
+      className="fixed inset-0 z-60 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150 select-none"
+    >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="privacy-dialog-title"
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl border border-neutral-200 text-neutral-800 animate-in zoom-in-95 duration-150 max-h-[85vh] flex flex-col">
+        className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl border border-neutral-200 text-neutral-800 animate-in zoom-in-95 duration-150 max-h-[85vh] flex flex-col"
+      >
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-neutral-100 shrink-0">
           <div className="flex items-center gap-3">
@@ -51,7 +53,8 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
             <div>
               <h2
                 id="privacy-dialog-title"
-                className="text-base font-semibold leading-tight text-neutral-900">
+                className="text-base font-semibold leading-tight text-neutral-900"
+              >
                 Privacy Policy
               </h2>
               <p className="text-xs text-neutral-500">
@@ -62,7 +65,8 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
           <button
             onClick={onClose}
             aria-label="Close privacy policy"
-            className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer">
+            className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+          >
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -76,10 +80,10 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
               <span>Zero Personal Data Collected</span>
             </div>
             <p className="leading-relaxed text-neutral-600">
-              PaperTab does <strong>not</strong> collect, track,
-              store, or sell any personal data, browsing history, or analytics.
-              Everything you draw, sketch, or configure is saved strictly on
-              your local device via{" "}
+              PaperTab does <strong>not</strong> collect, track, store, or sell
+              any personal data, browsing history, or analytics. Everything you
+              draw, sketch, or configure is saved strictly on your local device
+              via{" "}
               <code className="px-1 py-0.5 bg-neutral-200/70 rounded text-[11px] font-mono text-neutral-800">
                 chrome.storage.local
               </code>
@@ -155,7 +159,8 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
           </span>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition-all shadow-sm active:scale-95 cursor-pointer">
+            className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+          >
             Close
           </button>
         </div>

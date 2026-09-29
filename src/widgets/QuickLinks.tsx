@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, X } from 'lucide-react';
-import { useWidgetStore, MAX_QUICK_LINKS } from '../store/useWidgetStore';
-import { useAppStore } from '../store/useAppStore';
-import { isColorLight, cn } from '../lib/utils';
+import React, { useState, useEffect } from "react";
+import { Plus, X } from "lucide-react";
+import { useWidgetStore, MAX_QUICK_LINKS } from "../store/useWidgetStore";
+import { useAppStore } from "../store/useAppStore";
+import { isColorLight, cn } from "../lib/utils";
 
 interface QuickLinksProps {
   isLight?: boolean;
 }
 
-export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) => {
+export const QuickLinks: React.FC<QuickLinksProps> = ({
+  isLight: propIsLight,
+}) => {
   const showQuickLinks = useWidgetStore((s) => s.showQuickLinks);
   const quickLinks = useWidgetStore((s) => s.quickLinks);
   const addQuickLink = useWidgetStore((s) => s.addQuickLink);
@@ -16,28 +18,28 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
   const background = useAppStore((s) => s.background);
 
   const [isAdding, setIsAdding] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newUrl, setNewUrl] = useState('');
+  const [newTitle, setNewTitle] = useState("");
+  const [newUrl, setNewUrl] = useState("");
 
   const canAddMore = quickLinks.length < MAX_QUICK_LINKS;
 
   useEffect(() => {
     if (!isAdding) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         e.preventDefault();
         setIsAdding(false);
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isAdding]);
 
   const isLight =
     propIsLight !== undefined
       ? propIsLight
-      : !(background?.type === 'image' && background?.imageUrl) &&
-        isColorLight(background?.color || '#14141a');
+      : !(background?.type === "image" && background?.imageUrl) &&
+        isColorLight(background?.color || "#14141a");
 
   if (!showQuickLinks) return null;
 
@@ -45,8 +47,8 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
     e.preventDefault();
     if (!newUrl.trim() || !canAddMore) return;
     addQuickLink(newTitle, newUrl);
-    setNewTitle('');
-    setNewUrl('');
+    setNewTitle("");
+    setNewUrl("");
     setIsAdding(false);
   };
 
@@ -54,7 +56,7 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
     try {
       return new URL(url).hostname;
     } catch {
-      return '';
+      return "";
     }
   };
 
@@ -64,7 +66,7 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
         const domain = getDomain(link.url);
         const faviconUrl = domain
           ? `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`
-          : '';
+          : "";
 
         return (
           <div key={link.id} className="relative group">
@@ -72,16 +74,18 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
               href={link.url}
               title={link.title}
               className={cn(
-                'flex flex-col items-center gap-1.5 w-18 p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md',
+                "flex flex-col items-center gap-1.5 w-18 p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md",
                 isLight
-                  ? 'bg-white/80 hover:bg-white/95 border border-neutral-200/90 text-neutral-900 shadow-sm hover:shadow-md'
-                  : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white'
+                  ? "bg-white/80 hover:bg-white/95 border border-neutral-200/90 text-neutral-900 shadow-sm hover:shadow-md"
+                  : "bg-white/10 hover:bg-white/20 border border-white/15 text-white",
               )}
             >
               <div
                 className={cn(
-                  'w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden',
-                  isLight ? 'bg-neutral-100 border border-neutral-200/60' : 'bg-white/20'
+                  "w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden",
+                  isLight
+                    ? "bg-neutral-100 border border-neutral-200/60"
+                    : "bg-white/20",
                 )}
               >
                 <img
@@ -89,14 +93,14 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
                   alt={link.title}
                   className="w-5 h-5 object-contain"
                   onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
+                    (e.target as HTMLElement).style.display = "none";
                   }}
                 />
               </div>
               <span
                 className={cn(
-                  'text-[11px] font-semibold truncate max-w-full drop-shadow-xs',
-                  isLight ? 'text-neutral-800' : 'text-white/90'
+                  "text-[11px] font-semibold truncate max-w-full drop-shadow-xs",
+                  isLight ? "text-neutral-800" : "text-white/90",
                 )}
               >
                 {link.title}
@@ -125,24 +129,26 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
           onClick={() => setIsAdding(true)}
           title="Add Shortcut"
           className={cn(
-            'flex flex-col items-center justify-center w-18 h-[76px] p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md cursor-pointer',
+            "flex flex-col items-center justify-center w-18 h-[76px] p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md cursor-pointer",
             isLight
-              ? 'bg-white/80 hover:bg-white/95 border border-neutral-200/90 text-neutral-700 hover:text-neutral-900 shadow-sm hover:shadow-md'
-              : 'bg-white/10 hover:bg-white/20 border border-white/15 text-white/80 hover:text-white'
+              ? "bg-white/80 hover:bg-white/95 border border-neutral-200/90 text-neutral-700 hover:text-neutral-900 shadow-sm hover:shadow-md"
+              : "bg-white/10 hover:bg-white/20 border border-white/15 text-white/80 hover:text-white",
           )}
         >
           <div
             className={cn(
-              'w-10 h-10 rounded-xl flex items-center justify-center',
-              isLight ? 'bg-neutral-100 border border-neutral-200/60' : 'bg-white/15'
+              "w-10 h-10 rounded-xl flex items-center justify-center",
+              isLight
+                ? "bg-neutral-100 border border-neutral-200/60"
+                : "bg-white/15",
             )}
           >
             <Plus className="w-5 h-5" />
           </div>
           <span
             className={cn(
-              'text-[11px] font-semibold mt-1',
-              isLight ? 'text-neutral-700' : 'text-white/80'
+              "text-[11px] font-semibold mt-1",
+              isLight ? "text-neutral-700" : "text-white/80",
             )}
           >
             Add
@@ -160,7 +166,9 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({ isLight: propIsLight }) 
             onClick={(e) => e.stopPropagation()}
             className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border border-neutral-200 animate-in fade-in zoom-in-95 duration-150"
           >
-            <h3 className="text-sm font-semibold text-neutral-800 mb-3">Add Shortcut</h3>
+            <h3 className="text-sm font-semibold text-neutral-800 mb-3">
+              Add Shortcut
+            </h3>
             <form onSubmit={handleAdd} className="flex flex-col gap-3">
               <div>
                 <label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider block mb-1">

@@ -1,14 +1,14 @@
-import { Tool, ToolContext } from './types';
-import { useAppStore } from '../store/useAppStore';
-import { createElement } from '../elements/factory';
-import { CanvasElement, ToolType, Point } from '../elements/types';
-import { distance } from '../canvas/geometry';
+import { Tool, ToolContext } from "./types";
+import { useAppStore } from "../store/useAppStore";
+import { createElement } from "../elements/factory";
+import { CanvasElement, Point } from "../elements/types";
+import { distance } from "../canvas/geometry";
 
 export class LineTool implements Tool {
-  private type: 'line' | 'arrow';
+  private type: "line" | "arrow";
   private startPos: Point | null = null;
 
-  constructor(type: 'line' | 'arrow') {
+  constructor(type: "line" | "arrow") {
     this.type = type;
   }
 
@@ -33,7 +33,7 @@ export class LineTool implements Tool {
     if (!this.startPos) return;
     const store = useAppStore.getState();
     const draft = store.draft;
-    if (!draft || !('points' in draft)) return;
+    if (!draft || !("points" in draft)) return;
 
     let target = pos;
     // Shift constraint for 15-degree angle snap
@@ -72,7 +72,7 @@ export class LineTool implements Tool {
     const draft = store.draft;
     this.startPos = null;
 
-    if (!draft || !('points' in draft)) {
+    if (!draft || !("points" in draft)) {
       store.setDraft(null);
       return;
     }
@@ -85,7 +85,7 @@ export class LineTool implements Tool {
     store.pushHistory();
     store.setElements([...store.elements, draft]);
     store.setSelectedIds(new Set([draft.id]));
-    store.setTool('selection');
+    store.setTool("selection");
     store.setDraft(null);
     store.saveToStorage();
   }
@@ -95,6 +95,6 @@ export class LineTool implements Tool {
   }
 
   getCursor(): string {
-    return 'crosshair';
+    return "crosshair";
   }
 }

@@ -1,19 +1,19 @@
-import { useEffect, useRef } from 'react';
-import { useAppStore } from '../store/useAppStore';
-import { ImageElement, TextElement } from '../elements/types';
-import { newId, randomSeed } from '../lib/utils';
-import { optimizeImageDataUrl } from '../lib/imageInsert';
-import { FONT_SIZE_MAP } from '../canvas/geometry';
+import { useEffect, useRef } from "react";
+import { useAppStore } from "../store/useAppStore";
+import { ImageElement, TextElement } from "../elements/types";
+import { newId, randomSeed } from "../lib/utils";
+import { optimizeImageDataUrl } from "../lib/imageInsert";
+import { FONT_SIZE_MAP } from "../canvas/geometry";
 
 function isInputElement(target: EventTarget | null): boolean {
   const el = target as HTMLElement | null;
   const activeEl = document.activeElement as HTMLElement | null;
   return (
-    el?.tagName === 'TEXTAREA' ||
-    el?.tagName === 'INPUT' ||
+    el?.tagName === "TEXTAREA" ||
+    el?.tagName === "INPUT" ||
     el?.isContentEditable === true ||
-    activeEl?.tagName === 'TEXTAREA' ||
-    activeEl?.tagName === 'INPUT' ||
+    activeEl?.tagName === "TEXTAREA" ||
+    activeEl?.tagName === "INPUT" ||
     activeEl?.isContentEditable === true
   );
 }
@@ -30,19 +30,19 @@ export function useCanvasPaste() {
 
   useEffect(() => {
     const handlePaste = (e: ClipboardEvent) => {
-      if (mode !== 'drawing') return;
+      if (mode !== "drawing") return;
       if (isInputElement(e.target)) return;
 
       lastPasteHandledRef.current = Date.now();
 
       // 1. Check if clipboard text contains canvas elements
-      const text = e.clipboardData?.getData('text/plain');
+      const text = e.clipboardData?.getData("text/plain");
       if (text) {
         try {
           const parsed = JSON.parse(text);
           if (
             parsed &&
-            parsed.type === 'canvas-elements' &&
+            parsed.type === "canvas-elements" &&
             Array.isArray(parsed.elements) &&
             parsed.elements.length > 0
           ) {
@@ -60,7 +60,7 @@ export function useCanvasPaste() {
       let hasImage = false;
       if (items) {
         for (let i = 0; i < items.length; i++) {
-          if (items[i].type.indexOf('image') !== -1) {
+          if (items[i].type.indexOf("image") !== -1) {
             hasImage = true;
             const blob = items[i].getAsFile();
             if (!blob) continue;
@@ -78,12 +78,16 @@ export function useCanvasPaste() {
                 const store = useAppStore.getState();
                 const screenCenterX = window.innerWidth / 2;
                 const screenCenterY = window.innerHeight / 2;
-                const cx = Math.round(screenCenterX / store.zoom + store.scrollOffset.x - w / 2);
-                const cy = Math.round(screenCenterY / store.zoom + store.scrollOffset.y - h / 2);
+                const cx = Math.round(
+                  screenCenterX / store.zoom + store.scrollOffset.x - w / 2,
+                );
+                const cy = Math.round(
+                  screenCenterY / store.zoom + store.scrollOffset.y - h / 2,
+                );
 
                 const imageEl: ImageElement = {
                   id: newId(),
-                  type: 'image',
+                  type: "image",
                   angle: 0,
                   locked: false,
                   groupIds: [],
@@ -92,8 +96,8 @@ export function useCanvasPaste() {
                   width: w,
                   height: h,
                   dataUrl: optimizeImageDataUrl(img),
-                  strokeColor: store.currentStrokeColor || '#1e1e1e',
-                  fillColor: 'transparent',
+                  strokeColor: store.currentStrokeColor || "#1e1e1e",
+                  fillColor: "transparent",
                   strokeWidth: 1.5,
                   opacity: 100,
                   seed: randomSeed(),
@@ -102,7 +106,7 @@ export function useCanvasPaste() {
                 pushHistory();
                 setElements([...useAppStore.getState().elements, imageEl]);
                 setSelectedIds([imageEl.id]);
-                setTool('selection');
+                setTool("selection");
                 saveToStorage();
               };
               img.src = dataUrl;
@@ -119,12 +123,16 @@ export function useCanvasPaste() {
         const store = useAppStore.getState();
         const screenCenterX = window.innerWidth / 2;
         const screenCenterY = window.innerHeight / 2;
-        const cx = Math.round(screenCenterX / store.zoom + store.scrollOffset.x - 50);
-        const cy = Math.round(screenCenterY / store.zoom + store.scrollOffset.y - 15);
+        const cx = Math.round(
+          screenCenterX / store.zoom + store.scrollOffset.x - 50,
+        );
+        const cy = Math.round(
+          screenCenterY / store.zoom + store.scrollOffset.y - 15,
+        );
 
         const textEl: TextElement = {
           id: newId(),
-          type: 'text',
+          type: "text",
           angle: 0,
           locked: false,
           groupIds: [],
@@ -132,9 +140,9 @@ export function useCanvasPaste() {
           y: cy,
           text: text.slice(0, 10000),
           fontSize: FONT_SIZE_MAP[store.currentStrokeWidth] || 20,
-          fontFamily: store.currentFontFamily || 'handwritten',
+          fontFamily: store.currentFontFamily || "handwritten",
           strokeColor: store.currentStrokeColor,
-          fillColor: 'transparent',
+          fillColor: "transparent",
           strokeWidth: store.currentStrokeWidth,
           opacity: store.currentOpacity,
           seed: randomSeed(),
@@ -143,7 +151,7 @@ export function useCanvasPaste() {
         pushHistory();
         setElements([...useAppStore.getState().elements, textEl]);
         setSelectedIds([textEl.id]);
-        setTool('selection');
+        setTool("selection");
         saveToStorage();
         return;
       }
@@ -158,9 +166,17 @@ export function useCanvasPaste() {
       }
     };
 
-    window.addEventListener('paste', handlePaste);
+    window.addEventListener("paste", handlePaste);
     return () => {
-      window.removeEventListener('paste', handlePaste);
+      window.removeEventListener("paste", handlePaste);
     };
-  }, [mode, pasteClipboard, pushHistory, setElements, setSelectedIds, setTool, saveToStorage]);
+  }, [
+    mode,
+    pasteClipboard,
+    pushHistory,
+    setElements,
+    setSelectedIds,
+    setTool,
+    saveToStorage,
+  ]);
 }

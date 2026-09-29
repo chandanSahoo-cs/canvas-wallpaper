@@ -1,8 +1,11 @@
-import { ImageElement } from '../elements/types';
-import { newId, randomSeed } from './utils';
-import { useAppStore } from '../store/useAppStore';
+import { ImageElement } from "../elements/types";
+import { newId, randomSeed } from "./utils";
+import { useAppStore } from "../store/useAppStore";
 
-export function optimizeImageDataUrl(img: HTMLImageElement, maxDimension = 1600): string {
+export function optimizeImageDataUrl(
+  img: HTMLImageElement,
+  maxDimension = 1600,
+): string {
   if (img.width <= maxDimension && img.height <= maxDimension) {
     return img.src;
   }
@@ -10,18 +13,18 @@ export function optimizeImageDataUrl(img: HTMLImageElement, maxDimension = 1600)
   const targetW = Math.round(img.width * scale);
   const targetH = Math.round(img.height * scale);
 
-  const canvas = document.createElement('canvas');
+  const canvas = document.createElement("canvas");
   canvas.width = targetW;
   canvas.height = targetH;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext("2d");
   if (!ctx) return img.src;
   ctx.drawImage(img, 0, 0, targetW, targetH);
-  return canvas.toDataURL('image/png');
+  return canvas.toDataURL("image/png");
 }
 
 export function insertImageFromFile(file: File): Promise<boolean> {
   return new Promise((resolve) => {
-    if (!file || !file.type.startsWith('image/')) {
+    if (!file || !file.type.startsWith("image/")) {
       resolve(false);
       return;
     }
@@ -41,14 +44,18 @@ export function insertImageFromFile(file: File): Promise<boolean> {
         // Center within current zoomed/panned canvas viewport
         const screenCenterX = window.innerWidth / 2;
         const screenCenterY = window.innerHeight / 2;
-        const cx = Math.round(screenCenterX / store.zoom + store.scrollOffset.x - w / 2);
-        const cy = Math.round(screenCenterY / store.zoom + store.scrollOffset.y - h / 2);
+        const cx = Math.round(
+          screenCenterX / store.zoom + store.scrollOffset.x - w / 2,
+        );
+        const cy = Math.round(
+          screenCenterY / store.zoom + store.scrollOffset.y - h / 2,
+        );
 
         const finalDataUrl = optimizeImageDataUrl(img);
 
         const imageEl: ImageElement = {
           id: newId(),
-          type: 'image',
+          type: "image",
           angle: 0,
           locked: false,
           groupIds: [],
@@ -57,8 +64,8 @@ export function insertImageFromFile(file: File): Promise<boolean> {
           width: w,
           height: h,
           dataUrl: finalDataUrl,
-          strokeColor: '#1e1e1e',
-          fillColor: 'transparent',
+          strokeColor: "#1e1e1e",
+          fillColor: "transparent",
           strokeWidth: 1.5,
           opacity: 100,
           seed: randomSeed(),
@@ -67,7 +74,7 @@ export function insertImageFromFile(file: File): Promise<boolean> {
         store.pushHistory();
         store.setElements([...store.elements, imageEl]);
         store.setSelectedIds(new Set([imageEl.id]));
-        store.setTool('selection');
+        store.setTool("selection");
         store.saveToStorage();
         resolve(true);
       };

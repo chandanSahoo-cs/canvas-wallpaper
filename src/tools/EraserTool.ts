@@ -1,7 +1,12 @@
-import { Tool, ToolContext } from './types';
-import { useAppStore } from '../store/useAppStore';
-import { elementContains, rotatePoint, getCenter, distance } from '../canvas/geometry';
-import { CanvasElement, Point } from '../elements/types';
+import { Tool, ToolContext } from "./types";
+import { useAppStore } from "../store/useAppStore";
+import {
+  elementContains,
+  rotatePoint,
+  getCenter,
+  distance,
+} from "../canvas/geometry";
+import { CanvasElement, Point } from "../elements/types";
 
 export class EraserTool implements Tool {
   private erasing = false;
@@ -73,6 +78,6 @@ export class EraserTool implements Tool {
   }
 
   getCursor(): string {
-    return 'cell';
+    return "cell";
   }
 }

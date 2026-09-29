@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   ArrowDownToLine,
   ArrowUpToLine,
@@ -8,10 +8,10 @@ import {
   Trash2,
   Ungroup,
   Unlock,
-} from 'lucide-react';
-import { cn } from '../../lib/utils';
-import { CanvasElement } from '../../elements/types';
-import { useAppStore } from '../../store/useAppStore';
+} from "lucide-react";
+import { cn } from "../../lib/utils";
+import { CanvasElement } from "../../elements/types";
+import { useAppStore } from "../../store/useAppStore";
 
 interface ElementActionsProps {
   selectedMembers: CanvasElement[];
@@ -30,7 +30,9 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
   const sendBackward = useAppStore((s) => s.sendBackward);
   const sendForward = useAppStore((s) => s.sendForward);
 
-  const hasGroups = selectedMembers.some((el) => (el.groupIds?.length ?? 0) > 0);
+  const hasGroups = selectedMembers.some(
+    (el) => (el.groupIds?.length ?? 0) > 0,
+  );
   const canGroup = hasGroups || selectedMembers.length >= 2;
 
   return (
@@ -47,16 +49,20 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
           <Copy className="w-3.5 h-3.5" />
         </button>
         <button
-          title={isLocked ? 'Unlock' : 'Lock'}
+          title={isLocked ? "Unlock" : "Lock"}
           onClick={toggleLockSelected}
           className={cn(
-            'p-1.5 rounded-lg border flex items-center justify-center active:scale-95 transition-all',
+            "p-1.5 rounded-lg border flex items-center justify-center active:scale-95 transition-all",
             isLocked
-              ? 'bg-amber-50 border-amber-300 text-amber-700'
-              : 'border-neutral-200 hover:bg-neutral-50 text-neutral-700'
+              ? "bg-amber-50 border-amber-300 text-amber-700"
+              : "border-neutral-200 hover:bg-neutral-50 text-neutral-700",
           )}
         >
-          {isLocked ? <Unlock className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
+          {isLocked ? (
+            <Unlock className="w-3.5 h-3.5" />
+          ) : (
+            <Lock className="w-3.5 h-3.5" />
+          )}
         </button>
         <button
           title="Delete (Del / Backspace)"
@@ -66,12 +72,16 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
           <Trash2 className="w-3.5 h-3.5" />
         </button>
         <button
-          title={hasGroups ? 'Ungroup' : 'Group'}
+          title={hasGroups ? "Ungroup" : "Group"}
           onClick={hasGroups ? ungroupSelected : groupSelected}
           disabled={!canGroup}
           className="p-1.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-neutral-700 active:scale-95 transition-all"
         >
-          {hasGroups ? <Ungroup className="w-3.5 h-3.5" /> : <Group className="w-3.5 h-3.5" />}
+          {hasGroups ? (
+            <Ungroup className="w-3.5 h-3.5" />
+          ) : (
+            <Group className="w-3.5 h-3.5" />
+          )}
         </button>
       </div>
 

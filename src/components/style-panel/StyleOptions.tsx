@@ -1,8 +1,8 @@
-import React from 'react';
-import { FillStyle, FontFamily, StrokeStyle } from '../../elements/types';
-import { ColorPickers } from './ColorPickers';
-import { TypographySection } from './TypographySection';
-import { StrokeAndFillStyles } from './StrokeAndFillStyles';
+import React from "react";
+import { FillStyle, FontFamily, StrokeStyle } from "../../elements/types";
+import { ColorPickers } from "./ColorPickers";
+import { TypographySection } from "./TypographySection";
+import { StrokeAndFillStyles } from "./StrokeAndFillStyles";
 
 interface StyleOptionsProps {
   isLightBg: boolean;

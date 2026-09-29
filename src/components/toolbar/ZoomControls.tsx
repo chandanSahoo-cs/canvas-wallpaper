@@ -1,6 +1,6 @@
-import React from 'react';
-import { ZoomIn, ZoomOut } from 'lucide-react';
-import { useAppStore } from '../../store/useAppStore';
+import React from "react";
+import { ZoomIn, ZoomOut } from "lucide-react";
+import { useAppStore } from "../../store/useAppStore";
 
 export const ZoomControls: React.FC = () => {
   const zoom = useAppStore((s) => s.zoom);

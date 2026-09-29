@@ -1,6 +1,6 @@
-import React from 'react';
-import { FillStyle, StrokeStyle } from '../../elements/types';
-import { cn } from '../../lib/utils';
+import React from "react";
+import { FillStyle, StrokeStyle } from "../../elements/types";
+import { cn } from "../../lib/utils";
 
 interface StrokeAndFillStylesProps {
   activeFillStyle: FillStyle;
@@ -15,8 +15,8 @@ interface StrokeAndFillStylesProps {
 
 const FILL_STYLES: { id: FillStyle; label: string; icon: React.ReactNode }[] = [
   {
-    id: 'solid',
-    label: 'Solid',
+    id: "solid",
+    label: "Solid",
     icon: (
       <svg className="w-5 h-3" viewBox="0 0 20 12">
         <rect width="20" height="12" rx="2" fill="currentColor" opacity="0.8" />
@@ -24,45 +24,119 @@ const FILL_STYLES: { id: FillStyle; label: string; icon: React.ReactNode }[] = [
     ),
   },
   {
-    id: 'hachure',
-    label: 'Hachure',
+    id: "hachure",
+    label: "Hachure",
     icon: (
       <svg className="w-5 h-3" viewBox="0 0 20 12">
-        <rect width="20" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1" />
-        <line x1="2" y1="12" x2="12" y2="0" stroke="currentColor" strokeWidth="1.2" />
-        <line x1="7" y1="12" x2="17" y2="0" stroke="currentColor" strokeWidth="1.2" />
-        <line x1="12" y1="12" x2="20" y2="2" stroke="currentColor" strokeWidth="1.2" />
+        <rect
+          width="20"
+          height="12"
+          rx="2"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1"
+        />
+        <line
+          x1="2"
+          y1="12"
+          x2="12"
+          y2="0"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
+        <line
+          x1="7"
+          y1="12"
+          x2="17"
+          y2="0"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
+        <line
+          x1="12"
+          y1="12"
+          x2="20"
+          y2="2"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
       </svg>
     ),
   },
   {
-    id: 'cross-hatch',
-    label: 'Cross',
+    id: "cross-hatch",
+    label: "Cross",
     icon: (
       <svg className="w-5 h-3" viewBox="0 0 20 12">
-        <rect width="20" height="12" rx="2" fill="none" stroke="currentColor" strokeWidth="1" />
-        <line x1="2" y1="12" x2="12" y2="0" stroke="currentColor" strokeWidth="1.2" />
-        <line x1="10" y1="12" x2="20" y2="0" stroke="currentColor" strokeWidth="1.2" />
-        <line x1="2" y1="0" x2="12" y2="12" stroke="currentColor" strokeWidth="1.2" />
-        <line x1="10" y1="0" x2="20" y2="12" stroke="currentColor" strokeWidth="1.2" />
+        <rect
+          width="20"
+          height="12"
+          rx="2"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1"
+        />
+        <line
+          x1="2"
+          y1="12"
+          x2="12"
+          y2="0"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
+        <line
+          x1="10"
+          y1="12"
+          x2="20"
+          y2="0"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
+        <line
+          x1="2"
+          y1="0"
+          x2="12"
+          y2="12"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
+        <line
+          x1="10"
+          y1="0"
+          x2="20"
+          y2="12"
+          stroke="currentColor"
+          strokeWidth="1.2"
+        />
       </svg>
     ),
   },
 ];
 
-const STROKE_STYLES: { id: StrokeStyle; label: string; svg: React.ReactNode }[] = [
+const STROKE_STYLES: {
+  id: StrokeStyle;
+  label: string;
+  svg: React.ReactNode;
+}[] = [
   {
-    id: 'solid',
-    label: 'Solid',
+    id: "solid",
+    label: "Solid",
     svg: (
       <svg className="w-7 h-2" viewBox="0 0 28 8">
-        <line x1="0" y1="4" x2="28" y2="4" stroke="currentColor" strokeWidth="2.5" />
+        <line
+          x1="0"
+          y1="4"
+          x2="28"
+          y2="4"
+          stroke="currentColor"
+          strokeWidth="2.5"
+        />
       </svg>
     ),
   },
   {
-    id: 'dashed',
-    label: 'Dashed',
+    id: "dashed",
+    label: "Dashed",
     svg: (
       <svg className="w-7 h-2" viewBox="0 0 28 8">
         <line
@@ -78,8 +152,8 @@ const STROKE_STYLES: { id: StrokeStyle; label: string; svg: React.ReactNode }[] 
     ),
   },
   {
-    id: 'dotted',
-    label: 'Dotted',
+    id: "dotted",
+    label: "Dotted",
     svg: (
       <svg className="w-7 h-2" viewBox="0 0 28 8">
         <line
@@ -98,15 +172,15 @@ const STROKE_STYLES: { id: StrokeStyle; label: string; svg: React.ReactNode }[] 
 ];
 
 const ROUGHNESS_OPTIONS = [
-  { val: 0.2, label: 'Clean' },
-  { val: 1.4, label: 'Sketch' },
-  { val: 2.5, label: 'Rough' },
+  { val: 0.2, label: "Clean" },
+  { val: 1.4, label: "Sketch" },
+  { val: 2.5, label: "Rough" },
 ];
 
 const STROKE_WIDTH_OPTIONS = [
-  { size: 1.5, label: 'Thin', dot: 4 },
-  { size: 3, label: 'Medium', dot: 7 },
-  { size: 5.5, label: 'Thick', dot: 11 },
+  { size: 1.5, label: "Thin", dot: 4 },
+  { size: 3, label: "Medium", dot: 7 },
+  { size: 5.5, label: "Thick", dot: 11 },
 ];
 
 export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
@@ -133,14 +207,16 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
               onClick={() => onFillStyleChange(f.id)}
               title={f.label}
               className={cn(
-                'py-1.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer',
+                "py-1.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer",
                 activeFillStyle === f.id
-                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
-                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+                  ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                  : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
               )}
             >
               {f.icon}
-              <span className="text-[10px] font-medium leading-none">{f.label}</span>
+              <span className="text-[10px] font-medium leading-none">
+                {f.label}
+              </span>
             </button>
           ))}
         </div>
@@ -158,14 +234,16 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
               onClick={() => onStrokeStyleChange(s.id)}
               title={s.label}
               className={cn(
-                'py-1.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer',
+                "py-1.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer",
                 activeStrokeStyle === s.id
-                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
-                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+                  ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                  : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
               )}
             >
               {s.svg}
-              <span className="text-[10px] font-medium leading-none">{s.label}</span>
+              <span className="text-[10px] font-medium leading-none">
+                {s.label}
+              </span>
             </button>
           ))}
         </div>
@@ -182,10 +260,10 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
               key={r.val}
               onClick={() => onRoughnessChange(r.val)}
               className={cn(
-                'py-1.5 rounded-lg border text-[11px] font-medium transition-all active:scale-95 cursor-pointer',
+                "py-1.5 rounded-lg border text-[11px] font-medium transition-all active:scale-95 cursor-pointer",
                 Math.abs(activeRoughness - r.val) < 0.3
-                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
-                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+                  ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                  : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
               )}
             >
               {r.label}
@@ -206,10 +284,10 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
               onClick={() => onWidthChange(s.size)}
               title={s.label}
               className={cn(
-                'flex-1 py-1.5 rounded-lg flex items-center justify-center border transition-all active:scale-95 cursor-pointer',
+                "flex-1 py-1.5 rounded-lg flex items-center justify-center border transition-all active:scale-95 cursor-pointer",
                 activeStrokeWidth === s.size
-                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700'
-                  : 'border-neutral-200 hover:bg-neutral-50 text-neutral-600'
+                  ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                  : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
               )}
             >
               <span

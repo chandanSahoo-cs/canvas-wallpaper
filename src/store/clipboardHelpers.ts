@@ -1,9 +1,9 @@
-import { CanvasElement, Point } from '../elements/types';
-import { newId, randomSeed } from '../lib/utils';
+import { CanvasElement, Point } from "../elements/types";
+import { newId, randomSeed } from "../lib/utils";
 
 export function duplicateElements(
   elements: CanvasElement[],
-  selectedIds: Set<string>
+  selectedIds: Set<string>,
 ): { newElements: CanvasElement[]; newIds: string[] } {
   const groupIdMap = new Map<string, string>();
   const newElements: CanvasElement[] = [];
@@ -19,9 +19,12 @@ export function duplicateElements(
         return groupIdMap.get(gid)!;
       });
     }
-    if ('points' in clone && clone.points) {
-      clone.points = clone.points.map((p) => ({ x: p.x + 12, y: p.y + 12 })) as [Point, Point] & Point[];
-    } else if ('x' in clone && 'y' in clone) {
+    if ("points" in clone && clone.points) {
+      clone.points = clone.points.map((p) => ({
+        x: p.x + 12,
+        y: p.y + 12,
+      })) as [Point, Point] & Point[];
+    } else if ("x" in clone && "y" in clone) {
       clone.x += 12;
       clone.y += 12;
     }
@@ -34,7 +37,7 @@ export function duplicateElements(
 
 export function preparePastedElements(
   source: CanvasElement[],
-  pasteOffsetMultiplier: number
+  pasteOffsetMultiplier: number,
 ): { newElements: CanvasElement[]; newIds: string[]; nextMultiplier: number } {
   const offset = 20 * pasteOffsetMultiplier;
   const nextMultiplier = (pasteOffsetMultiplier % 15) + 1;
@@ -56,16 +59,16 @@ export function preparePastedElements(
       });
     }
 
-    if ('points' in clone && Array.isArray(clone.points)) {
+    if ("points" in clone && Array.isArray(clone.points)) {
       clone.points = clone.points.map((p) => ({
         x: p.x + offset,
         y: p.y + offset,
       })) as [Point, Point] & Point[];
     } else if (
-      'x' in clone &&
-      'y' in clone &&
-      typeof clone.x === 'number' &&
-      typeof clone.y === 'number'
+      "x" in clone &&
+      "y" in clone &&
+      typeof clone.x === "number" &&
+      typeof clone.y === "number"
     ) {
       clone.x += offset;
       clone.y += offset;

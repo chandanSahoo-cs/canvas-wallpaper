@@ -1,20 +1,20 @@
-import { Point } from '../../elements/types';
-import { LineHandleState } from './types';
+import { Point } from "../../elements/types";
+import { LineHandleState } from "./types";
 
 export function handleLineHandlePointerMove(
   pos: Point,
   state: LineHandleState,
   e: PointerEvent,
-  updateElement: (id: string, updates: any, shouldSave?: boolean) => void
+  updateElement: (id: string, updates: any, shouldSave?: boolean) => void,
 ): void {
   const { handle, elementId, initialPoints } = state;
   let nextPoints = [...initialPoints];
 
   let targetPos = pos;
   // Shift constraint: snap line angle to 15-degree steps
-  if (e.shiftKey && (handle === 'line-start' || handle === 'line-end')) {
+  if (e.shiftKey && (handle === "line-start" || handle === "line-end")) {
     const anchor =
-      handle === 'line-start'
+      handle === "line-start"
         ? initialPoints[initialPoints.length - 1]
         : initialPoints[0];
     const dx = pos.x - anchor.x;
@@ -29,11 +29,11 @@ export function handleLineHandlePointerMove(
     };
   }
 
-  if (handle === 'line-start') {
+  if (handle === "line-start") {
     nextPoints[0] = targetPos;
-  } else if (handle === 'line-end') {
+  } else if (handle === "line-end") {
     nextPoints[nextPoints.length - 1] = targetPos;
-  } else if (handle === 'line-mid') {
+  } else if (handle === "line-mid") {
     if (nextPoints.length === 2) {
       nextPoints = [nextPoints[0], pos, nextPoints[1]];
     } else {

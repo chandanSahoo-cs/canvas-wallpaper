@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { newId, sanitizeWebUrl } from '../lib/utils';
+import { create } from "zustand";
+import { newId, sanitizeWebUrl } from "../lib/utils";
 
 export interface QuickLink {
   id: string;
@@ -29,10 +29,10 @@ export const MAX_QUICK_LINKS = 10;
 
 export interface WidgetSettings {
   showClock: boolean;
-  clockFormat: '12h' | '24h';
+  clockFormat: "12h" | "24h";
   showDate: boolean;
   showSearch: boolean;
-  searchEngine: 'google' | 'duckduckgo' | 'bing' | 'brave';
+  searchEngine: "google" | "duckduckgo" | "bing" | "brave";
   showQuickLinks: boolean;
   quickLinks: QuickLink[];
 
@@ -41,17 +41,21 @@ export interface WidgetSettings {
   isLayoutMode: boolean;
 
   setShowClock: (show: boolean) => void;
-  setClockFormat: (format: '12h' | '24h') => void;
+  setClockFormat: (format: "12h" | "24h") => void;
   setShowDate: (show: boolean) => void;
   setShowSearch: (show: boolean) => void;
-  setSearchEngine: (engine: 'google' | 'duckduckgo' | 'bing' | 'brave') => void;
+  setSearchEngine: (engine: "google" | "duckduckgo" | "bing" | "brave") => void;
   setShowQuickLinks: (show: boolean) => void;
 
   addQuickLink: (title: string, url: string) => void;
   removeQuickLink: (id: string) => void;
   updateQuickLink: (id: string, title: string, url: string) => void;
 
-  setWidgetPosition: (widget: keyof WidgetPositions, pos: WidgetPosition, shouldSave?: boolean) => void;
+  setWidgetPosition: (
+    widget: keyof WidgetPositions,
+    pos: WidgetPosition,
+    shouldSave?: boolean,
+  ) => void;
   setAllWidgetPositions: (positions: WidgetPositions) => void;
   resetWidgetPositions: () => void;
   setIsLayoutMode: (enabled: boolean) => void;
@@ -61,20 +65,20 @@ export interface WidgetSettings {
 }
 
 const DEFAULT_QUICK_LINKS: QuickLink[] = [
-  { id: '1', title: 'GitHub', url: 'https://github.com' },
-  { id: '2', title: 'YouTube', url: 'https://youtube.com' },
-  { id: '3', title: 'Reddit', url: 'https://reddit.com' },
-  { id: '4', title: 'X', url: 'https://x.com' },
+  { id: "1", title: "GitHub", url: "https://github.com" },
+  { id: "2", title: "YouTube", url: "https://youtube.com" },
+  { id: "3", title: "Reddit", url: "https://reddit.com" },
+  { id: "4", title: "X", url: "https://x.com" },
 ];
 
 let lastWidgetLocalSaveTime = 0;
 
 export const useWidgetStore = create<WidgetSettings>((set, get) => ({
   showClock: true,
-  clockFormat: '12h',
+  clockFormat: "12h",
   showDate: true,
   showSearch: true,
-  searchEngine: 'google',
+  searchEngine: "google",
   showQuickLinks: true,
   quickLinks: DEFAULT_QUICK_LINKS,
 
@@ -117,7 +121,9 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
     if (!validUrl) return;
     const newLink: QuickLink = {
       id: newId(),
-      title: title.trim() || validUrl.replace(/^https?:\/\/(www\.)?/i, '').replace(/\/$/, ''),
+      title:
+        title.trim() ||
+        validUrl.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, ""),
       url: validUrl,
     };
     set((state) => ({ quickLinks: [...state.quickLinks, newLink] }));
@@ -125,7 +131,9 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
   },
 
   removeQuickLink: (id) => {
-    set((state) => ({ quickLinks: state.quickLinks.filter((l) => l.id !== id) }));
+    set((state) => ({
+      quickLinks: state.quickLinks.filter((l) => l.id !== id),
+    }));
     get().saveToStorage();
   },
 
@@ -134,7 +142,9 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
     if (!validUrl) return;
     set((state) => ({
       quickLinks: state.quickLinks.map((l) =>
-        l.id === id ? { ...l, title: title.trim() || l.title, url: validUrl } : l
+        l.id === id
+          ? { ...l, title: title.trim() || l.title, url: validUrl }
+          : l,
       ),
     }));
     get().saveToStorage();
@@ -193,13 +203,17 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
     };
     lastWidgetLocalSaveTime = Date.now();
     try {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.local
+      ) {
         chrome.storage.local.set({ wallpaperWidgets: JSON.stringify(data) });
       } else {
-        localStorage.setItem('wallpaperWidgets', JSON.stringify(data));
+        localStorage.setItem("wallpaperWidgets", JSON.stringify(data));
       }
     } catch (e) {
-      console.error('Widget settings save error', e);
+      console.error("Widget settings save error", e);
     }
   },
 
@@ -212,7 +226,7 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
           data.quickLinks = data.quickLinks
             .map((l: any) => ({
               id: String(l.id || newId()),
-              title: String(l.title || 'Link'),
+              title: String(l.title || "Link"),
               url: sanitizeWebUrl(l.url),
             }))
             .filter((l: any) => Boolean(l.url))
@@ -230,23 +244,30 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
     };
 
     try {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(['wallpaperWidgets'], (res: Record<string, any>) => {
-          if (res.wallpaperWidgets) apply(res.wallpaperWidgets as string);
-        });
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.local
+      ) {
+        chrome.storage.local.get(
+          ["wallpaperWidgets"],
+          (res: Record<string, any>) => {
+            if (res.wallpaperWidgets) apply(res.wallpaperWidgets as string);
+          },
+        );
       } else {
-        apply(localStorage.getItem('wallpaperWidgets'));
+        apply(localStorage.getItem("wallpaperWidgets"));
       }
     } catch (e) {
-      console.error('Widget settings load error', e);
+      console.error("Widget settings load error", e);
     }
   },
 }));
 
 // Cross-tab synchronization for widget settings
-if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
+if (typeof chrome !== "undefined" && chrome.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName !== 'local') return;
+    if (areaName !== "local") return;
     // Ignore storage change notifications originated by this tab's own recent save
     if (Date.now() - lastWidgetLocalSaveTime < 350) return;
     if (changes.wallpaperWidgets) {

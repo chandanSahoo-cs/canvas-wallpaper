@@ -1,5 +1,5 @@
-import React from 'react';
-import { cn } from '../../lib/utils';
+import React from "react";
+import { cn } from "../../lib/utils";
 
 interface ColorPickersProps {
   isLightBg: boolean;
@@ -10,12 +10,12 @@ interface ColorPickersProps {
 }
 
 const FILL_PRESETS = [
-  'transparent',
-  '#ffc9c9',
-  '#b2f2bb',
-  '#a5d8ff',
-  '#ffec99',
-  '#f3f0ff',
+  "transparent",
+  "#ffc9c9",
+  "#b2f2bb",
+  "#a5d8ff",
+  "#ffec99",
+  "#f3f0ff",
 ];
 
 export const ColorPickers: React.FC<ColorPickersProps> = ({
@@ -26,8 +26,8 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({
   onFillChange,
 }) => {
   const strokePresets = isLightBg
-    ? ['#1e1e1e', '#e03131', '#2f9e44', '#1971c2', '#f08c00', '#ffffff']
-    : ['#ffffff', '#e03131', '#2f9e44', '#1971c2', '#f08c00', '#1e1e1e'];
+    ? ["#1e1e1e", "#e03131", "#2f9e44", "#1971c2", "#f08c00", "#ffffff"]
+    : ["#ffffff", "#e03131", "#2f9e44", "#1971c2", "#f08c00", "#1e1e1e"];
 
   return (
     <>
@@ -42,10 +42,10 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({
               key={c}
               onClick={() => onStrokeChange(c)}
               className={cn(
-                'w-6 h-6 rounded-full border-2 transition-transform active:scale-90',
+                "w-6 h-6 rounded-full border-2 transition-transform active:scale-90",
                 activeStrokeColor === c
-                  ? 'border-indigo-600 scale-110 shadow-sm'
-                  : 'border-black/10 hover:scale-105'
+                  ? "border-indigo-600 scale-110 shadow-sm"
+                  : "border-black/10 hover:scale-105",
               )}
               style={{ backgroundColor: c }}
             />
@@ -72,20 +72,22 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({
               key={c}
               onClick={() => onFillChange(c)}
               className={cn(
-                'w-6 h-6 rounded-full border-2 transition-transform active:scale-90',
+                "w-6 h-6 rounded-full border-2 transition-transform active:scale-90",
                 activeFillColor === c
-                  ? 'border-indigo-600 scale-110 shadow-sm'
-                  : 'border-black/10 hover:scale-105',
-                c === 'transparent' &&
-                  'bg-[radial-gradient(#e2e2e6_1px,transparent_1px)] [background-size:4px_4px] bg-white'
+                  ? "border-indigo-600 scale-110 shadow-sm"
+                  : "border-black/10 hover:scale-105",
+                c === "transparent" &&
+                  "bg-[radial-gradient(#e2e2e6_1px,transparent_1px)] [background-size:4px_4px] bg-white",
               )}
-              style={c !== 'transparent' ? { backgroundColor: c } : {}}
+              style={c !== "transparent" ? { backgroundColor: c } : {}}
             />
           ))}
           <label className="w-6 h-6 rounded-full overflow-hidden relative cursor-pointer border border-neutral-200 bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-500 active:scale-90 transition-transform">
             <input
               type="color"
-              value={activeFillColor === 'transparent' ? '#ffffff' : activeFillColor}
+              value={
+                activeFillColor === "transparent" ? "#ffffff" : activeFillColor
+              }
               onChange={(e) => onFillChange(e.target.value)}
               className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
             />

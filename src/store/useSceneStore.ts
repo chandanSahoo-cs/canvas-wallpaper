@@ -1,8 +1,8 @@
-import { create } from 'zustand';
-import { CanvasElement, BackgroundConfig } from '../elements/types';
-import { newId } from '../lib/utils';
-import { useAppStore } from './useAppStore';
-import { getDefaultWallpaperElements } from '../lib/defaultWallpaperPreset';
+import { create } from "zustand";
+import { CanvasElement, BackgroundConfig } from "../elements/types";
+import { newId } from "../lib/utils";
+import { useAppStore } from "./useAppStore";
+import { getDefaultWallpaperElements } from "../lib/defaultWallpaperPreset";
 
 export interface Scene {
   id: string;
@@ -30,14 +30,14 @@ let lastLocalSaveTime = 0;
 export const useSceneStore = create<SceneState>((set, get) => ({
   scenes: [
     {
-      id: 'default',
-      name: 'Wallpaper 1',
+      id: "default",
+      name: "Wallpaper 1",
       elements: getDefaultWallpaperElements(),
-      background: { type: 'color', color: '#14141a' },
+      background: { type: "color", color: "#14141a" },
       createdAt: Date.now(),
     },
   ],
-  activeSceneId: 'default',
+  activeSceneId: "default",
 
   createScene: (name) => {
     if (get().scenes.length >= MAX_SCENES) {
@@ -68,7 +68,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       id,
       name: name || `Wallpaper ${sceneNumber}`,
       elements: [],
-      background: { type: 'color', color: '#14141a' },
+      background: { type: "color", color: "#14141a" },
       createdAt: Date.now(),
     };
     set({
@@ -77,7 +77,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     });
     appStore.resetHistory();
     appStore.setElements([]);
-    appStore.setBackground({ type: 'color', color: '#14141a' });
+    appStore.setBackground({ type: "color", color: "#14141a" });
     get().saveScenesToStorage();
     return id;
   },
@@ -136,17 +136,21 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     const { scenes, activeSceneId } = get();
     lastLocalSaveTime = Date.now();
     try {
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.local
+      ) {
         chrome.storage.local.set({
           wallpaperScenes: JSON.stringify(scenes),
           wallpaperActiveSceneId: activeSceneId,
         });
       } else {
-        localStorage.setItem('wallpaperScenes', JSON.stringify(scenes));
-        localStorage.setItem('wallpaperActiveSceneId', activeSceneId);
+        localStorage.setItem("wallpaperScenes", JSON.stringify(scenes));
+        localStorage.setItem("wallpaperActiveSceneId", activeSceneId);
       }
     } catch (e) {
-      console.error('Scenes save error', e);
+      console.error("Scenes save error", e);
     }
   },
 
@@ -155,12 +159,14 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       const sanitize = (raw: any): CanvasElement[] => {
         if (!Array.isArray(raw)) return [];
         return raw
-          .filter((el) => el && typeof el === 'object' && typeof el.type === 'string')
+          .filter(
+            (el) => el && typeof el === "object" && typeof el.type === "string",
+          )
           .map((el) => {
-            if (el.type === 'text') {
+            if (el.type === "text") {
               return {
                 ...el,
-                text: typeof el.text === 'string' ? el.text : '',
+                text: typeof el.text === "string" ? el.text : "",
               };
             }
             return el;
@@ -171,7 +177,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         rawScenes: string | null,
         rawActiveId: string | null,
         rawFallbackElements: string | null,
-        rawFallbackBg: string | null
+        rawFallbackBg: string | null,
       ) => {
         let scenes: Scene[] = [];
         if (rawScenes) {
@@ -193,13 +199,16 @@ export const useSceneStore = create<SceneState>((set, get) => ({
           } catch (e) {}
         }
 
-        let fallbackBg: BackgroundConfig = { type: 'color', color: '#14141a' };
+        let fallbackBg: BackgroundConfig = { type: "color", color: "#14141a" };
         if (rawFallbackBg) {
           try {
             const parsed = JSON.parse(rawFallbackBg);
-            fallbackBg = typeof parsed === 'string' ? { type: 'color', color: parsed } : parsed;
+            fallbackBg =
+              typeof parsed === "string"
+                ? { type: "color", color: parsed }
+                : parsed;
           } catch (e) {
-            fallbackBg = { type: 'color', color: rawFallbackBg };
+            fallbackBg = { type: "color", color: rawFallbackBg };
           }
         }
 
@@ -207,9 +216,12 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         if (isFirstRun) {
           scenes = [
             {
-              id: 'default',
-              name: 'Wallpaper 1',
-              elements: fallbackElements.length > 0 ? fallbackElements : getDefaultWallpaperElements(),
+              id: "default",
+              name: "Wallpaper 1",
+              elements:
+                fallbackElements.length > 0
+                  ? fallbackElements
+                  : getDefaultWallpaperElements(),
               background: fallbackBg,
               createdAt: Date.now(),
             },
@@ -218,7 +230,9 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
         const prevActiveId = get().activeSceneId;
         const activeId =
-          rawActiveId && scenes.some((s) => s.id === rawActiveId) ? rawActiveId : scenes[0].id;
+          rawActiveId && scenes.some((s) => s.id === rawActiveId)
+            ? rawActiveId
+            : scenes[0].id;
 
         // If another tab switched the active scene, reset undo/redo history to prevent cross-scene bleed
         if (activeId !== prevActiveId) {
@@ -229,7 +243,11 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
         const currentScene = scenes.find((s) => s.id === activeId) || scenes[0];
         let elementsToLoad = currentScene.elements;
-        if ((!elementsToLoad || elementsToLoad.length === 0) && fallbackElements.length > 0 && isFirstRun) {
+        if (
+          (!elementsToLoad || elementsToLoad.length === 0) &&
+          fallbackElements.length > 0 &&
+          isFirstRun
+        ) {
           elementsToLoad = fallbackElements;
           currentScene.elements = fallbackElements;
         } else if (!elementsToLoad) {
@@ -241,8 +259,8 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         const appStore = useAppStore.getState();
         const validSelected = new Set(
           [...appStore.selectedIds].filter((id) =>
-            (elementsToLoad || []).some((el) => el.id === id)
-          )
+            (elementsToLoad || []).some((el) => el.id === id),
+          ),
         );
         appStore.setSelectedIds(validSelected);
         appStore.setElements(elementsToLoad || []);
@@ -252,36 +270,45 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         }, 50);
       };
 
-      if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.local
+      ) {
         chrome.storage.local.get(
-          ['wallpaperScenes', 'wallpaperActiveSceneId', 'wallpaperElements', 'wallpaperBackground'],
+          [
+            "wallpaperScenes",
+            "wallpaperActiveSceneId",
+            "wallpaperElements",
+            "wallpaperBackground",
+          ],
           (res: Record<string, any>) => {
             applyScenes(
               (res.wallpaperScenes as string) || null,
               (res.wallpaperActiveSceneId as string) || null,
               (res.wallpaperElements as string) || null,
-              (res.wallpaperBackground as string) || null
+              (res.wallpaperBackground as string) || null,
             );
-          }
+          },
         );
       } else {
         applyScenes(
-          localStorage.getItem('wallpaperScenes'),
-          localStorage.getItem('wallpaperActiveSceneId'),
-          localStorage.getItem('wallpaperElements'),
-          localStorage.getItem('wallpaperBackground')
+          localStorage.getItem("wallpaperScenes"),
+          localStorage.getItem("wallpaperActiveSceneId"),
+          localStorage.getItem("wallpaperElements"),
+          localStorage.getItem("wallpaperBackground"),
         );
       }
     } catch (e) {
-      console.error('Scenes load error', e);
+      console.error("Scenes load error", e);
     }
   },
 }));
 
 // Cross-tab synchronization via chrome.storage.onChanged
-if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
+if (typeof chrome !== "undefined" && chrome.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName !== 'local') return;
+    if (areaName !== "local") return;
     // Ignore storage change notifications originated by this tab's own recent save
     if (Date.now() - lastLocalSaveTime < 350) return;
     if (changes.wallpaperScenes || changes.wallpaperActiveSceneId) {
@@ -296,12 +323,15 @@ let isHydrating = false;
 
 useAppStore.subscribe((state, prevState) => {
   if (isHydrating) return;
-  if (state.elements !== prevState.elements || state.background !== prevState.background) {
+  if (
+    state.elements !== prevState.elements ||
+    state.background !== prevState.background
+  ) {
     const sceneState = useSceneStore.getState();
     const updatedScenes = sceneState.scenes.map((s) =>
       s.id === sceneState.activeSceneId
         ? { ...s, elements: state.elements, background: state.background }
-        : s
+        : s,
     );
     useSceneStore.setState({ scenes: updatedScenes });
 
@@ -315,7 +345,7 @@ useAppStore.subscribe((state, prevState) => {
 });
 
 // Flush any pending debounced writes before tab close or navigation
-if (typeof window !== 'undefined') {
+if (typeof window !== "undefined") {
   const flushSync = () => {
     if (syncTimeout) {
       clearTimeout(syncTimeout);
@@ -323,6 +353,6 @@ if (typeof window !== 'undefined') {
       useSceneStore.getState().saveScenesToStorage();
     }
   };
-  window.addEventListener('beforeunload', flushSync);
-  window.addEventListener('pagehide', flushSync);
+  window.addEventListener("beforeunload", flushSync);
+  window.addEventListener("pagehide", flushSync);
 }

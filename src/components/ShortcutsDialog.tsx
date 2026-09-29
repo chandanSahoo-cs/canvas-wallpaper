@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { X, Keyboard, Command } from 'lucide-react';
+import React, { useEffect } from "react";
+import { X, Keyboard, Command } from "lucide-react";
 
 interface ShortcutsDialogProps {
   isOpen: boolean;
@@ -18,70 +18,82 @@ interface ShortcutSection {
 
 const SHORTCUT_SECTIONS: ShortcutSection[] = [
   {
-    title: 'Drawing Tools',
+    title: "Drawing Tools",
     shortcuts: [
-      { keys: ['V', '1'], description: 'Selection tool' },
-      { keys: ['R', '2'], description: 'Rectangle shape' },
-      { keys: ['D', '3'], description: 'Diamond shape' },
-      { keys: ['O', '4'], description: 'Ellipse / Circle' },
-      { keys: ['A', '5'], description: 'Arrow' },
-      { keys: ['L', '6'], description: 'Straight Line' },
-      { keys: ['P', '7'], description: 'Freehand Pencil' },
-      { keys: ['T', '8'], description: 'Text element' },
-      { keys: ['E', '9'], description: 'Eraser tool' },
-      { keys: ['Shift', 'Drag'], description: 'Keep 1:1 aspect ratio / 15° snap' },
-      { keys: ['Alt', 'Drag'], description: 'Draw / resize from center' },
+      { keys: ["V", "1"], description: "Selection tool" },
+      { keys: ["R", "2"], description: "Rectangle shape" },
+      { keys: ["D", "3"], description: "Diamond shape" },
+      { keys: ["O", "4"], description: "Ellipse / Circle" },
+      { keys: ["A", "5"], description: "Arrow" },
+      { keys: ["L", "6"], description: "Straight Line" },
+      { keys: ["P", "7"], description: "Freehand Pencil" },
+      { keys: ["T", "8"], description: "Text element" },
+      { keys: ["E", "9"], description: "Eraser tool" },
+      {
+        keys: ["Shift", "Drag"],
+        description: "Keep 1:1 aspect ratio / 15° snap",
+      },
+      { keys: ["Alt", "Drag"], description: "Draw / resize from center" },
     ],
   },
   {
-    title: 'Edit & Clipboard',
+    title: "Edit & Clipboard",
     shortcuts: [
-      { keys: ['Ctrl', 'C'], description: 'Copy selected element(s)' },
-      { keys: ['Ctrl', 'V'], description: 'Paste element(s) or images' },
-      { keys: ['Ctrl', 'X'], description: 'Cut selected element(s)' },
-      { keys: ['Ctrl', 'D'], description: 'Duplicate selection' },
-      { keys: ['Alt', 'Drag'], description: 'Duplicate element on drag' },
-      { keys: ['Del'], description: 'Delete selected element(s)' },
-      { keys: ['Ctrl', 'Z'], description: 'Undo last action' },
-      { keys: ['Ctrl', 'Y'], description: 'Redo action' },
+      { keys: ["Ctrl", "C"], description: "Copy selected element(s)" },
+      { keys: ["Ctrl", "V"], description: "Paste element(s) or images" },
+      { keys: ["Ctrl", "X"], description: "Cut selected element(s)" },
+      { keys: ["Ctrl", "D"], description: "Duplicate selection" },
+      { keys: ["Alt", "Drag"], description: "Duplicate element on drag" },
+      { keys: ["Del"], description: "Delete selected element(s)" },
+      { keys: ["Ctrl", "Z"], description: "Undo last action" },
+      { keys: ["Ctrl", "Y"], description: "Redo action" },
     ],
   },
   {
-    title: 'Navigation & View',
+    title: "Navigation & View",
     shortcuts: [
-      { keys: ['Space', 'Drag'], description: 'Pan across canvas' },
-      { keys: ['Ctrl', 'Scroll'], description: 'Zoom in / out' },
-      { keys: ['Shift', 'Scroll'], description: 'Pan horizontally' },
-      { keys: ['H'], description: 'Toggle clean preview (hide UI)' },
-      { keys: ['E'], description: 'Enter Drawing mode (Wallpaper)' },
-      { keys: ['Esc'], description: 'Exit Drawing mode / Deselect' },
-      { keys: ['?'], description: 'Open this shortcuts cheatsheet' },
+      { keys: ["Space", "Drag"], description: "Pan across canvas" },
+      { keys: ["Ctrl", "Scroll"], description: "Zoom in / out" },
+      { keys: ["Shift", "Scroll"], description: "Pan horizontally" },
+      { keys: ["H"], description: "Toggle clean preview (hide UI)" },
+      { keys: ["E"], description: "Enter Drawing mode (Wallpaper)" },
+      { keys: ["Esc"], description: "Exit Drawing mode / Deselect" },
+      { keys: ["?"], description: "Open this shortcuts cheatsheet" },
     ],
   },
   {
-    title: 'Layers & Groups',
+    title: "Layers & Groups",
     shortcuts: [
-      { keys: ['Arrow keys'], description: 'Nudge element 1px (Shift for 10px)' },
-      { keys: ['Ctrl', 'G'], description: 'Group selected elements' },
-      { keys: ['Ctrl', 'Shift', 'G'], description: 'Ungroup selected elements' },
-      { keys: ['Ctrl', 'Shift', 'L'], description: 'Lock or unlock element' },
-      { keys: ['Ctrl', ']'], description: 'Bring forward' },
-      { keys: ['Ctrl', '['], description: 'Send backward' },
+      {
+        keys: ["Arrow keys"],
+        description: "Nudge element 1px (Shift for 10px)",
+      },
+      { keys: ["Ctrl", "G"], description: "Group selected elements" },
+      {
+        keys: ["Ctrl", "Shift", "G"],
+        description: "Ungroup selected elements",
+      },
+      { keys: ["Ctrl", "Shift", "L"], description: "Lock or unlock element" },
+      { keys: ["Ctrl", "]"], description: "Bring forward" },
+      { keys: ["Ctrl", "["], description: "Send backward" },
     ],
   },
 ];
 
-export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({ isOpen, onClose }) => {
+export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
+  isOpen,
+  onClose,
+}) => {
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         e.preventDefault();
         onClose();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -102,8 +114,12 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({ isOpen, onClos
               <Keyboard className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-semibold leading-tight">Keyboard Shortcuts</h2>
-              <p className="text-xs text-neutral-500">Quick controls to boost your workflow</p>
+              <h2 className="text-base font-semibold leading-tight">
+                Keyboard Shortcuts
+              </h2>
+              <p className="text-xs text-neutral-500">
+                Quick controls to boost your workflow
+              </p>
             </div>
           </div>
           <button

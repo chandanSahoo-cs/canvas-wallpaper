@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Check } from 'lucide-react';
-import { useWidgetStore } from '../../store/useWidgetStore';
-import { cn } from '../../lib/utils';
+import React, { useState, useRef, useEffect } from "react";
+import { ChevronDown, Check } from "lucide-react";
+import { useWidgetStore } from "../../store/useWidgetStore";
+import { cn } from "../../lib/utils";
 
 const ENGINES = [
-  { id: 'google', label: 'Google' },
-  { id: 'duckduckgo', label: 'DuckDuckGo' },
-  { id: 'bing', label: 'Bing' },
-  { id: 'brave', label: 'Brave Search' },
+  { id: "google", label: "Google" },
+  { id: "duckduckgo", label: "DuckDuckGo" },
+  { id: "bing", label: "Bing" },
+  { id: "brave", label: "Brave Search" },
 ] as const;
 
 export const SearchEngineDropdown: React.FC = () => {
@@ -18,18 +18,22 @@ export const SearchEngineDropdown: React.FC = () => {
 
   useEffect(() => {
     const handleOutsideClick = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
     if (isOpen) {
-      document.addEventListener('pointerdown', handleOutsideClick);
+      document.addEventListener("pointerdown", handleOutsideClick);
     }
-    return () => document.removeEventListener('pointerdown', handleOutsideClick);
+    return () =>
+      document.removeEventListener("pointerdown", handleOutsideClick);
   }, [isOpen]);
 
   const activeLabel =
-    ENGINES.find((e) => e.id === searchEngine)?.label || 'Google';
+    ENGINES.find((e) => e.id === searchEngine)?.label || "Google";
 
   return (
     <div ref={dropdownRef} className="relative">
@@ -41,8 +45,8 @@ export const SearchEngineDropdown: React.FC = () => {
         <span>{activeLabel}</span>
         <ChevronDown
           className={cn(
-            'w-3.5 h-3.5 text-neutral-500 transition-transform duration-150',
-            isOpen && 'rotate-180'
+            "w-3.5 h-3.5 text-neutral-500 transition-transform duration-150",
+            isOpen && "rotate-180",
           )}
         />
       </button>
@@ -58,10 +62,10 @@ export const SearchEngineDropdown: React.FC = () => {
                 setIsOpen(false);
               }}
               className={cn(
-                'w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition-colors cursor-pointer',
+                "w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition-colors cursor-pointer",
                 searchEngine === eng.id
-                  ? 'bg-indigo-50 text-indigo-600 font-semibold'
-                  : 'text-neutral-700 hover:bg-neutral-100'
+                  ? "bg-indigo-50 text-indigo-600 font-semibold"
+                  : "text-neutral-700 hover:bg-neutral-100",
               )}
             >
               <span>{eng.label}</span>

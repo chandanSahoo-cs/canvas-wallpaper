@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Point } from '../elements/types';
-import { TextEditorState } from '../store/useAppStore';
-import { getFontFamilyString } from '../canvas/geometry';
+import React, { useEffect, useRef, useState } from "react";
+import { Point } from "../elements/types";
+import { TextEditorState } from "../store/useAppStore";
+import { getFontFamilyString } from "../canvas/geometry";
 
 interface InlineTextEditorProps {
   data: TextEditorState;
@@ -13,10 +13,10 @@ interface InlineTextEditorProps {
 
 let measureCtx: CanvasRenderingContext2D | null = null;
 function getMeasureCtx(): CanvasRenderingContext2D | null {
-  if (typeof document === 'undefined') return null;
+  if (typeof document === "undefined") return null;
   if (!measureCtx) {
-    const c = document.createElement('canvas');
-    measureCtx = c.getContext('2d');
+    const c = document.createElement("canvas");
+    measureCtx = c.getContext("2d");
   }
   return measureCtx;
 }
@@ -28,7 +28,7 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
   onCommit,
   onCancel,
 }) => {
-  const [text, setText] = useState(data.text || '');
+  const [text, setText] = useState(data.text || "");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isCommittedRef = useRef(false);
   const mountedAtRef = useRef(Date.now());
@@ -45,7 +45,10 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
       }
     }
     const timer = setTimeout(() => {
-      if (textareaRef.current && document.activeElement !== textareaRef.current) {
+      if (
+        textareaRef.current &&
+        document.activeElement !== textareaRef.current
+      ) {
         textareaRef.current.focus();
       }
     }, 20);
@@ -79,7 +82,7 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
   const lineHeight = scaledFontSize * 1.25;
 
   // Measure text to dynamically fit width and height like Excalidraw
-  const lines = text.split('\n');
+  const lines = text.split("\n");
   const ctx = getMeasureCtx();
   let maxLineWidth = 0;
   if (ctx) {
@@ -89,7 +92,8 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
       if (w > maxLineWidth) maxLineWidth = w;
     }
   } else {
-    maxLineWidth = Math.max(...lines.map((l) => l.length), 1) * (scaledFontSize * 0.6);
+    maxLineWidth =
+      Math.max(...lines.map((l) => l.length), 1) * (scaledFontSize * 0.6);
   }
 
   // Minimum width gives room for blinking caret at start
@@ -101,7 +105,7 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
   const screenCenterY = screenY + editorHeight / 2;
 
   const style: React.CSSProperties = {
-    position: 'fixed',
+    position: "fixed",
     left: `${screenCenterX}px`,
     top: `${screenCenterY}px`,
     width: `${editorWidth}px`,
@@ -109,23 +113,24 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
     font: `${scaledFontSize}px ${fontFamily}`,
     fontFamily,
     fontSize: `${scaledFontSize}px`,
-    lineHeight: '1.25',
-    color: data.strokeColor || '#1e1e1e',
-    caretColor: data.strokeColor || '#1e1e1e',
-    background: 'transparent',
-    border: 'none',
-    outline: 'none',
-    boxShadow: 'none',
-    padding: '0px',
-    margin: '0px',
-    resize: 'none',
-    overflow: 'hidden',
-    whiteSpace: 'pre',
-    wordBreak: 'normal',
-    boxSizing: 'content-box',
+    lineHeight: "1.25",
+    color: data.strokeColor || "#1e1e1e",
+    caretColor: data.strokeColor || "#1e1e1e",
+    background: "transparent",
+    border: "none",
+    outline: "none",
+    boxShadow: "none",
+    padding: "0px",
+    margin: "0px",
+    resize: "none",
+    overflow: "hidden",
+    whiteSpace: "pre",
+    wordBreak: "normal",
+    boxSizing: "content-box",
     zIndex: 50,
-    transformOrigin: 'center center',
-    transform: `translate(-50%, -50%) ${data.angle ? `rotate(${data.angle}rad)` : ''}`.trim(),
+    transformOrigin: "center center",
+    transform:
+      `translate(-50%, -50%) ${data.angle ? `rotate(${data.angle}rad)` : ""}`.trim(),
   };
 
   return (
@@ -144,22 +149,23 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
         e.stopPropagation();
         e.nativeEvent.stopImmediatePropagation();
 
-        if (e.key === 'Escape') {
+        if (e.key === "Escape") {
           e.preventDefault();
           // In Excalidraw, Escape commits whatever was typed (empty text will be cleaned up on commit)
           commit(false);
-        } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        } else if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
           e.preventDefault();
           commit(false);
-        } else if (e.key === 'Tab') {
+        } else if (e.key === "Tab") {
           e.preventDefault();
           const start = e.currentTarget.selectionStart;
           const end = e.currentTarget.selectionEnd;
-          const next = text.substring(0, start) + '  ' + text.substring(end);
+          const next = text.substring(0, start) + "  " + text.substring(end);
           setText(next);
           requestAnimationFrame(() => {
             if (textareaRef.current) {
-              textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + 2;
+              textareaRef.current.selectionStart =
+                textareaRef.current.selectionEnd = start + 2;
             }
           });
         }

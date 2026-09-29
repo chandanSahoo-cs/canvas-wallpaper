@@ -1,8 +1,8 @@
-import { Tool, ToolContext } from './types';
-import { useAppStore } from '../store/useAppStore';
-import { createElement } from '../elements/factory';
-import { CanvasElement } from '../elements/types';
-import { distance } from '../canvas/geometry';
+import { Tool, ToolContext } from "./types";
+import { useAppStore } from "../store/useAppStore";
+import { createElement } from "../elements/factory";
+import { CanvasElement } from "../elements/types";
+import { distance } from "../canvas/geometry";
 
 export class FreedrawTool implements Tool {
   private active = false;
@@ -12,9 +12,9 @@ export class FreedrawTool implements Tool {
     this.active = true;
     const store = useAppStore.getState();
 
-    const draft = createElement('freedraw', pos, {
+    const draft = createElement("freedraw", pos, {
       strokeColor: store.currentStrokeColor,
-      fillColor: 'transparent',
+      fillColor: "transparent",
       strokeWidth: store.currentStrokeWidth,
       opacity: store.currentOpacity,
     });
@@ -26,7 +26,7 @@ export class FreedrawTool implements Tool {
     if (!this.active) return;
     const store = useAppStore.getState();
     const draft = store.draft;
-    if (!draft || draft.type !== 'freedraw') return;
+    if (!draft || draft.type !== "freedraw") return;
 
     const last = draft.points[draft.points.length - 1];
     if (distance(pos, last) > 2.5) {
@@ -42,7 +42,7 @@ export class FreedrawTool implements Tool {
     const store = useAppStore.getState();
     const draft = store.draft;
 
-    if (!draft || draft.type !== 'freedraw' || draft.points.length === 0) {
+    if (!draft || draft.type !== "freedraw" || draft.points.length === 0) {
       store.setDraft(null);
       return;
     }
@@ -59,6 +59,6 @@ export class FreedrawTool implements Tool {
   }
 
   getCursor(): string {
-    return 'crosshair';
+    return "crosshair";
   }
 }

@@ -1,12 +1,12 @@
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 export function newId(): string {
-  return Date.now() + '-' + Math.random().toString(36).slice(2, 8);
+  return Date.now() + "-" + Math.random().toString(36).slice(2, 8);
 }
 
 export function randomSeed(): number {
@@ -16,16 +16,31 @@ export function randomSeed(): number {
 export function isColorLight(colorStr?: string): boolean {
   if (!colorStr) return false;
   const s = colorStr.toLowerCase().trim();
-  if (['white', 'snow', 'ivory', 'ghostwhite', 'floralwhite', 'whitesmoke', 'aliceblue', 'seashell'].includes(s)) {
+  if (
+    [
+      "white",
+      "snow",
+      "ivory",
+      "ghostwhite",
+      "floralwhite",
+      "whitesmoke",
+      "aliceblue",
+      "seashell",
+    ].includes(s)
+  ) {
     return true;
   }
-  if (['black', 'transparent', 'none'].includes(s)) {
+  if (["black", "transparent", "none"].includes(s)) {
     return false;
   }
 
-  let hex = s.replace('#', '').trim();
+  let hex = s.replace("#", "").trim();
   if (hex.length === 3 || hex.length === 4) {
-    hex = hex.slice(0, 3).split('').map((c) => c + c).join('');
+    hex = hex
+      .slice(0, 3)
+      .split("")
+      .map((c) => c + c)
+      .join("");
   } else if (hex.length >= 6) {
     hex = hex.substring(0, 6);
   }
@@ -53,15 +68,15 @@ export function isColorLight(colorStr?: string): boolean {
 }
 
 export function getDefaultStrokeColor(bgColor?: string): string {
-  return isColorLight(bgColor || '#14141a') ? '#1e1e1e' : '#ffffff';
+  return isColorLight(bgColor || "#14141a") ? "#1e1e1e" : "#ffffff";
 }
 
 export function sanitizeWebUrl(raw?: string): string {
-  if (!raw || typeof raw !== 'string') return '';
+  if (!raw || typeof raw !== "string") return "";
   const trimmed = raw.trim();
-  if (!trimmed) return '';
+  if (!trimmed) return "";
   if (/^(javascript|data|file|vbscript|about):/i.test(trimmed)) {
-    return '';
+    return "";
   }
   let url = trimmed;
   if (!/^https?:\/\//i.test(url)) {
@@ -69,21 +84,21 @@ export function sanitizeWebUrl(raw?: string): string {
   }
   try {
     const parsed = new URL(url);
-    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
       return parsed.href;
     }
   } catch {
-    return '';
+    return "";
   }
-  return '';
+  return "";
 }
 
 export function escapeXml(str?: string): string {
-  if (!str) return '';
+  if (!str) return "";
   return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&apos;');
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }

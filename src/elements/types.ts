@@ -1,7 +1,7 @@
 export type Point = { x: number; y: number };
 
-export type FillStyle = 'solid' | 'hachure' | 'cross-hatch';
-export type StrokeStyle = 'solid' | 'dashed' | 'dotted';
+export type FillStyle = "solid" | "hachure" | "cross-hatch";
+export type StrokeStyle = "solid" | "dashed" | "dotted";
 
 export interface BaseElement {
   id: string;
@@ -20,7 +20,7 @@ export interface BaseElement {
 }
 
 export interface RectangleElement extends BaseElement {
-  type: 'rectangle';
+  type: "rectangle";
   x: number;
   y: number;
   width: number;
@@ -28,7 +28,7 @@ export interface RectangleElement extends BaseElement {
 }
 
 export interface DiamondElement extends BaseElement {
-  type: 'diamond';
+  type: "diamond";
   x: number;
   y: number;
   width: number;
@@ -36,7 +36,7 @@ export interface DiamondElement extends BaseElement {
 }
 
 export interface EllipseElement extends BaseElement {
-  type: 'ellipse';
+  type: "ellipse";
   x: number;
   y: number;
   width: number;
@@ -44,24 +44,24 @@ export interface EllipseElement extends BaseElement {
 }
 
 export interface LineElement extends BaseElement {
-  type: 'line';
+  type: "line";
   points: Point[];
 }
 
 export interface ArrowElement extends BaseElement {
-  type: 'arrow';
+  type: "arrow";
   points: Point[];
 }
 
 export interface FreedrawElement extends BaseElement {
-  type: 'freedraw';
+  type: "freedraw";
   points: Point[];
 }
 
-export type FontFamily = 'handwritten' | 'sans' | 'monospace';
+export type FontFamily = "handwritten" | "sans" | "monospace";
 
 export interface TextElement extends BaseElement {
-  type: 'text';
+  type: "text";
   x: number;
   y: number;
   text: string;
@@ -70,7 +70,7 @@ export interface TextElement extends BaseElement {
 }
 
 export interface ImageElement extends BaseElement {
-  type: 'image';
+  type: "image";
   x: number;
   y: number;
   width: number;
@@ -89,18 +89,18 @@ export type CanvasElement =
   | ImageElement;
 
 export type ToolType =
-  | 'selection'
-  | 'rectangle'
-  | 'diamond'
-  | 'ellipse'
-  | 'arrow'
-  | 'line'
-  | 'freedraw'
-  | 'text'
-  | 'eraser';
+  | "selection"
+  | "rectangle"
+  | "diamond"
+  | "ellipse"
+  | "arrow"
+  | "line"
+  | "freedraw"
+  | "text"
+  | "eraser";
 
-export type BackgroundType = 'color' | 'gradient' | 'image';
-export type PatternType = 'none' | 'dots' | 'grid' | 'lines';
+export type BackgroundType = "color" | "gradient" | "image";
+export type PatternType = "none" | "dots" | "grid" | "lines";
 
 export interface BackgroundConfig {
   type: BackgroundType;

@@ -1,23 +1,23 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useCanvas } from './canvas/useCanvas';
-import { InlineTextEditor } from './components/InlineTextEditor';
-import { SceneSwitcher } from './components/SceneSwitcher';
-import { ShortcutsDialog } from './components/ShortcutsDialog';
-import { StylePanel } from './components/StylePanel';
-import { Toolbar } from './components/Toolbar';
-import { WallpaperDock } from './components/WallpaperDock';
-import { WallpaperWidgets } from './components/WallpaperWidgets';
-import { PreviewPill } from './components/PreviewPill';
-import { SettingsDialog } from './widgets/SettingsDialog';
-import { WidgetLayoutOverlay } from './widgets/WidgetLayoutOverlay';
-import { useAppStore } from './store/useAppStore';
-import { useSceneStore } from './store/useSceneStore';
-import { useWidgetStore } from './store/useWidgetStore';
-import { useWallpaperBackground } from './hooks/useWallpaperBackground';
-import { useTextEditing } from './hooks/useTextEditing';
-import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
-import { useCanvasPaste } from './hooks/useCanvasPaste';
-import { cn } from './lib/utils';
+import React, { useEffect, useRef, useState } from "react";
+import { useCanvas } from "./canvas/useCanvas";
+import { InlineTextEditor } from "./components/InlineTextEditor";
+import { SceneSwitcher } from "./components/SceneSwitcher";
+import { ShortcutsDialog } from "./components/ShortcutsDialog";
+import { StylePanel } from "./components/StylePanel";
+import { Toolbar } from "./components/Toolbar";
+import { WallpaperDock } from "./components/WallpaperDock";
+import { WallpaperWidgets } from "./components/WallpaperWidgets";
+import { PreviewPill } from "./components/PreviewPill";
+import { SettingsDialog } from "./widgets/SettingsDialog";
+import { WidgetLayoutOverlay } from "./widgets/WidgetLayoutOverlay";
+import { useAppStore } from "./store/useAppStore";
+import { useSceneStore } from "./store/useSceneStore";
+import { useWidgetStore } from "./store/useWidgetStore";
+import { useWallpaperBackground } from "./hooks/useWallpaperBackground";
+import { useTextEditing } from "./hooks/useTextEditing";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { useCanvasPaste } from "./hooks/useCanvasPaste";
+import { cn } from "./lib/utils";
 
 export const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -62,15 +62,15 @@ export const App: React.FC = () => {
       <canvas
         ref={canvasRef}
         className={cn(
-          'absolute inset-0 w-full h-full touch-none',
-          mode === 'wallpaper' || isPreviewing
-            ? 'pointer-events-none'
-            : 'pointer-events-auto'
+          "absolute inset-0 w-full h-full touch-none",
+          mode === "wallpaper" || isPreviewing
+            ? "pointer-events-none"
+            : "pointer-events-auto",
         )}
       />
 
       {/* Excalidraw-style inline WYSIWYG text editor */}
-      {mode === 'drawing' && editingText && !isPreviewing && (
+      {mode === "drawing" && editingText && !isPreviewing && (
         <InlineTextEditor
           data={editingText}
           zoom={zoom}
@@ -81,7 +81,7 @@ export const App: React.FC = () => {
       )}
 
       {/* Wallpaper Mode & Preview Mode Widgets Overlay */}
-      {(mode === 'wallpaper' || isPreviewing) && !isLayoutMode && (
+      {(mode === "wallpaper" || isPreviewing) && !isLayoutMode && (
         <WallpaperWidgets isLight={isLight} />
       )}
 
@@ -89,13 +89,13 @@ export const App: React.FC = () => {
       {isLayoutMode && <WidgetLayoutOverlay isLight={isLight} />}
 
       {/* Floating Action Micro-Dock (Wallpaper Mode) */}
-      {mode === 'wallpaper' && (
+      {mode === "wallpaper" && (
         <WallpaperDock
           isLight={isLight}
           onOpenShortcuts={() => setIsShortcutsOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onOpenLayout={() => setIsLayoutMode(true)}
-          onEnterDrawMode={() => setMode('drawing')}
+          onEnterDrawMode={() => setMode("drawing")}
         />
       )}
 
@@ -112,7 +112,7 @@ export const App: React.FC = () => {
       />
 
       {/* Drawing Mode UI Overlays */}
-      {mode === 'drawing' && !isPreviewing && (
+      {mode === "drawing" && !isPreviewing && (
         <>
           <Toolbar onOpenShortcuts={() => setIsShortcutsOpen(true)} />
           <StylePanel />
@@ -121,7 +121,7 @@ export const App: React.FC = () => {
       )}
 
       {/* Floating Preview Pill when UI is hidden */}
-      {mode === 'drawing' && isPreviewing && (
+      {mode === "drawing" && isPreviewing && (
         <PreviewPill onExitPreview={togglePreview} />
       )}
     </div>

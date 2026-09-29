@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef } from "react";
 import {
   Pointer,
   Square,
@@ -15,28 +15,78 @@ import {
   Eye,
   Image as ImageIcon,
   Keyboard,
-} from 'lucide-react';
-import { insertImageFromFile } from '../lib/imageInsert';
-import { useAppStore } from '../store/useAppStore';
-import { ToolType } from '../elements/types';
-import { cn } from '../lib/utils';
-import { ExportMenu } from './toolbar/ExportMenu';
-import { ZoomControls } from './toolbar/ZoomControls';
+} from "lucide-react";
+import { insertImageFromFile } from "../lib/imageInsert";
+import { useAppStore } from "../store/useAppStore";
+import { ToolType } from "../elements/types";
+import { cn } from "../lib/utils";
+import { ExportMenu } from "./toolbar/ExportMenu";
+import { ZoomControls } from "./toolbar/ZoomControls";
 
 interface ToolbarProps {
   onOpenShortcuts?: () => void;
 }
 
-const TOOLS: { id: ToolType; label: string; icon: React.ReactNode; shortcut: string }[] = [
-  { id: 'selection', label: 'Select', icon: <Pointer className="w-4 h-4" />, shortcut: 'V' },
-  { id: 'rectangle', label: 'Rectangle', icon: <Square className="w-4 h-4" />, shortcut: 'R' },
-  { id: 'diamond', label: 'Diamond', icon: <Diamond className="w-4 h-4" />, shortcut: 'D' },
-  { id: 'ellipse', label: 'Ellipse', icon: <Circle className="w-4 h-4" />, shortcut: 'O' },
-  { id: 'arrow', label: 'Arrow', icon: <MoveUpRight className="w-4 h-4" />, shortcut: 'A' },
-  { id: 'line', label: 'Line', icon: <Minus className="w-4 h-4 rotate-45" />, shortcut: 'L' },
-  { id: 'freedraw', label: 'Draw', icon: <Pencil className="w-4 h-4" />, shortcut: 'P' },
-  { id: 'text', label: 'Text', icon: <Type className="w-4 h-4" />, shortcut: 'T' },
-  { id: 'eraser', label: 'Eraser', icon: <Eraser className="w-4 h-4" />, shortcut: 'E' },
+const TOOLS: {
+  id: ToolType;
+  label: string;
+  icon: React.ReactNode;
+  shortcut: string;
+}[] = [
+  {
+    id: "selection",
+    label: "Select",
+    icon: <Pointer className="w-4 h-4" />,
+    shortcut: "V",
+  },
+  {
+    id: "rectangle",
+    label: "Rectangle",
+    icon: <Square className="w-4 h-4" />,
+    shortcut: "R",
+  },
+  {
+    id: "diamond",
+    label: "Diamond",
+    icon: <Diamond className="w-4 h-4" />,
+    shortcut: "D",
+  },
+  {
+    id: "ellipse",
+    label: "Ellipse",
+    icon: <Circle className="w-4 h-4" />,
+    shortcut: "O",
+  },
+  {
+    id: "arrow",
+    label: "Arrow",
+    icon: <MoveUpRight className="w-4 h-4" />,
+    shortcut: "A",
+  },
+  {
+    id: "line",
+    label: "Line",
+    icon: <Minus className="w-4 h-4 rotate-45" />,
+    shortcut: "L",
+  },
+  {
+    id: "freedraw",
+    label: "Draw",
+    icon: <Pencil className="w-4 h-4" />,
+    shortcut: "P",
+  },
+  {
+    id: "text",
+    label: "Text",
+    icon: <Type className="w-4 h-4" />,
+    shortcut: "T",
+  },
+  {
+    id: "eraser",
+    label: "Eraser",
+    icon: <Eraser className="w-4 h-4" />,
+    shortcut: "E",
+  },
 ];
 
 export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
@@ -61,10 +111,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
             title={`${t.label} (${t.shortcut})`}
             onClick={() => setTool(t.id)}
             className={cn(
-              'w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer',
+              "w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer",
               currentTool === t.id
-                ? 'bg-indigo-600 text-white shadow-sm scale-102 font-medium'
-                : 'text-neutral-700 hover:bg-neutral-100/90 hover:text-neutral-900 active:scale-95'
+                ? "bg-indigo-600 text-white shadow-sm scale-102 font-medium"
+                : "text-neutral-700 hover:bg-neutral-100/90 hover:text-neutral-900 active:scale-95",
             )}
           >
             {t.icon}
@@ -89,7 +139,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
             const file = e.target.files?.[0];
             if (file) {
               await insertImageFromFile(file);
-              e.target.value = '';
+              e.target.value = "";
             }
           }}
         />
@@ -104,10 +154,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
           disabled={history.length === 0}
           onClick={undo}
           className={cn(
-            'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150',
+            "w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150",
             history.length === 0
-              ? 'opacity-25 cursor-not-allowed text-neutral-400'
-              : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 active:scale-95 cursor-pointer'
+              ? "opacity-25 cursor-not-allowed text-neutral-400"
+              : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 active:scale-95 cursor-pointer",
           )}
         >
           <Undo2 className="w-4 h-4" />
@@ -117,10 +167,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
           disabled={future.length === 0}
           onClick={redo}
           className={cn(
-            'w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150',
+            "w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150",
             future.length === 0
-              ? 'opacity-25 cursor-not-allowed text-neutral-400'
-              : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 active:scale-95 cursor-pointer'
+              ? "opacity-25 cursor-not-allowed text-neutral-400"
+              : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 active:scale-95 cursor-pointer",
           )}
         >
           <Redo2 className="w-4 h-4" />
@@ -158,7 +208,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
         {/* Done / Exit Drawing Mode */}
         <button
           title="Exit Drawing Mode"
-          onClick={() => setMode('wallpaper')}
+          onClick={() => setMode("wallpaper")}
           className="w-8.5 h-8.5 rounded-xl flex items-center justify-center bg-neutral-900 text-white hover:bg-neutral-800 transition-all duration-150 shadow-xs active:scale-95 ml-0.5 cursor-pointer"
         >
           <Check className="w-4 h-4" />

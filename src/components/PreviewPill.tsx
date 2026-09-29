@@ -1,5 +1,5 @@
-import React from 'react';
-import { EyeOff } from 'lucide-react';
+import React from "react";
+import { EyeOff } from "lucide-react";
 
 interface PreviewPillProps {
   onExitPreview: () => void;

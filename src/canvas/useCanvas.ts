@@ -1,17 +1,19 @@
-import { useEffect, useRef } from 'react';
-import { useAppStore } from '../store/useAppStore';
-import { CanvasRenderer } from './CanvasRenderer';
-import { SelectionTool } from '../tools/SelectionTool';
-import { ShapeTool } from '../tools/ShapeTool';
-import { LineTool } from '../tools/LineTool';
-import { FreedrawTool } from '../tools/FreedrawTool';
-import { TextTool, openTextEditor } from '../tools/TextTool';
-import { EraserTool } from '../tools/EraserTool';
-import { Tool, ToolContext } from '../tools/types';
-import { Point, ToolType, TextElement } from '../elements/types';
-import { rotatePoint, getCenter, elementContains } from './geometry';
+import { useEffect, useRef } from "react";
+import { Point, TextElement, ToolType } from "../elements/types";
+import { useAppStore } from "../store/useAppStore";
+import { EraserTool } from "../tools/EraserTool";
+import { FreedrawTool } from "../tools/FreedrawTool";
+import { LineTool } from "../tools/LineTool";
+import { SelectionTool } from "../tools/SelectionTool";
+import { ShapeTool } from "../tools/ShapeTool";
+import { TextTool, openTextEditor } from "../tools/TextTool";
+import { Tool } from "../tools/types";
+import { CanvasRenderer } from "./CanvasRenderer";
+import { elementContains, getCenter, rotatePoint } from "./geometry";
 
-export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) {
+export function useCanvas(
+  canvasRef: React.RefObject<HTMLCanvasElement | null>,
+) {
   const rendererRef = useRef<CanvasRenderer | null>(null);
   const toolsRef = useRef<Record<ToolType, Tool> | null>(null);
   const isPanningRef = useRef(false);
@@ -29,11 +31,11 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     const selectionTool = new SelectionTool();
     const tools: Record<ToolType, Tool> = {
       selection: selectionTool,
-      rectangle: new ShapeTool('rectangle'),
-      diamond: new ShapeTool('diamond'),
-      ellipse: new ShapeTool('ellipse'),
-      arrow: new LineTool('arrow'),
-      line: new LineTool('line'),
+      rectangle: new ShapeTool("rectangle"),
+      diamond: new ShapeTool("diamond"),
+      ellipse: new ShapeTool("ellipse"),
+      arrow: new LineTool("arrow"),
+      line: new LineTool("line"),
       freedraw: new FreedrawTool(),
       text: new TextTool(),
       eraser: new EraserTool(),
@@ -46,12 +48,12 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       triggerRender();
     };
     handleResize();
-    window.addEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
 
     // Render loop helper
     function triggerRender() {
       const state = useAppStore.getState();
-      const isCleanView = state.mode === 'wallpaper' || state.isPreviewing;
+      const isCleanView = state.mode === "wallpaper" || state.isPreviewing;
       renderer.render({
         elements: state.elements,
         draft: isCleanView ? null : state.draft,
@@ -59,7 +61,9 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         zoom: isCleanView ? 1 : state.zoom,
         scrollOffset: isCleanView ? { x: 0, y: 0 } : state.scrollOffset,
         marquee: isCleanView ? null : selectionTool.marqueeState,
-        rotationOverlay: isCleanView ? null : selectionTool.getRotationOverlay(),
+        rotationOverlay: isCleanView
+          ? null
+          : selectionTool.getRotationOverlay(),
       });
     }
 
@@ -84,19 +88,10 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       };
     }
 
-    function canvasToScreen(cx: number, cy: number): Point {
-      const rect = canvas!.getBoundingClientRect();
-      const { zoom, scrollOffset } = useAppStore.getState();
-      return {
-        x: (cx - scrollOffset.x) * zoom + rect.left,
-        y: (cy - scrollOffset.y) * zoom + rect.top,
-      };
-    }
-
     // Pointer events
     const onPointerDown = (e: PointerEvent) => {
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing' || state.isPreviewing) return;
+      if (state.mode !== "drawing" || state.isPreviewing) return;
 
       // Space + Drag or Middle mouse button -> Panning
       if (isSpacePressedRef.current || e.button === 1) {
@@ -125,7 +120,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
 
     const onPointerMove = (e: PointerEvent) => {
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing' || state.isPreviewing) return;
+      if (state.mode !== "drawing" || state.isPreviewing) return;
 
       if (isPanningRef.current) {
         const dx = (e.clientX - panStartRef.current.x) / state.zoom;
@@ -158,7 +153,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
         return;
       }
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing' || state.isPreviewing) return;
+      if (state.mode !== "drawing" || state.isPreviewing) return;
 
       const rawPos = { x: e.clientX, y: e.clientY };
       const pos = screenToCanvas(e.clientX, e.clientY);
@@ -175,7 +170,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       } catch {}
       isPanningRef.current = false;
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing' || state.isPreviewing) return;
+      if (state.mode !== "drawing" || state.isPreviewing) return;
       const rawPos = { x: e.clientX, y: e.clientY };
       const pos = screenToCanvas(e.clientX, e.clientY);
       const tool = tools[state.currentTool];
@@ -188,19 +183,25 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     // Double-click to edit existing text, add text into shapes, or start typing anywhere like Excalidraw
     const onDoubleClick = (e: MouseEvent) => {
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing' || state.isPreviewing) return;
+      if (state.mode !== "drawing" || state.isPreviewing) return;
 
       const pos = screenToCanvas(e.clientX, e.clientY);
       // Hit test elements top-to-bottom
       for (let i = state.elements.length - 1; i >= 0; i--) {
         const el = state.elements[i];
-        const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
+        const local = el.angle
+          ? rotatePoint(pos, getCenter(el), -el.angle)
+          : pos;
         if (elementContains(el, local)) {
-          if (el.type === 'text') {
+          if (el.type === "text") {
             openTextEditor({ x: el.x, y: el.y }, el as TextElement);
             return;
           }
-          if (el.type === 'rectangle' || el.type === 'diamond' || el.type === 'ellipse') {
+          if (
+            el.type === "rectangle" ||
+            el.type === "diamond" ||
+            el.type === "ellipse"
+          ) {
             const center = getCenter(el);
             openTextEditor({ x: center.x - 24, y: center.y - 12 });
             return;
@@ -215,7 +216,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     // Wheel event for zoom with Ctrl or touchpad pinch, and 2-finger panning
     const onWheel = (e: WheelEvent) => {
       const state = useAppStore.getState();
-      if (state.mode !== 'drawing' || state.isPreviewing) return;
+      if (state.mode !== "drawing" || state.isPreviewing) return;
 
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
@@ -257,33 +258,33 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     const onKeyDown = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
       if (
-        e.code === 'Space' &&
+        e.code === "Space" &&
         !e.repeat &&
-        document.activeElement?.tagName !== 'TEXTAREA' &&
-        document.activeElement?.tagName !== 'INPUT' &&
-        target?.tagName !== 'TEXTAREA' &&
-        target?.tagName !== 'INPUT'
+        document.activeElement?.tagName !== "TEXTAREA" &&
+        document.activeElement?.tagName !== "INPUT" &&
+        target?.tagName !== "TEXTAREA" &&
+        target?.tagName !== "INPUT"
       ) {
         isSpacePressedRef.current = true;
-        canvas!.style.cursor = 'grab';
+        canvas!.style.cursor = "grab";
       }
     };
 
     const onKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space') {
+      if (e.code === "Space") {
         isSpacePressedRef.current = false;
-        canvas!.style.cursor = 'default';
+        canvas!.style.cursor = "default";
       }
     };
 
-    canvas.addEventListener('pointerdown', onPointerDown);
-    canvas.addEventListener('pointermove', onPointerMove);
-    canvas.addEventListener('pointerup', onPointerUp);
-    canvas.addEventListener('pointercancel', onPointerCancel);
-    canvas.addEventListener('dblclick', onDoubleClick);
-    canvas.addEventListener('wheel', onWheel, { passive: false });
-    window.addEventListener('keydown', onKeyDown);
-    window.addEventListener('keyup', onKeyUp);
+    canvas.addEventListener("pointerdown", onPointerDown);
+    canvas.addEventListener("pointermove", onPointerMove);
+    canvas.addEventListener("pointerup", onPointerUp);
+    canvas.addEventListener("pointercancel", onPointerCancel);
+    canvas.addEventListener("dblclick", onDoubleClick);
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
 
     // Initial render and robust font load trigger
     triggerRender();
@@ -293,12 +294,12 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       triggerRender();
     };
 
-    if (typeof document !== 'undefined' && 'fonts' in document) {
-      document.fonts.addEventListener('loadingdone', onFontsLoaded);
+    if (typeof document !== "undefined" && "fonts" in document) {
+      document.fonts.addEventListener("loadingdone", onFontsLoaded);
 
       Promise.all([
-        document.fonts.load('20px Excalifont'),
-        document.fonts.load('20px Virgil'),
+        document.fonts.load("20px Excalifont"),
+        document.fonts.load("20px Virgil"),
         document.fonts.ready,
       ])
         .then(onFontsLoaded)
@@ -310,7 +311,7 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
       let attempts = 0;
       fontInterval = setInterval(() => {
         attempts++;
-        if (document.fonts.check('20px Excalifont') || attempts >= 15) {
+        if (document.fonts.check("20px Excalifont") || attempts >= 15) {
           if (fontInterval) clearInterval(fontInterval);
           fontInterval = null;
           triggerRender();
@@ -319,17 +320,17 @@ export function useCanvas(canvasRef: React.RefObject<HTMLCanvasElement | null>) 
     }
 
     return () => {
-      window.removeEventListener('resize', handleResize);
-      canvas.removeEventListener('pointerdown', onPointerDown);
-      canvas.removeEventListener('pointermove', onPointerMove);
-      canvas.removeEventListener('pointerup', onPointerUp);
-      canvas.removeEventListener('pointercancel', onPointerCancel);
-      canvas.removeEventListener('dblclick', onDoubleClick);
-      canvas.removeEventListener('wheel', onWheel);
-      window.removeEventListener('keydown', onKeyDown);
-      window.removeEventListener('keyup', onKeyUp);
-      if (typeof document !== 'undefined' && 'fonts' in document) {
-        document.fonts.removeEventListener('loadingdone', onFontsLoaded);
+      window.removeEventListener("resize", handleResize);
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      canvas.removeEventListener("pointermove", onPointerMove);
+      canvas.removeEventListener("pointerup", onPointerUp);
+      canvas.removeEventListener("pointercancel", onPointerCancel);
+      canvas.removeEventListener("dblclick", onDoubleClick);
+      canvas.removeEventListener("wheel", onWheel);
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      if (typeof document !== "undefined" && "fonts" in document) {
+        document.fonts.removeEventListener("loadingdone", onFontsLoaded);
       }
       if (fontInterval) {
         clearInterval(fontInterval);

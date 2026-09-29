@@ -1,7 +1,7 @@
-import { Tool, ToolContext } from './types';
-import { useAppStore } from '../store/useAppStore';
-import { Point, TextElement } from '../elements/types';
-import { FONT_SIZE_MAP } from '../canvas/geometry';
+import { Tool, ToolContext } from "./types";
+import { useAppStore } from "../store/useAppStore";
+import { Point, TextElement } from "../elements/types";
+import { FONT_SIZE_MAP } from "../canvas/geometry";
 
 export class TextTool implements Tool {
   onPointerDown({ pos, e }: ToolContext): void {
@@ -13,28 +13,33 @@ export class TextTool implements Tool {
   onPointerUp(): void {}
 
   getCursor(): string {
-    return 'text';
+    return "text";
   }
 }
 
 export function openTextEditor(
   canvasPos: Point,
-  existingElement?: TextElement
+  existingElement?: TextElement,
 ): void {
   const store = useAppStore.getState();
   const fontSize =
     existingElement?.fontSize ||
-    FONT_SIZE_MAP[existingElement ? existingElement.strokeWidth : store.currentStrokeWidth] ||
+    FONT_SIZE_MAP[
+      existingElement ? existingElement.strokeWidth : store.currentStrokeWidth
+    ] ||
     20;
 
   store.setEditingText({
     elementId: existingElement ? existingElement.id : null,
     canvasX: existingElement ? existingElement.x : canvasPos.x,
     canvasY: existingElement ? existingElement.y : canvasPos.y,
-    text: existingElement ? existingElement.text || '' : '',
+    text: existingElement ? existingElement.text || "" : "",
     fontSize,
-    fontFamily: existingElement?.fontFamily || store.currentFontFamily || 'handwritten',
-    strokeColor: existingElement ? existingElement.strokeColor : store.currentStrokeColor,
+    fontFamily:
+      existingElement?.fontFamily || store.currentFontFamily || "handwritten",
+    strokeColor: existingElement
+      ? existingElement.strokeColor
+      : store.currentStrokeColor,
     angle: existingElement ? existingElement.angle : 0,
   });
 }

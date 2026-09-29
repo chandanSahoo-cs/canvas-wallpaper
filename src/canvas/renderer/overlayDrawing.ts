@@ -1,7 +1,4 @@
-import {
-  CanvasElement,
-  Point,
-} from '../../elements/types';
+import { CanvasElement, Point } from "../../elements/types";
 import {
   getBBox,
   getCenter,
@@ -11,8 +8,8 @@ import {
   ROTATE_HANDLE_OFFSET,
   RotationOverlay,
   angleToDegrees,
-} from '../geometry';
-import { useAppStore } from '../../store/useAppStore';
+} from "../geometry";
+import { useAppStore } from "../../store/useAppStore";
 
 export function drawRoundedRect(
   ctx: CanvasRenderingContext2D,
@@ -20,9 +17,9 @@ export function drawRoundedRect(
   y: number,
   w: number,
   h: number,
-  r: number
+  r: number,
 ): void {
-  if (typeof ctx.roundRect === 'function') {
+  if (typeof ctx.roundRect === "function") {
     ctx.beginPath();
     ctx.roundRect(x, y, w, h, r);
   } else {
@@ -36,26 +33,30 @@ export function drawRoundedRect(
   }
 }
 
-export function drawLockMarker(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+export function drawLockMarker(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+): void {
   ctx.save();
   // Circular badge with subtle shadow
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
+  ctx.shadowColor = "rgba(0, 0, 0, 0.12)";
   ctx.shadowBlur = 4;
   ctx.shadowOffsetY = 1;
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = "#ffffff";
   ctx.beginPath();
   ctx.arc(x, y, 11, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.shadowColor = 'transparent';
-  ctx.strokeStyle = '#94a3b8';
+  ctx.shadowColor = "transparent";
+  ctx.strokeStyle = "#94a3b8";
   ctx.lineWidth = 1.2;
   ctx.stroke();
 
   // Padlock shackle
-  ctx.strokeStyle = '#475569';
+  ctx.strokeStyle = "#475569";
   ctx.lineWidth = 1.6;
-  ctx.lineCap = 'round';
+  ctx.lineCap = "round";
   ctx.beginPath();
   ctx.moveTo(x - 3.2, y - 1);
   ctx.lineTo(x - 3.2, y - 4);
@@ -64,16 +65,16 @@ export function drawLockMarker(ctx: CanvasRenderingContext2D, x: number, y: numb
   ctx.stroke();
 
   // Padlock body
-  ctx.fillStyle = '#475569';
+  ctx.fillStyle = "#475569";
   drawRoundedRect(ctx, x - 5, y - 1, 10, 7.5, 1.5);
   ctx.fill();
 
   // Keyhole dot & slit
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = "#ffffff";
   ctx.beginPath();
   ctx.arc(x, y + 2, 0.9, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = '#ffffff';
+  ctx.strokeStyle = "#ffffff";
   ctx.lineWidth = 0.9;
   ctx.beginPath();
   ctx.moveTo(x, y + 2);
@@ -83,30 +84,34 @@ export function drawLockMarker(ctx: CanvasRenderingContext2D, x: number, y: numb
   ctx.restore();
 }
 
-export function drawGroupMarker(ctx: CanvasRenderingContext2D, x: number, y: number): void {
+export function drawGroupMarker(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+): void {
   ctx.save();
   // Circular badge with subtle shadow
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.12)';
+  ctx.shadowColor = "rgba(0, 0, 0, 0.12)";
   ctx.shadowBlur = 4;
   ctx.shadowOffsetY = 1;
-  ctx.fillStyle = '#ffffff';
+  ctx.fillStyle = "#ffffff";
   ctx.beginPath();
   ctx.arc(x, y, 11, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.shadowColor = 'transparent';
-  ctx.strokeStyle = '#6366f1';
+  ctx.shadowColor = "transparent";
+  ctx.strokeStyle = "#6366f1";
   ctx.lineWidth = 1.2;
   ctx.stroke();
 
   // Group icon: two overlapping squares
-  ctx.strokeStyle = '#818cf8';
+  ctx.strokeStyle = "#818cf8";
   ctx.lineWidth = 1.2;
   drawRoundedRect(ctx, x - 5.5, y - 5.5, 7, 7, 1);
   ctx.stroke();
 
-  ctx.fillStyle = '#ffffff';
-  ctx.strokeStyle = '#4f46e5';
+  ctx.fillStyle = "#ffffff";
+  ctx.strokeStyle = "#4f46e5";
   ctx.lineWidth = 1.2;
   drawRoundedRect(ctx, x - 1.5, y - 1.5, 7, 7, 1);
   ctx.fill();
@@ -115,10 +120,17 @@ export function drawGroupMarker(ctx: CanvasRenderingContext2D, x: number, y: num
   ctx.restore();
 }
 
-export function drawLockBadge(ctx: CanvasRenderingContext2D, el: CanvasElement): void {
+export function drawLockBadge(
+  ctx: CanvasRenderingContext2D,
+  el: CanvasElement,
+): void {
   const b = getBBox(el);
   const center = getCenter(el);
-  const tr = rotatePoint({ x: b.x + b.w + 4, y: b.y - 12 }, center, el.angle || 0);
+  const tr = rotatePoint(
+    { x: b.x + b.w + 4, y: b.y - 12 },
+    center,
+    el.angle || 0,
+  );
   drawLockMarker(ctx, tr.x, tr.y);
 }
 
@@ -126,14 +138,14 @@ export function drawRotationBadge(
   ctx: CanvasRenderingContext2D,
   pos: Point,
   deg: number,
-  frameCenter?: Point
+  frameCenter?: Point,
 ): void {
   const text = `${deg}°`;
   ctx.save();
   ctx.font =
     '600 11px Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
 
   const textWidth = ctx.measureText(text).width;
   const paddingX = 8;
@@ -160,24 +172,24 @@ export function drawRotationBadge(
   const x = bx - badgeW / 2;
   const y = by - badgeH / 2;
 
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+  ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
   ctx.shadowBlur = 6;
   ctx.shadowOffsetY = 2;
 
-  ctx.fillStyle = '#18181b';
+  ctx.fillStyle = "#18181b";
   drawRoundedRect(ctx, x, y, badgeW, badgeH, r);
   ctx.fill();
 
-  ctx.shadowColor = 'transparent';
+  ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
 
-  ctx.strokeStyle = '#6366f1';
+  ctx.strokeStyle = "#6366f1";
   ctx.lineWidth = 1.2;
   drawRoundedRect(ctx, x, y, badgeW, badgeH, r);
   ctx.stroke();
 
-  ctx.fillStyle = '#f4f4f5';
+  ctx.fillStyle = "#f4f4f5";
   ctx.fillText(text, bx, by);
 
   ctx.restore();
@@ -185,7 +197,7 @@ export function drawRotationBadge(
 
 export function drawMarquee(
   ctx: CanvasRenderingContext2D,
-  marquee: { start: Point; current: Point }
+  marquee: { start: Point; current: Point },
 ): void {
   const x0 = Math.min(marquee.start.x, marquee.current.x);
   const y0 = Math.min(marquee.start.y, marquee.current.y);
@@ -193,8 +205,8 @@ export function drawMarquee(
   const h = Math.abs(marquee.current.y - marquee.start.y);
 
   ctx.save();
-  ctx.fillStyle = 'rgba(105, 101, 219, 0.08)';
-  ctx.strokeStyle = '#6965db';
+  ctx.fillStyle = "rgba(105, 101, 219, 0.08)";
+  ctx.strokeStyle = "#6965db";
   ctx.lineWidth = 1;
   ctx.fillRect(x0, y0, w, h);
   ctx.strokeRect(x0, y0, w, h);
@@ -205,17 +217,21 @@ export function drawSelectionOverlays(
   ctx: CanvasRenderingContext2D,
   elements: CanvasElement[],
   selectedIds: Set<string>,
-  rotationOverlay?: RotationOverlay | null
+  rotationOverlay?: RotationOverlay | null,
 ): void {
   const editingText = useAppStore.getState().editingText;
   const selectedMembers = elements.filter(
-    (el) => selectedIds.has(el.id) && (!editingText || el.id !== editingText.elementId)
+    (el) =>
+      selectedIds.has(el.id) &&
+      (!editingText || el.id !== editingText.elementId),
   );
   if (selectedMembers.length === 0) return;
 
   const anyLocked = selectedMembers.some((el) => el.locked);
   const allLocked = selectedMembers.every((el) => el.locked);
-  const hasGroup = selectedMembers.some((el) => el.groupIds && el.groupIds.length > 0);
+  const hasGroup = selectedMembers.some(
+    (el) => el.groupIds && el.groupIds.length > 0,
+  );
   const isGrouped =
     hasGroup &&
     (selectedMembers.length > 1 ||
@@ -233,8 +249,8 @@ export function drawSelectionOverlays(
         ctx.translate(-center.x, -center.y);
       }
       ctx.strokeStyle = el.locked
-        ? 'rgba(155, 155, 163, 0.7)'
-        : 'rgba(105, 101, 219, 0.5)';
+        ? "rgba(155, 155, 163, 0.7)"
+        : "rgba(105, 101, 219, 0.5)";
       ctx.lineWidth = 1;
       ctx.setLineDash([3, 3]);
       ctx.strokeRect(b.x - 3, b.y - 3, b.w + 6, b.h + 6);
@@ -251,15 +267,15 @@ export function drawSelectionOverlays(
   // Single unlocked line or arrow selected
   if (frame.isLine && frame.lineElement && !allLocked) {
     const handles = getHandlePositions(frame);
-    const startPt = handles['line-start'];
-    const midPt = handles['line-mid'];
-    const endPt = handles['line-end'];
+    const startPt = handles["line-start"];
+    const midPt = handles["line-mid"];
+    const endPt = handles["line-end"];
 
     if (startPt && endPt) {
       ctx.save();
 
       if (frame.lineElement.points.length > 2) {
-        ctx.strokeStyle = 'rgba(99, 102, 241, 0.6)';
+        ctx.strokeStyle = "rgba(99, 102, 241, 0.6)";
         ctx.lineWidth = 1;
         ctx.setLineDash([3, 3]);
         ctx.beginPath();
@@ -270,8 +286,8 @@ export function drawSelectionOverlays(
         ctx.setLineDash([]);
       }
 
-      ctx.fillStyle = '#ffffff';
-      ctx.strokeStyle = '#6366f1';
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#6366f1";
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(startPt.x, startPt.y, 6, 0, Math.PI * 2);
@@ -283,8 +299,8 @@ export function drawSelectionOverlays(
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = '#6366f1';
-      ctx.strokeStyle = '#ffffff';
+      ctx.fillStyle = "#6366f1";
+      ctx.strokeStyle = "#ffffff";
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(midPt.x, midPt.y, 5, 0, Math.PI * 2);
@@ -315,7 +331,7 @@ export function drawSelectionOverlays(
   ctx.rotate(frame.angle);
   ctx.translate(-frame.center.x, -frame.center.y);
 
-  ctx.strokeStyle = allLocked ? '#9b9ba3' : '#6965db';
+  ctx.strokeStyle = allLocked ? "#9b9ba3" : "#6965db";
   ctx.lineWidth = 1.5;
   if (allLocked) {
     ctx.setLineDash([4, 4]);
@@ -345,8 +361,8 @@ export function drawSelectionOverlays(
       [x0, y1],
       [x0, midY],
     ];
-    ctx.fillStyle = '#ffffff';
-    ctx.strokeStyle = '#6366f1';
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#6366f1";
     ctx.lineWidth = 1.5;
     for (const [hx, hy] of handlePts) {
       ctx.beginPath();
@@ -368,8 +384,16 @@ export function drawSelectionOverlays(
   const lockOffset = narrow && isGrouped ? 8 : 0;
   const groupOffset = narrow && (allLocked || anyLocked) ? -8 : 0;
 
-  const topRight = rotatePoint({ x: x1 + lockOffset, y: y0 - 14 }, frame.center, frame.angle);
-  const topLeft = rotatePoint({ x: x0 + groupOffset, y: y0 - 14 }, frame.center, frame.angle);
+  const topRight = rotatePoint(
+    { x: x1 + lockOffset, y: y0 - 14 },
+    frame.center,
+    frame.angle,
+  );
+  const topLeft = rotatePoint(
+    { x: x0 + groupOffset, y: y0 - 14 },
+    frame.center,
+    frame.angle,
+  );
 
   if (allLocked || anyLocked) {
     drawLockMarker(ctx, topRight.x, topRight.y);
@@ -381,14 +405,14 @@ export function drawSelectionOverlays(
   if (!allLocked) {
     if (
       rotationOverlay &&
-      typeof rotationOverlay.degrees === 'number' &&
+      typeof rotationOverlay.degrees === "number" &&
       rotationOverlay.handlePos
     ) {
       drawRotationBadge(
         ctx,
         rotationOverlay.handlePos,
         rotationOverlay.degrees,
-        frame.center
+        frame.center,
       );
     } else if (frame.angle && Math.abs(frame.angle) > 0.001) {
       const deg = angleToDegrees(frame.angle);

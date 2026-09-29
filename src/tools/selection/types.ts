@@ -1,5 +1,5 @@
-import { Point, CanvasElement } from '../../elements/types';
-import { BoundingBox, SelectionFrame } from '../../canvas/geometry';
+import { Point, CanvasElement } from "../../elements/types";
+import { BoundingBox, SelectionFrame } from "../../canvas/geometry";
 
 export interface ResizeState {
   handle: string;
@@ -17,7 +17,12 @@ export interface RotateState {
   totalDelta: number;
   origBBox: BoundingBox;
   origAngle: number;
-  members: { id: string; startAngle: number; snapshot: CanvasElement; origCenter: Point }[];
+  members: {
+    id: string;
+    startAngle: number;
+    snapshot: CanvasElement;
+    origCenter: Point;
+  }[];
   historyPushed: boolean;
   activeAngleDegrees: number | null;
   activeFrame: SelectionFrame | null;
@@ -37,7 +42,7 @@ export interface MarqueeState {
 }
 
 export interface LineHandleState {
-  handle: 'line-start' | 'line-mid' | 'line-end';
+  handle: "line-start" | "line-mid" | "line-end";
   elementId: string;
   initialPoints: Point[];
   historyPushed: boolean;

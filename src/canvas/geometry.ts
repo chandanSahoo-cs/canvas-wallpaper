@@ -1,14 +1,26 @@
-import { Point, CanvasElement, RectangleElement, DiamondElement, EllipseElement, LineElement, ArrowElement, FreedrawElement, TextElement, ImageElement, FontFamily } from '../elements/types';
+import {
+  Point,
+  CanvasElement,
+  LineElement,
+  ArrowElement,
+  TextElement,
+  FontFamily,
+} from "../elements/types";
 
-export const FONT_SIZE_MAP: Record<number, number> = { 1.5: 16, 3: 20, 5.5: 28, 8: 36 };
+export const FONT_SIZE_MAP: Record<number, number> = {
+  1.5: 16,
+  3: 20,
+  5.5: 28,
+  8: 36,
+};
 export const EXCALIDRAW_FONT_FAMILY =
   'Excalifont, Virgil, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
 export function getFontFamilyString(family?: FontFamily): string {
-  if (family === 'sans') {
+  if (family === "sans") {
     return '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
   }
-  if (family === 'monospace') {
+  if (family === "monospace") {
     return '"Cascadia Code", "Courier New", monospace';
   }
   return EXCALIDRAW_FONT_FAMILY;
@@ -19,10 +31,10 @@ export const ROTATE_HANDLE_OFFSET = 28;
 
 let sharedMeasureCtx: CanvasRenderingContext2D | null = null;
 function getSharedMeasureCtx(): CanvasRenderingContext2D | null {
-  if (typeof document === 'undefined') return null;
+  if (typeof document === "undefined") return null;
   if (!sharedMeasureCtx) {
-    const c = document.createElement('canvas');
-    sharedMeasureCtx = c.getContext('2d');
+    const c = document.createElement("canvas");
+    sharedMeasureCtx = c.getContext("2d");
   }
   return sharedMeasureCtx;
 }
@@ -60,7 +72,12 @@ export function distanceToSegment(p: Point, a: Point, b: Point): number {
   return distance(p, { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y) });
 }
 
-export function normBox(el: { x: number; y: number; width: number; height: number }): BoundingBox {
+export function normBox(el: {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}): BoundingBox {
   return {
     x: Math.min(el.x, el.x + el.width),
     y: Math.min(el.y, el.y + el.height),
@@ -69,7 +86,12 @@ export function normBox(el: { x: number; y: number; width: number; height: numbe
   };
 }
 
-export function diamondPoints(x: number, y: number, w: number, h: number): [number, number][] {
+export function diamondPoints(
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+): [number, number][] {
   return [
     [x + w / 2, y],
     [x + w, y + h / 2],
@@ -80,9 +102,14 @@ export function diamondPoints(x: number, y: number, w: number, h: number): [numb
 
 export function rotatePoint(pos: Point, center: Point, angle: number): Point {
   if (!angle) return pos;
-  const cos = Math.cos(angle), sin = Math.sin(angle);
-  const dx = pos.x - center.x, dy = pos.y - center.y;
-  return { x: center.x + dx * cos - dy * sin, y: center.y + dx * sin + dy * cos };
+  const cos = Math.cos(angle),
+    sin = Math.sin(angle);
+  const dx = pos.x - center.x,
+    dy = pos.y - center.y;
+  return {
+    x: center.x + dx * cos - dy * sin,
+    y: center.y + dx * sin + dy * cos,
+  };
 }
 
 export function normalizeAngle(angle: number): number {
@@ -100,15 +127,22 @@ export function angleToDegrees(angle: number): number {
 }
 
 export function getBBox(el: CanvasElement): BoundingBox {
-  if (el.type === 'rectangle' || el.type === 'diamond' || el.type === 'ellipse' || el.type === 'image') {
+  if (
+    el.type === "rectangle" ||
+    el.type === "diamond" ||
+    el.type === "ellipse" ||
+    el.type === "image"
+  ) {
     return normBox(el);
   }
-  if (el.type === 'line' || el.type === 'arrow') {
+  if (el.type === "line" || el.type === "arrow") {
     const xs = el.points.map((p) => p.x);
     const ys = el.points.map((p) => p.y);
     if (xs.length === 0) return { x: 0, y: 0, w: 0, h: 0 };
-    const minX = Math.min(...xs), maxX = Math.max(...xs);
-    const minY = Math.min(...ys), maxY = Math.max(...ys);
+    const minX = Math.min(...xs),
+      maxX = Math.max(...xs);
+    const minY = Math.min(...ys),
+      maxY = Math.max(...ys);
     return {
       x: minX,
       y: minY,
@@ -116,19 +150,26 @@ export function getBBox(el: CanvasElement): BoundingBox {
       h: Math.max(maxY - minY, 4),
     };
   }
-  if (el.type === 'freedraw') {
+  if (el.type === "freedraw") {
     const xs = el.points.map((p) => p.x),
       ys = el.points.map((p) => p.y);
     if (xs.length === 0) return { x: 0, y: 0, w: 0, h: 0 };
-    const minX = Math.min(...xs), maxX = Math.max(...xs);
-    const minY = Math.min(...ys), maxY = Math.max(...ys);
-    return { x: minX, y: minY, w: Math.max(maxX - minX, 4), h: Math.max(maxY - minY, 4) };
+    const minX = Math.min(...xs),
+      maxX = Math.max(...xs);
+    const minY = Math.min(...ys),
+      maxY = Math.max(...ys);
+    return {
+      x: minX,
+      y: minY,
+      w: Math.max(maxX - minX, 4),
+      h: Math.max(maxY - minY, 4),
+    };
   }
-  if (el.type === 'text') {
+  if (el.type === "text") {
     const textEl = el as TextElement;
     const fontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
-    const textStr = typeof textEl.text === 'string' ? textEl.text : '';
-    const lines = textStr ? textStr.split('\n') : [''];
+    const textStr = typeof textEl.text === "string" ? textEl.text : "";
+    const lines = textStr ? textStr.split("\n") : [""];
     const lineHeight = fontSize * 1.25;
 
     const ctx = getSharedMeasureCtx();
@@ -181,15 +222,22 @@ export function getScreenBBox(el: CanvasElement): BoundingBox {
 }
 
 export function rectsIntersect(a: BoundingBox, b: BoundingBox): boolean {
-  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+  return (
+    a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y
+  );
 }
 
 export function elementContains(el: CanvasElement, localPos: Point): boolean {
-  if (el.type === 'rectangle' || el.type === 'text' || el.type === 'image') {
+  if (el.type === "rectangle" || el.type === "text" || el.type === "image") {
     const b = getBBox(el);
-    return localPos.x >= b.x - 4 && localPos.x <= b.x + b.w + 4 && localPos.y >= b.y - 4 && localPos.y <= b.y + b.h + 4;
+    return (
+      localPos.x >= b.x - 4 &&
+      localPos.x <= b.x + b.w + 4 &&
+      localPos.y >= b.y - 4 &&
+      localPos.y <= b.y + b.h + 4
+    );
   }
-  if (el.type === 'ellipse') {
+  if (el.type === "ellipse") {
     const b = getBBox(el);
     const rx = b.w / 2 + 4;
     const ry = b.h / 2 + 4;
@@ -198,35 +246,52 @@ export function elementContains(el: CanvasElement, localPos: Point): boolean {
     const cy = b.y + b.h / 2;
     return ((localPos.x - cx) / rx) ** 2 + ((localPos.y - cy) / ry) ** 2 <= 1;
   }
-  if (el.type === 'diamond') {
+  if (el.type === "diamond") {
     const b = getBBox(el);
     const rx = b.w / 2;
     const ry = b.h / 2;
     if (rx <= 0 || ry <= 0) return false;
     const cx = b.x + rx;
     const cy = b.y + ry;
-    return Math.abs(localPos.x - cx) / (rx + 4) + Math.abs(localPos.y - cy) / (ry + 4) <= 1;
+    return (
+      Math.abs(localPos.x - cx) / (rx + 4) +
+        Math.abs(localPos.y - cy) / (ry + 4) <=
+      1
+    );
   }
-  if (el.type === 'line' || el.type === 'arrow') {
+  if (el.type === "line" || el.type === "arrow") {
     for (let i = 0; i < el.points.length - 1; i++) {
-      if (distanceToSegment(localPos, el.points[i], el.points[i + 1]) <= 6 + el.strokeWidth) return true;
+      if (
+        distanceToSegment(localPos, el.points[i], el.points[i + 1]) <=
+        6 + el.strokeWidth
+      )
+        return true;
     }
     return false;
   }
-  if (el.type === 'freedraw') {
+  if (el.type === "freedraw") {
     for (let i = 0; i < el.points.length - 1; i++) {
-      if (distanceToSegment(localPos, el.points[i], el.points[i + 1]) <= 6 + el.strokeWidth) return true;
+      if (
+        distanceToSegment(localPos, el.points[i], el.points[i + 1]) <=
+        6 + el.strokeWidth
+      )
+        return true;
     }
-    return el.points.length === 1 && distance(localPos, el.points[0]) <= 6 + el.strokeWidth;
+    return (
+      el.points.length === 1 &&
+      distance(localPos, el.points[0]) <= 6 + el.strokeWidth
+    );
   }
   return false;
 }
 
-export function computeSelectionFrame(members: CanvasElement[]): SelectionFrame | null {
+export function computeSelectionFrame(
+  members: CanvasElement[],
+): SelectionFrame | null {
   if (members.length === 0) return null;
   if (members.length === 1) {
     const el = members[0];
-    const isLine = el.type === 'line' || el.type === 'arrow';
+    const isLine = el.type === "line" || el.type === "arrow";
     return {
       bbox: getBBox(el),
       angle: el.angle || 0,
@@ -244,8 +309,14 @@ export function computeSelectionFrame(members: CanvasElement[]): SelectionFrame 
   return { bbox, angle: 0, center: { x: x0 + bbox.w / 2, y: y0 + bbox.h / 2 } };
 }
 
-export function getHandlePositions(frame: SelectionFrame): Record<string, Point> {
-  if (frame.isLine && frame.lineElement && frame.lineElement.points.length >= 2) {
+export function getHandlePositions(
+  frame: SelectionFrame,
+): Record<string, Point> {
+  if (
+    frame.isLine &&
+    frame.lineElement &&
+    frame.lineElement.points.length >= 2
+  ) {
     const pts = frame.lineElement.points;
     const p0 = pts[0];
     const pEnd = pts[pts.length - 1];
@@ -256,16 +327,20 @@ export function getHandlePositions(frame: SelectionFrame): Record<string, Point>
       pMid = { x: (p0.x + pEnd.x) / 2, y: (p0.y + pEnd.y) / 2 };
     }
     return {
-      'line-start': p0,
-      'line-mid': pMid,
-      'line-end': pEnd,
+      "line-start": p0,
+      "line-mid": pMid,
+      "line-end": pEnd,
     };
   }
 
   const b = frame.bbox;
   const PAD = 8;
-  const x0 = b.x - PAD, y0 = b.y - PAD, x1 = b.x + b.w + PAD, y1 = b.y + b.h + PAD;
-  const midX = (x0 + x1) / 2, midY = (y0 + y1) / 2;
+  const x0 = b.x - PAD,
+    y0 = b.y - PAD,
+    x1 = b.x + b.w + PAD,
+    y1 = b.y + b.h + PAD;
+  const midX = (x0 + x1) / 2,
+    midY = (y0 + y1) / 2;
   const local: Record<string, Point> = {
     nw: { x: x0, y: y0 },
     n: { x: midX, y: y0 },
@@ -284,7 +359,10 @@ export function getHandlePositions(frame: SelectionFrame): Record<string, Point>
   return screen;
 }
 
-export function hitTestHandle(pos: Point, frame: SelectionFrame): string | null {
+export function hitTestHandle(
+  pos: Point,
+  frame: SelectionFrame,
+): string | null {
   const handles = getHandlePositions(frame);
   for (const key in handles) {
     if (distance(pos, handles[key]) <= HANDLE_HIT_RADIUS) return key;
@@ -292,8 +370,13 @@ export function hitTestHandle(pos: Point, frame: SelectionFrame): string | null 
   return null;
 }
 
-export function isPointInsideSelectionFrame(pos: Point, frame: SelectionFrame): boolean {
-  const local = frame.angle ? rotatePoint(pos, frame.center, -frame.angle) : pos;
+export function isPointInsideSelectionFrame(
+  pos: Point,
+  frame: SelectionFrame,
+): boolean {
+  const local = frame.angle
+    ? rotatePoint(pos, frame.center, -frame.angle)
+    : pos;
   const PAD = 8;
   const b = frame.bbox;
   return (
@@ -315,21 +398,21 @@ export function getResizeCursor(handle: string, angle: number = 0): string {
     n: 270,
     ne: 315,
   };
-  if (!(handle in HANDLE_ANGLES)) return 'default';
+  if (!(handle in HANDLE_ANGLES)) return "default";
 
   const baseAngle = HANDLE_ANGLES[handle];
   const angleDeg = (angle * 180) / Math.PI;
-  const totalDeg = ((baseAngle + angleDeg) % 360 + 360) % 360;
+  const totalDeg = (((baseAngle + angleDeg) % 360) + 360) % 360;
 
   const mod180 = totalDeg % 180;
   if (mod180 >= 22.5 && mod180 < 67.5) {
-    return 'nwse-resize';
+    return "nwse-resize";
   }
   if (mod180 >= 67.5 && mod180 < 112.5) {
-    return 'ns-resize';
+    return "ns-resize";
   }
   if (mod180 >= 112.5 && mod180 < 157.5) {
-    return 'nesw-resize';
+    return "nesw-resize";
   }
-  return 'ew-resize';
+  return "ew-resize";
 }

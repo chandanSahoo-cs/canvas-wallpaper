@@ -1,6 +1,6 @@
-import { TextElement } from '../elements/types';
-import { newId, randomSeed } from '../lib/utils';
-import { useAppStore } from '../store/useAppStore';
+import { TextElement } from "../elements/types";
+import { newId, randomSeed } from "../lib/utils";
+import { useAppStore } from "../store/useAppStore";
 
 export function useTextEditing() {
   const editingText = useAppStore((s) => s.editingText);
@@ -32,7 +32,7 @@ export function useTextEditing() {
     } else if (text) {
       const el: TextElement = {
         id: newId(),
-        type: 'text',
+        type: "text",
         angle: editingText.angle || 0,
         locked: false,
         groupIds: [],
@@ -43,9 +43,9 @@ export function useTextEditing() {
         fontFamily:
           editingText.fontFamily ||
           useAppStore.getState().currentFontFamily ||
-          'handwritten',
+          "handwritten",
         strokeColor: editingText.strokeColor,
-        fillColor: 'transparent',
+        fillColor: "transparent",
         strokeWidth: useAppStore.getState().currentStrokeWidth,
         opacity: useAppStore.getState().currentOpacity,
         seed: randomSeed(),
@@ -57,12 +57,12 @@ export function useTextEditing() {
     }
 
     setEditingText(null);
-    setTool('selection');
+    setTool("selection");
   };
 
   const handleCancelText = () => {
     setEditingText(null);
-    setTool('selection');
+    setTool("selection");
   };
 
   return {

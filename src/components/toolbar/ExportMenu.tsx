@@ -1,15 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from "react";
+import { Download, FileCode, FileJson, Upload } from "lucide-react";
+import { exportWallpaperAsPng } from "../../hooks/useExport";
+import { exportWallpaperAsSvg } from "../../hooks/useSvgExport";
 import {
-  Download,
-  FileCode,
-  FileJson,
-  Upload,
-} from 'lucide-react';
-import { exportWallpaperAsPng } from '../../hooks/useExport';
-import { exportWallpaperAsSvg } from '../../hooks/useSvgExport';
-import { exportWallpaperFile, importWallpaperFile } from '../../hooks/useWallpaperFile';
-import { useSceneStore } from '../../store/useSceneStore';
-import { cn } from '../../lib/utils';
+  exportWallpaperFile,
+  importWallpaperFile,
+} from "../../hooks/useWallpaperFile";
+import { useSceneStore } from "../../store/useSceneStore";
+import { cn } from "../../lib/utils";
 
 export const ExportMenu: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,10 +21,10 @@ export const ExportMenu: React.FC = () => {
       }
     };
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
 
@@ -42,7 +40,7 @@ export const ExportMenu: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       await importWallpaperFile(file);
-      e.target.value = '';
+      e.target.value = "";
     }
   };
 
@@ -52,10 +50,10 @@ export const ExportMenu: React.FC = () => {
         title="Export / Share Wallpaper"
         onClick={() => setIsOpen((v) => !v)}
         className={cn(
-          'w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 cursor-pointer',
+          "w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 cursor-pointer",
           isOpen
-            ? 'bg-indigo-50 text-indigo-600'
-            : 'text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900'
+            ? "bg-indigo-50 text-indigo-600"
+            : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900",
         )}
       >
         <Download className="w-4 h-4" />

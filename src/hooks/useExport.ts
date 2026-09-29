@@ -1,8 +1,12 @@
-import rough from 'roughjs';
-import { useAppStore } from '../store/useAppStore';
-import { CanvasElement, Point, TextElement, ImageElement } from '../elements/types';
-import { getRoughDrawable, roughOptions } from '../canvas/rough-cache';
-import { getCenter, FONT_SIZE_MAP, getFontFamilyString } from '../canvas/geometry';
+import rough from "roughjs";
+import { useAppStore } from "../store/useAppStore";
+import { TextElement, ImageElement } from "../elements/types";
+import { getRoughDrawable, roughOptions } from "../canvas/rough-cache";
+import {
+  getCenter,
+  FONT_SIZE_MAP,
+  getFontFamilyString,
+} from "../canvas/geometry";
 
 export async function exportWallpaperAsPng(): Promise<void> {
   const state = useAppStore.getState();
@@ -12,16 +16,16 @@ export async function exportWallpaperAsPng(): Promise<void> {
   const height = window.innerHeight;
   const dpr = window.devicePixelRatio || 1;
 
-  const offscreen = document.createElement('canvas');
+  const offscreen = document.createElement("canvas");
   offscreen.width = width * dpr;
   offscreen.height = height * dpr;
-  const ctx = offscreen.getContext('2d');
+  const ctx = offscreen.getContext("2d");
   if (!ctx) return;
 
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   // 1. Draw background
-  if (background.type === 'image' && background.imageUrl) {
+  if (background.type === "image" && background.imageUrl) {
     const bgImg = new Image();
     bgImg.src = background.imageUrl;
     await new Promise((resolve) => {
@@ -42,19 +46,21 @@ export async function exportWallpaperAsPng(): Promise<void> {
     });
     ctx.drawImage(bgImg, 0, 0, width, height);
   } else {
-    ctx.fillStyle = background.color || '#14141a';
+    ctx.fillStyle = background.color || "#14141a";
     ctx.fillRect(0, 0, width, height);
   }
 
   // Draw pattern overlay if selected
-  if (background.pattern && background.pattern !== 'none') {
+  if (background.pattern && background.pattern !== "none") {
     ctx.save();
-    const isLight = background.color === '#f5f5f7';
-    const patColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.12)';
+    const isLight = background.color === "#f5f5f7";
+    const patColor = isLight
+      ? "rgba(0, 0, 0, 0.08)"
+      : "rgba(255, 255, 255, 0.12)";
     ctx.strokeStyle = patColor;
     ctx.fillStyle = patColor;
 
-    if (background.pattern === 'dots') {
+    if (background.pattern === "dots") {
       const step = 24;
       for (let x = 12; x < width; x += step) {
         for (let y = 12; y < height; y += step) {
@@ -63,7 +69,7 @@ export async function exportWallpaperAsPng(): Promise<void> {
           ctx.fill();
         }
       }
-    } else if (background.pattern === 'grid') {
+    } else if (background.pattern === "grid") {
       const step = 24;
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -76,7 +82,7 @@ export async function exportWallpaperAsPng(): Promise<void> {
         ctx.lineTo(width, y);
       }
       ctx.stroke();
-    } else if (background.pattern === 'lines') {
+    } else if (background.pattern === "lines") {
       const step = 28;
       ctx.lineWidth = 1;
       ctx.beginPath();
@@ -104,30 +110,36 @@ export async function exportWallpaperAsPng(): Promise<void> {
     }
 
     switch (el.type) {
-      case 'rectangle':
-      case 'diamond':
-      case 'ellipse': {
+      case "rectangle":
+      case "diamond":
+      case "ellipse": {
         const drawable = getRoughDrawable(el);
         if (drawable) rc.draw(drawable);
         break;
       }
-      case 'line': {
+      case "line": {
         const pts = el.points;
         if (pts.length === 2) {
           rc.line(pts[0].x, pts[0].y, pts[1].x, pts[1].y, roughOptions(el));
         } else if (pts.length > 2) {
-          rc.linearPath(pts.map((p) => [p.x, p.y]), roughOptions(el));
+          rc.linearPath(
+            pts.map((p) => [p.x, p.y]),
+            roughOptions(el),
+          );
         }
         break;
       }
-      case 'arrow': {
+      case "arrow": {
         const pts = el.points;
         if (pts.length < 2) break;
         const opts = roughOptions(el);
         if (pts.length === 2) {
           rc.line(pts[0].x, pts[0].y, pts[1].x, pts[1].y, opts);
         } else {
-          rc.linearPath(pts.map((p) => [p.x, p.y]), opts);
+          rc.linearPath(
+            pts.map((p) => [p.x, p.y]),
+            opts,
+          );
         }
         const pLast = pts[pts.length - 1];
         const pPrev = pts[pts.length - 2];
@@ -135,15 +147,27 @@ export async function exportWallpaperAsPng(): Promise<void> {
         const headLen = 10 + el.strokeWidth * 3;
         const a1 = angle + Math.PI - 0.5;
         const a2 = angle + Math.PI + 0.5;
-        rc.line(pLast.x, pLast.y, pLast.x + headLen * Math.cos(a1), pLast.y + headLen * Math.sin(a1), opts);
-        rc.line(pLast.x, pLast.y, pLast.x + headLen * Math.cos(a2), pLast.y + headLen * Math.sin(a2), opts);
+        rc.line(
+          pLast.x,
+          pLast.y,
+          pLast.x + headLen * Math.cos(a1),
+          pLast.y + headLen * Math.sin(a1),
+          opts,
+        );
+        rc.line(
+          pLast.x,
+          pLast.y,
+          pLast.x + headLen * Math.cos(a2),
+          pLast.y + headLen * Math.sin(a2),
+          opts,
+        );
         break;
       }
-      case 'freedraw': {
+      case "freedraw": {
         const pts = el.points;
         if (pts.length > 0) {
-          ctx.lineJoin = 'round';
-          ctx.lineCap = 'round';
+          ctx.lineJoin = "round";
+          ctx.lineCap = "round";
           ctx.lineWidth = el.strokeWidth * 2.2;
           ctx.strokeStyle = el.strokeColor;
           ctx.beginPath();
@@ -163,22 +187,27 @@ export async function exportWallpaperAsPng(): Promise<void> {
         }
         break;
       }
-      case 'text': {
+      case "text": {
         const textEl = el as TextElement;
-        const textStr = typeof textEl.text === 'string' ? textEl.text : '';
+        const textStr = typeof textEl.text === "string" ? textEl.text : "";
         if (!textStr) break;
-        const fontSize = textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
+        const fontSize =
+          textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
         ctx.font = `${fontSize}px ${getFontFamilyString(textEl.fontFamily)}`;
-        ctx.fillStyle = textEl.strokeColor || '#1e1e1e';
-        ctx.textBaseline = 'top';
-        const lines = textStr.split('\n');
+        ctx.fillStyle = textEl.strokeColor || "#1e1e1e";
+        ctx.textBaseline = "top";
+        const lines = textStr.split("\n");
         const lineHeight = fontSize * 1.25;
         for (let i = 0; i < lines.length; i++) {
-          ctx.fillText(lines[i], textEl.x ?? 0, (textEl.y ?? 0) + i * lineHeight);
+          ctx.fillText(
+            lines[i],
+            textEl.x ?? 0,
+            (textEl.y ?? 0) + i * lineHeight,
+          );
         }
         break;
       }
-      case 'image': {
+      case "image": {
         const imgEl = el as ImageElement;
         const img = new Image();
         img.src = imgEl.dataUrl;
@@ -199,8 +228,8 @@ export async function exportWallpaperAsPng(): Promise<void> {
   }
 
   // 3. Export to PNG and download
-  const dataUrl = offscreen.toDataURL('image/png');
-  const a = document.createElement('a');
+  const dataUrl = offscreen.toDataURL("image/png");
+  const a = document.createElement("a");
   a.href = dataUrl;
   a.download = `wallpaper-${Date.now()}.png`;
   document.body.appendChild(a);

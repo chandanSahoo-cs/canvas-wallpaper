@@ -1,5 +1,5 @@
-import { CanvasElement } from '../elements/types';
-import { newId } from './utils';
+import { CanvasElement } from "../elements/types";
+import { newId } from "./utils";
 
 /**
  * Returns all elements that share any group ID in common with seedIds (transitively).
@@ -8,7 +8,7 @@ import { newId } from './utils';
  */
 export function getConnectedGroupElementIds(
   elements: CanvasElement[],
-  seedIds: Iterable<string>
+  seedIds: Iterable<string>,
 ): Set<string> {
   const result = new Set<string>(seedIds);
   if (result.size === 0) return result;
@@ -48,7 +48,7 @@ export function getConnectedGroupElementIds(
  */
 export function getElementsInGroup(
   elements: CanvasElement[],
-  groupId: string
+  groupId: string,
 ): CanvasElement[] {
   return elements.filter((el) => el.groupIds && el.groupIds.includes(groupId));
 }
@@ -58,7 +58,7 @@ export function getElementsInGroup(
  */
 export function groupElements(
   elements: CanvasElement[],
-  selectedIds: Set<string>
+  selectedIds: Set<string>,
 ): { elements: CanvasElement[]; newGroupId: string } {
   const newGroupId = newId();
   const updatedElements = elements.map((el) => {
@@ -76,7 +76,7 @@ export function groupElements(
  */
 export function ungroupElements(
   elements: CanvasElement[],
-  selectedIds: Set<string>
+  selectedIds: Set<string>,
 ): CanvasElement[] {
   // Find outermost group IDs present on the selected elements
   const targetGroupIds = new Set<string>();
@@ -88,7 +88,8 @@ export function ungroupElements(
 
   if (targetGroupIds.size === 0) {
     return elements.map((el) => {
-      if (!selectedIds.has(el.id) || !el.groupIds || el.groupIds.length === 0) return el;
+      if (!selectedIds.has(el.id) || !el.groupIds || el.groupIds.length === 0)
+        return el;
       return {
         ...el,
         groupIds: el.groupIds.slice(0, -1),
@@ -98,7 +99,9 @@ export function ungroupElements(
 
   return elements.map((el) => {
     if (!el.groupIds || el.groupIds.length === 0) return el;
-    const filteredGroupIds = el.groupIds.filter((gid) => !targetGroupIds.has(gid));
+    const filteredGroupIds = el.groupIds.filter(
+      (gid) => !targetGroupIds.has(gid),
+    );
     if (filteredGroupIds.length === el.groupIds.length) return el;
     return {
       ...el,

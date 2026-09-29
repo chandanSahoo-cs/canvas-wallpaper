@@ -1,19 +1,25 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 import {
-  CanvasElement,
-  ToolType,
-  Point,
-  FillStyle,
-  StrokeStyle,
   BackgroundConfig,
+  CanvasElement,
+  FillStyle,
   FontFamily,
-} from '../elements/types';
-import { newId, isColorLight, randomSeed } from '../lib/utils';
-import { getCenter, rotatePoint } from '../canvas/geometry';
-import { getConnectedGroupElementIds, groupElements, ungroupElements } from '../lib/groups';
-import { getDefaultWallpaperElements } from '../lib/defaultWallpaperPreset';
-import { duplicateElements, preparePastedElements } from './clipboardHelpers';
-import { saveAppStoreToStorage, loadAppStoreFromStorage } from './storagePersistence';
+  Point,
+  StrokeStyle,
+  ToolType,
+} from "../elements/types";
+import { getDefaultWallpaperElements } from "../lib/defaultWallpaperPreset";
+import {
+  getConnectedGroupElementIds,
+  groupElements,
+  ungroupElements,
+} from "../lib/groups";
+import { isColorLight } from "../lib/utils";
+import { duplicateElements, preparePastedElements } from "./clipboardHelpers";
+import {
+  loadAppStoreFromStorage,
+  saveAppStoreToStorage,
+} from "./storagePersistence";
 
 export const HISTORY_LIMIT = 50;
 
@@ -29,7 +35,7 @@ export interface TextEditorState {
 }
 
 export interface AppState {
-  mode: 'wallpaper' | 'drawing';
+  mode: "wallpaper" | "drawing";
   currentTool: ToolType;
   elements: CanvasElement[];
   selectedIds: Set<string>;
@@ -59,7 +65,7 @@ export interface AppState {
   future: CanvasElement[][];
 
   // Actions
-  setMode: (mode: 'wallpaper' | 'drawing') => void;
+  setMode: (mode: "wallpaper" | "drawing") => void;
   togglePreview: () => void;
   setTool: (tool: ToolType) => void;
   setElements: (elements: CanvasElement[]) => void;
@@ -74,21 +80,31 @@ export interface AppState {
   resetZoom: () => void;
 
   setBackground: (bg: Partial<BackgroundConfig> | string) => void;
-  setCurrentStyles: (styles: Partial<{
-    strokeColor: string;
-    fillColor: string;
-    fillStyle: FillStyle;
-    strokeWidth: number;
-    strokeStyle: StrokeStyle;
-    roughness: number;
-    opacity: number;
-    fontFamily: FontFamily;
-  }>) => void;
+  setCurrentStyles: (
+    styles: Partial<{
+      strokeColor: string;
+      fillColor: string;
+      fillStyle: FillStyle;
+      strokeWidth: number;
+      strokeStyle: StrokeStyle;
+      roughness: number;
+      opacity: number;
+      fontFamily: FontFamily;
+    }>,
+  ) => void;
 
   // Manipulation on selected
-  updateElement: (id: string, updates: Partial<CanvasElement>, shouldSave?: boolean) => void;
+  updateElement: (
+    id: string,
+    updates: Partial<CanvasElement>,
+    shouldSave?: boolean,
+  ) => void;
   updateSelectedElements: (updates: Partial<CanvasElement>) => void;
-  moveSelected: (snapshots: { id: string; snapshot: CanvasElement }[], dx: number, dy: number) => void;
+  moveSelected: (
+    snapshots: { id: string; snapshot: CanvasElement }[],
+    dx: number,
+    dy: number,
+  ) => void;
   deleteSelected: () => void;
   duplicateSelected: () => void;
   copySelected: () => void;
@@ -116,8 +132,8 @@ export interface AppState {
 let pasteOffsetMultiplier = 1;
 
 export const useAppStore = create<AppState>((set, get) => ({
-  mode: 'wallpaper',
-  currentTool: 'selection',
+  mode: "wallpaper",
+  currentTool: "selection",
   elements: getDefaultWallpaperElements(),
   selectedIds: new Set<string>(),
   clipboard: [],
@@ -129,18 +145,18 @@ export const useAppStore = create<AppState>((set, get) => ({
   scrollOffset: { x: 0, y: 0 },
 
   background: {
-    type: 'color',
-    color: '#14141a',
+    type: "color",
+    color: "#14141a",
   },
 
-  currentStrokeColor: '#ffffff',
-  currentFillColor: 'transparent',
-  currentFillStyle: 'solid',
+  currentStrokeColor: "#ffffff",
+  currentFillColor: "transparent",
+  currentFillStyle: "solid",
   currentStrokeWidth: 1.5,
-  currentStrokeStyle: 'solid',
+  currentStrokeStyle: "solid",
   currentRoughness: 1.4,
   currentOpacity: 100,
-  currentFontFamily: 'handwritten',
+  currentFontFamily: "handwritten",
 
   history: [],
   future: [],
@@ -151,7 +167,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       draft: null,
       selectedIds: new Set(),
       isPreviewing: false,
-      currentTool: mode === 'drawing' ? 'selection' : 'selection',
+      currentTool: mode === "drawing" ? "selection" : "selection",
     });
   },
 
@@ -161,7 +177,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({
       currentTool: tool,
       draft: null,
-      selectedIds: tool === 'selection' ? get().selectedIds : new Set(),
+      selectedIds: tool === "selection" ? get().selectedIds : new Set(),
     });
   },
 
@@ -177,14 +193,18 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (firstSelected) {
       set({
         selectedIds: next,
-        currentStrokeColor: firstSelected.strokeColor ?? get().currentStrokeColor,
+        currentStrokeColor:
+          firstSelected.strokeColor ?? get().currentStrokeColor,
         currentFillColor: firstSelected.fillColor ?? get().currentFillColor,
-        currentStrokeWidth: firstSelected.strokeWidth ?? get().currentStrokeWidth,
-        currentStrokeStyle: firstSelected.strokeStyle ?? get().currentStrokeStyle,
+        currentStrokeWidth:
+          firstSelected.strokeWidth ?? get().currentStrokeWidth,
+        currentStrokeStyle:
+          firstSelected.strokeStyle ?? get().currentStrokeStyle,
         currentFillStyle: firstSelected.fillStyle ?? get().currentFillStyle,
         currentRoughness: firstSelected.roughness ?? get().currentRoughness,
         currentOpacity: firstSelected.opacity ?? get().currentOpacity,
-        currentFontFamily: (firstSelected as any).fontFamily ?? get().currentFontFamily,
+        currentFontFamily:
+          (firstSelected as any).fontFamily ?? get().currentFontFamily,
       });
     } else {
       set({ selectedIds: next });
@@ -194,21 +214,27 @@ export const useAppStore = create<AppState>((set, get) => ({
   toggleSelectedId: (id) => {
     const { elements, selectedIds } = get();
     const groupMemberIds = getConnectedGroupElementIds(elements, [id]);
-    const allIn = Array.from(groupMemberIds).every((gid) => selectedIds.has(gid));
+    const allIn = Array.from(groupMemberIds).every((gid) =>
+      selectedIds.has(gid),
+    );
     const next = new Set(selectedIds);
     groupMemberIds.forEach((gid) => (allIn ? next.delete(gid) : next.add(gid)));
     const firstSelected = elements.find((e) => next.has(e.id));
     if (firstSelected) {
       set({
         selectedIds: next,
-        currentStrokeColor: firstSelected.strokeColor ?? get().currentStrokeColor,
+        currentStrokeColor:
+          firstSelected.strokeColor ?? get().currentStrokeColor,
         currentFillColor: firstSelected.fillColor ?? get().currentFillColor,
-        currentStrokeWidth: firstSelected.strokeWidth ?? get().currentStrokeWidth,
-        currentStrokeStyle: firstSelected.strokeStyle ?? get().currentStrokeStyle,
+        currentStrokeWidth:
+          firstSelected.strokeWidth ?? get().currentStrokeWidth,
+        currentStrokeStyle:
+          firstSelected.strokeStyle ?? get().currentStrokeStyle,
         currentFillStyle: firstSelected.fillStyle ?? get().currentFillStyle,
         currentRoughness: firstSelected.roughness ?? get().currentRoughness,
         currentOpacity: firstSelected.opacity ?? get().currentOpacity,
-        currentFontFamily: (firstSelected as any).fontFamily ?? get().currentFontFamily,
+        currentFontFamily:
+          (firstSelected as any).fontFamily ?? get().currentFontFamily,
       });
     } else {
       set({ selectedIds: next });
@@ -231,14 +257,18 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (firstSelected) {
         set({
           selectedIds: next,
-          currentStrokeColor: firstSelected.strokeColor ?? get().currentStrokeColor,
+          currentStrokeColor:
+            firstSelected.strokeColor ?? get().currentStrokeColor,
           currentFillColor: firstSelected.fillColor ?? get().currentFillColor,
-          currentStrokeWidth: firstSelected.strokeWidth ?? get().currentStrokeWidth,
-          currentStrokeStyle: firstSelected.strokeStyle ?? get().currentStrokeStyle,
+          currentStrokeWidth:
+            firstSelected.strokeWidth ?? get().currentStrokeWidth,
+          currentStrokeStyle:
+            firstSelected.strokeStyle ?? get().currentStrokeStyle,
           currentFillStyle: firstSelected.fillStyle ?? get().currentFillStyle,
           currentRoughness: firstSelected.roughness ?? get().currentRoughness,
           currentOpacity: firstSelected.opacity ?? get().currentOpacity,
-          currentFontFamily: (firstSelected as any).fontFamily ?? get().currentFontFamily,
+          currentFontFamily:
+            (firstSelected as any).fontFamily ?? get().currentFontFamily,
         });
       } else {
         set({ selectedIds: next });
@@ -259,12 +289,16 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   setZoom: (zoomOrFn) => {
-    const next = typeof zoomOrFn === 'function' ? zoomOrFn(get().zoom) : zoomOrFn;
+    const next =
+      typeof zoomOrFn === "function" ? zoomOrFn(get().zoom) : zoomOrFn;
     set({ zoom: Math.max(0.5, Math.min(5.0, next)) });
   },
 
   setScrollOffset: (offsetOrFn) => {
-    const next = typeof offsetOrFn === 'function' ? offsetOrFn(get().scrollOffset) : offsetOrFn;
+    const next =
+      typeof offsetOrFn === "function"
+        ? offsetOrFn(get().scrollOffset)
+        : offsetOrFn;
     set({ scrollOffset: next });
   },
 
@@ -272,12 +306,13 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setBackground: (bg) => {
     const prevBg = get().background;
-    const newBg: BackgroundConfig = typeof bg === 'string'
-      ? { type: 'color', color: bg }
-      : { ...prevBg, ...bg, type: bg.type || prevBg.type || 'color' };
+    const newBg: BackgroundConfig =
+      typeof bg === "string"
+        ? { type: "color", color: bg }
+        : { ...prevBg, ...bg, type: bg.type || prevBg.type || "color" };
 
-    const prevColor = prevBg.color || '#14141a';
-    const newColor = newBg.color || '#14141a';
+    const prevColor = prevBg.color || "#14141a";
+    const newColor = newBg.color || "#14141a";
     const prevIsLight = isColorLight(prevColor);
     const newIsLight = isColorLight(newColor);
 
@@ -288,20 +323,27 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (prevIsLight !== newIsLight) {
       if (newIsLight) {
         // Switched to light background: default stroke becomes black (#1e1e1e)
-        if (nextStroke === '#ffffff') nextStroke = '#1e1e1e';
+        if (nextStroke === "#ffffff") nextStroke = "#1e1e1e";
         nextElements = nextElements.map((el) =>
-          el.strokeColor === '#ffffff' ? { ...el, strokeColor: '#1e1e1e' } : el
+          el.strokeColor === "#ffffff" ? { ...el, strokeColor: "#1e1e1e" } : el,
         );
       } else {
         // Switched to dark background: default stroke becomes white (#ffffff)
-        if (nextStroke === '#1e1e1e' || nextStroke === '#000000') nextStroke = '#ffffff';
+        if (nextStroke === "#1e1e1e" || nextStroke === "#000000")
+          nextStroke = "#ffffff";
         nextElements = nextElements.map((el) =>
-          el.strokeColor === '#1e1e1e' || el.strokeColor === '#000000' ? { ...el, strokeColor: '#ffffff' } : el
+          el.strokeColor === "#1e1e1e" || el.strokeColor === "#000000"
+            ? { ...el, strokeColor: "#ffffff" }
+            : el,
         );
       }
     }
 
-    set({ background: newBg, currentStrokeColor: nextStroke, elements: nextElements });
+    set({
+      background: newBg,
+      currentStrokeColor: nextStroke,
+      elements: nextElements,
+    });
     get().saveToStorage();
   },
 
@@ -319,7 +361,9 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   updateElement: (id, updates, shouldSave = true) => {
     set((state) => ({
-      elements: state.elements.map((el) => (el.id === id ? { ...el, ...updates } as CanvasElement : el)),
+      elements: state.elements.map((el) =>
+        el.id === id ? ({ ...el, ...updates } as CanvasElement) : el,
+      ),
     }));
     if (shouldSave) {
       get().saveToStorage();
@@ -332,7 +376,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     get().pushHistory();
     set((state) => ({
       elements: state.elements.map((el) =>
-        selectedIds.has(el.id) && !el.locked ? ({ ...el, ...updates } as CanvasElement) : el
+        selectedIds.has(el.id) && !el.locked
+          ? ({ ...el, ...updates } as CanvasElement)
+          : el,
       ),
     }));
     get().saveToStorage();
@@ -344,12 +390,12 @@ export const useAppStore = create<AppState>((set, get) => ({
       elements: state.elements.map((el) => {
         const snap = snapMap.get(el.id);
         if (!snap || el.locked) return el;
-        if ('points' in snap && snap.points) {
+        if ("points" in snap && snap.points) {
           return {
             ...el,
             points: snap.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
           } as CanvasElement;
-        } else if ('x' in snap && 'y' in snap) {
+        } else if ("x" in snap && "y" in snap) {
           return {
             ...el,
             x: snap.x + dx,
@@ -366,8 +412,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (selectedIds.size === 0) return;
     get().pushHistory();
     set((state) => ({
-      elements: state.elements.filter((el) => !(selectedIds.has(el.id) && !el.locked)),
-      selectedIds: new Set([...selectedIds].filter((id) => state.elements.some((e) => e.id === id && e.locked))),
+      elements: state.elements.filter(
+        (el) => !(selectedIds.has(el.id) && !el.locked),
+      ),
+      selectedIds: new Set(
+        [...selectedIds].filter((id) =>
+          state.elements.some((e) => e.id === id && e.locked),
+        ),
+      ),
     }));
     get().saveToStorage();
   },
@@ -389,7 +441,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   copySelected: () => {
     const { elements, selectedIds } = get();
     if (selectedIds.size === 0) return;
-    const selected = elements.filter((el) => selectedIds.has(el.id) && !el.locked);
+    const selected = elements.filter(
+      (el) => selectedIds.has(el.id) && !el.locked,
+    );
     if (selected.length === 0) return;
 
     pasteOffsetMultiplier = 1;
@@ -397,14 +451,14 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ clipboard: cloned });
 
     try {
-      if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
         navigator.clipboard
           .writeText(
             JSON.stringify({
-              type: 'canvas-elements',
+              type: "canvas-elements",
               version: 1,
               elements: cloned,
-            })
+            }),
           )
           .catch(() => {});
       }
@@ -421,20 +475,24 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   pasteClipboard: (elementsToPaste?: CanvasElement[]) => {
-    const { elements } = get();
     const source =
-      elementsToPaste && elementsToPaste.length > 0 ? elementsToPaste : get().clipboard;
+      elementsToPaste && elementsToPaste.length > 0
+        ? elementsToPaste
+        : get().clipboard;
     if (!source || source.length === 0) return;
 
     get().pushHistory();
 
-    const { newElements, newIds, nextMultiplier } = preparePastedElements(source, pasteOffsetMultiplier);
+    const { newElements, newIds, nextMultiplier } = preparePastedElements(
+      source,
+      pasteOffsetMultiplier,
+    );
     pasteOffsetMultiplier = nextMultiplier;
 
     set((state) => ({
       elements: [...state.elements, ...newElements],
       selectedIds: new Set(newIds),
-      currentTool: 'selection',
+      currentTool: "selection",
     }));
     get().saveToStorage();
   },
@@ -443,10 +501,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     const { elements, selectedIds } = get();
     if (selectedIds.size === 0) return;
     get().pushHistory();
-    const shouldLock = elements.some((el) => selectedIds.has(el.id) && !el.locked);
+    const shouldLock = elements.some(
+      (el) => selectedIds.has(el.id) && !el.locked,
+    );
     set((state) => ({
       elements: state.elements.map((el) =>
-        selectedIds.has(el.id) ? { ...el, locked: shouldLock } : el
+        selectedIds.has(el.id) ? { ...el, locked: shouldLock } : el,
       ),
     }));
     get().saveToStorage();

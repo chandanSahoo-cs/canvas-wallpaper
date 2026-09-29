@@ -1,10 +1,6 @@
-import { Tool, ToolContext } from './types';
-import { useAppStore } from '../store/useAppStore';
-import {
-  Point,
-  LineElement,
-  ArrowElement,
-} from '../elements/types';
+import { Tool, ToolContext } from "./types";
+import { useAppStore } from "../store/useAppStore";
+import { Point, LineElement, ArrowElement } from "../elements/types";
 import {
   computeSelectionFrame,
   hitTestHandle,
@@ -17,21 +13,20 @@ import {
   getBBox,
   getScreenBBox,
   distance,
-  SelectionFrame,
   getHandlePositions,
   RotationOverlay,
   getResizeCursor,
-} from '../canvas/geometry';
+} from "../canvas/geometry";
 import {
   ResizeState,
   RotateState,
   MoveState,
   MarqueeState,
   LineHandleState,
-} from './selection/types';
-import { handleResizePointerMove } from './selection/resizeHandlers';
-import { handleRotatePointerMove } from './selection/rotateHandlers';
-import { handleLineHandlePointerMove } from './selection/lineHandlers';
+} from "./selection/types";
+import { handleResizePointerMove } from "./selection/resizeHandlers";
+import { handleRotatePointerMove } from "./selection/rotateHandlers";
+import { handleLineHandlePointerMove } from "./selection/lineHandlers";
 
 export class SelectionTool implements Tool {
   private resizeState: ResizeState | null = null;
@@ -71,13 +66,17 @@ export class SelectionTool implements Tool {
     canvas.setPointerCapture(e.pointerId);
 
     const selectedMembers = elements.filter((el) => selectedIds.has(el.id));
-    const allLocked = selectedMembers.length > 0 && selectedMembers.every((el) => el.locked);
+    const allLocked =
+      selectedMembers.length > 0 && selectedMembers.every((el) => el.locked);
     const anyLocked = selectedMembers.some((el) => el.locked);
-    const hasGroup = selectedMembers.some((el) => el.groupIds && el.groupIds.length > 0);
+    const hasGroup = selectedMembers.some(
+      (el) => el.groupIds && el.groupIds.length > 0,
+    );
     const isGrouped =
       hasGroup &&
       (selectedMembers.length > 1 ||
-        (selectedMembers[0]?.groupIds && selectedMembers[0].groupIds.length > 0));
+        (selectedMembers[0]?.groupIds &&
+          selectedMembers[0].groupIds.length > 0));
 
     // Check hit on Lock marker or Group marker of selection
     if (selectedMembers.length > 0) {
@@ -96,7 +95,7 @@ export class SelectionTool implements Tool {
           const lockPos = rotatePoint(
             { x: x1 + lockOffset, y: y0 - 14 },
             frame.center,
-            frame.angle
+            frame.angle,
           );
           if (distance(pos, lockPos) <= 14) {
             store.toggleLockSelected();
@@ -108,7 +107,7 @@ export class SelectionTool implements Tool {
           const groupPos = rotatePoint(
             { x: x0 + groupOffset, y: y0 - 14 },
             frame.center,
-            frame.angle
+            frame.angle,
           );
           if (distance(pos, groupPos) <= 14) {
             store.ungroupSelected();
@@ -124,7 +123,11 @@ export class SelectionTool implements Tool {
       if (el.locked && !selectedIds.has(el.id)) {
         const b = getBBox(el);
         const center = getCenter(el);
-        const tr = rotatePoint({ x: b.x + b.w + 4, y: b.y - 12 }, center, el.angle || 0);
+        const tr = rotatePoint(
+          { x: b.x + b.w + 4, y: b.y - 12 },
+          center,
+          el.angle || 0,
+        );
         if (distance(pos, tr) <= 14) {
           store.setSelectedIds(new Set([el.id]));
           store.toggleLockSelected();
@@ -138,17 +141,17 @@ export class SelectionTool implements Tool {
       const frame = computeSelectionFrame(selectedMembers);
       if (frame) {
         const handle = hitTestHandle(pos, frame);
-        if (handle && handle.startsWith('line-')) {
+        if (handle && handle.startsWith("line-")) {
           const el = selectedMembers[0] as LineElement | ArrowElement;
           this.lineHandleState = {
-            handle: handle as 'line-start' | 'line-mid' | 'line-end',
+            handle: handle as "line-start" | "line-mid" | "line-end",
             elementId: el.id,
             initialPoints: JSON.parse(JSON.stringify(el.points)),
             historyPushed: false,
           };
           return;
         }
-        if (handle === 'rotate') {
+        if (handle === "rotate") {
           const members = selectedMembers
             .filter((el) => !el.locked)
             .map((el) => ({
@@ -158,12 +161,17 @@ export class SelectionTool implements Tool {
               origCenter: getCenter(el),
             }));
           if (members.length > 0) {
-            const startPointerAngle = Math.atan2(pos.y - frame.center.y, pos.x - frame.center.x);
+            const startPointerAngle = Math.atan2(
+              pos.y - frame.center.y,
+              pos.x - frame.center.x,
+            );
             const firstAngle = members[0].startAngle;
             const allSameAngle = members.every(
-              (m) => Math.abs(m.startAngle - firstAngle) < 1e-4
+              (m) => Math.abs(m.startAngle - firstAngle) < 1e-4,
             );
-            const initialDegrees = angleToDegrees(allSameAngle ? firstAngle : 0);
+            const initialDegrees = angleToDegrees(
+              allSameAngle ? firstAngle : 0,
+            );
             const handles = getHandlePositions(frame);
             this.rotateState = {
               center: frame.center,
@@ -184,7 +192,10 @@ export class SelectionTool implements Tool {
         if (handle) {
           const members = selectedMembers
             .filter((el) => !el.locked)
-            .map((el) => ({ id: el.id, snapshot: JSON.parse(JSON.stringify(el)) }));
+            .map((el) => ({
+              id: el.id,
+              snapshot: JSON.parse(JSON.stringify(el)),
+            }));
           if (members.length > 0) {
             this.resizeState = {
               handle,
@@ -207,17 +218,23 @@ export class SelectionTool implements Tool {
         frame &&
         (isPointInsideSelectionFrame(pos, frame) ||
           selectedMembers.some((el) => {
-            const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
+            const local = el.angle
+              ? rotatePoint(pos, getCenter(el), -el.angle)
+              : pos;
             return elementContains(el, local);
           }));
 
       if (isInsideSelection) {
-        const currentSelectedMembers = selectedMembers.filter((el) => !el.locked);
+        const currentSelectedMembers = selectedMembers.filter(
+          (el) => !el.locked,
+        );
         const snaps = currentSelectedMembers.map((el) => ({
           id: el.id,
           snapshot: JSON.parse(JSON.stringify(el)),
         }));
-        this.moveState = snaps.length ? { pos, snapshots: snaps, historyPushed: false } : null;
+        this.moveState = snaps.length
+          ? { pos, snapshots: snaps, historyPushed: false }
+          : null;
         return;
       }
     }
@@ -236,12 +253,16 @@ export class SelectionTool implements Tool {
 
         const currentSelectedMembers = useAppStore
           .getState()
-          .elements.filter((m) => useAppStore.getState().selectedIds.has(m.id) && !m.locked);
+          .elements.filter(
+            (m) => useAppStore.getState().selectedIds.has(m.id) && !m.locked,
+          );
         const snaps = currentSelectedMembers.map((m) => ({
           id: m.id,
           snapshot: JSON.parse(JSON.stringify(m)),
         }));
-        this.moveState = snaps.length ? { pos, snapshots: snaps, historyPushed: false } : null;
+        this.moveState = snaps.length
+          ? { pos, snapshots: snaps, historyPushed: false }
+          : null;
         return;
       }
     }
@@ -262,7 +283,12 @@ export class SelectionTool implements Tool {
         store.pushHistory();
         this.lineHandleState.historyPushed = true;
       }
-      handleLineHandlePointerMove(pos, this.lineHandleState, e, store.updateElement);
+      handleLineHandlePointerMove(
+        pos,
+        this.lineHandleState,
+        e,
+        store.updateElement,
+      );
       return;
     }
 
@@ -367,22 +393,27 @@ export class SelectionTool implements Tool {
   }
 
   getCursor(pos?: Point): string {
-    if (this.lineHandleState) return 'crosshair';
-    if (this.rotateState) return 'grabbing';
+    if (this.lineHandleState) return "crosshair";
+    if (this.rotateState) return "grabbing";
     if (this.resizeState) {
       return getResizeCursor(this.resizeState.handle, this.resizeState.angle);
     }
-    if (!pos) return 'default';
+    if (!pos) return "default";
     const store = useAppStore.getState();
-    const selectedMembers = store.elements.filter((el) => store.selectedIds.has(el.id));
+    const selectedMembers = store.elements.filter((el) =>
+      store.selectedIds.has(el.id),
+    );
     if (selectedMembers.length > 0) {
       const anyLocked = selectedMembers.some((el) => el.locked);
       const allLocked = selectedMembers.every((el) => el.locked);
-      const hasGroup = selectedMembers.some((el) => el.groupIds && el.groupIds.length > 0);
+      const hasGroup = selectedMembers.some(
+        (el) => el.groupIds && el.groupIds.length > 0,
+      );
       const isGrouped =
         hasGroup &&
         (selectedMembers.length > 1 ||
-          (selectedMembers[0]?.groupIds && selectedMembers[0].groupIds.length > 0));
+          (selectedMembers[0]?.groupIds &&
+            selectedMembers[0].groupIds.length > 0));
 
       const frame = computeSelectionFrame(selectedMembers);
       if (frame) {
@@ -399,35 +430,37 @@ export class SelectionTool implements Tool {
           const lockPos = rotatePoint(
             { x: x1 + lockOffset, y: y0 - 14 },
             frame.center,
-            frame.angle
+            frame.angle,
           );
-          if (distance(pos, lockPos) <= 14) return 'pointer';
+          if (distance(pos, lockPos) <= 14) return "pointer";
         }
 
         if (isGrouped) {
           const groupPos = rotatePoint(
             { x: x0 + groupOffset, y: y0 - 14 },
             frame.center,
-            frame.angle
+            frame.angle,
           );
-          if (distance(pos, groupPos) <= 14) return 'pointer';
+          if (distance(pos, groupPos) <= 14) return "pointer";
         }
 
         if (!allLocked) {
           const handle = hitTestHandle(pos, frame);
-          if (handle && handle.startsWith('line-')) return 'crosshair';
-          if (handle === 'rotate') return 'grab';
+          if (handle && handle.startsWith("line-")) return "crosshair";
+          if (handle === "rotate") return "grab";
           if (handle) {
             return getResizeCursor(handle, frame.angle);
           }
           if (
             isPointInsideSelectionFrame(pos, frame) ||
             selectedMembers.some((el) => {
-              const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
+              const local = el.angle
+                ? rotatePoint(pos, getCenter(el), -el.angle)
+                : pos;
               return elementContains(el, local);
             })
           ) {
-            return 'move';
+            return "move";
           }
         }
       }
@@ -438,11 +471,15 @@ export class SelectionTool implements Tool {
       if (el.locked && !store.selectedIds.has(el.id)) {
         const b = getBBox(el);
         const center = getCenter(el);
-        const tr = rotatePoint({ x: b.x + b.w + 4, y: b.y - 12 }, center, el.angle || 0);
-        if (distance(pos, tr) <= 14) return 'pointer';
+        const tr = rotatePoint(
+          { x: b.x + b.w + 4, y: b.y - 12 },
+          center,
+          el.angle || 0,
+        );
+        if (distance(pos, tr) <= 14) return "pointer";
       }
     }
 
-    return 'default';
+    return "default";
   }
 }
