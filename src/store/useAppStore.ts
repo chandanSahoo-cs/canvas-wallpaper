@@ -79,6 +79,10 @@ export interface AppState {
   setScrollOffset: (offset: Point | ((prev: Point) => Point)) => void;
   resetZoom: () => void;
 
+  canvasMode: "viewport" | "infinite";
+  setCanvasMode: (mode: "viewport" | "infinite") => void;
+  toggleCanvasMode: () => void;
+
   setBackground: (bg: Partial<BackgroundConfig> | string) => void;
   setCurrentStyles: (
     styles: Partial<{
@@ -143,6 +147,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   zoom: 1.0,
   scrollOffset: { x: 0, y: 0 },
+  canvasMode: "viewport",
 
   background: {
     type: "color",
@@ -291,7 +296,14 @@ export const useAppStore = create<AppState>((set, get) => ({
   setZoom: (zoomOrFn) => {
     const next =
       typeof zoomOrFn === "function" ? zoomOrFn(get().zoom) : zoomOrFn;
-    set({ zoom: Math.max(0.5, Math.min(5.0, next)) });
+    const minZ = get().canvasMode === "viewport" ? 1.0 : 0.5;
+    const clampedZoom = Math.max(minZ, Math.min(5.0, next));
+    set({
+      zoom: clampedZoom,
+      ...(clampedZoom === 1.0 && get().canvasMode === "viewport"
+        ? { scrollOffset: { x: 0, y: 0 } }
+        : {}),
+    });
   },
 
   setScrollOffset: (offsetOrFn) => {
@@ -303,6 +315,22 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   resetZoom: () => set({ zoom: 1.0, scrollOffset: { x: 0, y: 0 } }),
+
+  setCanvasMode: (mode) => {
+    set((state) => ({
+      canvasMode: mode,
+      ...(mode === "viewport" && state.zoom < 1.0
+        ? { zoom: 1.0, scrollOffset: { x: 0, y: 0 } }
+        : {}),
+    }));
+    get().saveToStorage();
+  },
+
+  toggleCanvasMode: () => {
+    const nextMode =
+      get().canvasMode === "viewport" ? "infinite" : "viewport";
+    get().setCanvasMode(nextMode);
+  },
 
   setBackground: (bg) => {
     const prevBg = get().background;
@@ -614,8 +642,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   saveToStorage: () => {
-    const { elements, background } = get();
-    saveAppStoreToStorage(elements, background);
+    const { elements, background, canvasMode } = get();
+    saveAppStoreToStorage(elements, background, canvasMode);
   },
 
   loadFromStorage: () => {
@@ -624,6 +652,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (data.elements) stateUpdate.elements = data.elements;
       if (data.background) stateUpdate.background = data.background;
       if (data.nextStroke) stateUpdate.currentStrokeColor = data.nextStroke;
+      if (data.canvasMode) stateUpdate.canvasMode = data.canvasMode;
       set(stateUpdate);
     });
   },

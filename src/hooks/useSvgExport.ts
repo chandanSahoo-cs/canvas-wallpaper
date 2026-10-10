@@ -8,11 +8,13 @@ import {
   getFontFamilyString,
 } from "../canvas/geometry";
 import { escapeXml } from "../lib/utils";
+import { computeViewportTransform } from "../canvas/viewport";
 
 export function exportWallpaperAsSvg(): void {
-  const { elements, background } = useAppStore.getState();
+  const { elements, background, canvasMode } = useAppStore.getState();
   const width = window.innerWidth;
   const height = window.innerHeight;
+  const transform = computeViewportTransform(width, height, 1, canvasMode);
 
   const svgParts: string[] = [];
   svgParts.push(
@@ -24,6 +26,10 @@ export function exportWallpaperAsSvg(): void {
     background.type === "color" ? background.color : "#14141a",
   );
   svgParts.push(`<rect width="100%" height="100%" fill="${bgColor}" />`);
+
+  svgParts.push(
+    `<g transform="translate(${transform.originX}, ${transform.originY}) scale(${transform.effectiveZoom})">`,
+  );
 
   for (const el of elements) {
     const opacity = (el.opacity ?? 100) / 100;
@@ -166,6 +172,7 @@ export function exportWallpaperAsSvg(): void {
     }
   }
 
+  svgParts.push("</g>");
   svgParts.push("</svg>");
 
   const svgBlob = new Blob([svgParts.join("\n")], { type: "image/svg+xml" });

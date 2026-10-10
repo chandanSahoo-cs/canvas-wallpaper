@@ -15,6 +15,12 @@ import {
   drawMarquee,
 } from "./renderer/overlayDrawing";
 
+import {
+  computeViewportTransform,
+  BASE_CANVAS_WIDTH,
+  BASE_CANVAS_HEIGHT,
+} from "./viewport";
+
 type RoughCanvas = ReturnType<typeof rough.canvas>;
 
 export class CanvasRenderer {
@@ -45,6 +51,8 @@ export class CanvasRenderer {
     selectedIds,
     zoom = 1,
     scrollOffset = { x: 0, y: 0 },
+    canvasMode = "viewport",
+    isCleanView = false,
     marquee,
     rotationOverlay,
   }: {
@@ -53,23 +61,56 @@ export class CanvasRenderer {
     selectedIds: Set<string>;
     zoom?: number;
     scrollOffset?: Point;
+    canvasMode?: "viewport" | "infinite";
+    isCleanView?: boolean;
     marquee?: { start: Point; current: Point } | null;
     rotationOverlay?: RotationOverlay | null;
   }): void {
     const dpr = window.devicePixelRatio || 1;
+    const width = this.canvas.width / dpr;
+    const height = this.canvas.height / dpr;
+
+    const transform = computeViewportTransform(
+      width,
+      height,
+      zoom,
+      canvasMode,
+    );
 
     // Reset transform to identity and clear screen
     this.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    // Apply camera transform: DPR + Camera Zoom & Pan Offset
+    // In drawing mode when in viewport mode: draw artboard boundary if zoomed in or letterboxed
+    if (!isCleanView && canvasMode === "viewport") {
+      this.ctx.save();
+      const screenLeft =
+        transform.originX + (0 - scrollOffset.x) * transform.effectiveZoom;
+      const screenTop =
+        transform.originY + (0 - scrollOffset.y) * transform.effectiveZoom;
+      const screenW = BASE_CANVAS_WIDTH * transform.effectiveZoom;
+      const screenH = BASE_CANVAS_HEIGHT * transform.effectiveZoom;
+
+      this.ctx.strokeStyle = "rgba(99, 102, 241, 0.35)";
+      this.ctx.lineWidth = 1 * dpr;
+      this.ctx.setLineDash([6 * dpr, 6 * dpr]);
+      this.ctx.strokeRect(
+        screenLeft * dpr,
+        screenTop * dpr,
+        screenW * dpr,
+        screenH * dpr,
+      );
+      this.ctx.restore();
+    }
+
+    // Apply camera transform: DPR + Camera Zoom & Pan Offset + Viewport Origin
     this.ctx.setTransform(
-      dpr * zoom,
+      dpr * transform.effectiveZoom,
       0,
       0,
-      dpr * zoom,
-      -scrollOffset.x * zoom * dpr,
-      -scrollOffset.y * zoom * dpr,
+      dpr * transform.effectiveZoom,
+      (transform.originX - scrollOffset.x * transform.effectiveZoom) * dpr,
+      (transform.originY - scrollOffset.y * transform.effectiveZoom) * dpr,
     );
 
     // Draw all elements and draft

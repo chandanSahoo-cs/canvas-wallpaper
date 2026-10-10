@@ -11,7 +11,7 @@ PaperTab brings an Excalidraw-inspired sketching canvas directly to your New Tab
 - **Hand-Drawn Sketching**: Rectangles, diamonds, ellipses, lines, arrows, freehand drawings, text, and image insertion (via toolbar or clipboard paste).
 - **Dual-Mode Workflow**:
   - **Wallpaper Mode**: Clean, distraction-free new tab showcasing your artwork with handy widgets.
-  - **Drawing Mode**: Full creative toolset with colors, roughness, stroke styles, and layers.
+  - **Drawing Mode**: Full creative toolset with colors, roughness, stroke styles, layers, and toggleable **Viewport-Bound (16:9 Auto-Fit)** or **Infinite Canvas** modes.
 - **Align-Anywhere Widgets**: Drag and place your Digital Clock, Search Bar, and Quick Links anywhere on screen with grid snapping.
 - **Multi-Scene Switcher**: Maintain multiple wallpapers/canvases and switch between them anytime.
 - **Keyboard Shortcuts & Modal**: Press `?` anytime to view the complete shortcuts cheatsheet. Full support for `Ctrl+C`, `Ctrl+V`, `Ctrl+X`, `Ctrl+Z`, `Ctrl+Y`, `Ctrl+D`, nudge with arrow keys, and quick tool keys (`V`, `R`, `D`, `O`, `A`, `L`, `P`, `T`, `E`).

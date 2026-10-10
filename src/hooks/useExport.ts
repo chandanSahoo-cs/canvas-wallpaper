@@ -7,10 +7,11 @@ import {
   FONT_SIZE_MAP,
   getFontFamilyString,
 } from "../canvas/geometry";
+import { computeViewportTransform } from "../canvas/viewport";
 
 export async function exportWallpaperAsPng(): Promise<void> {
   const state = useAppStore.getState();
-  const { elements, background } = state;
+  const { elements, background, canvasMode } = state;
 
   const width = window.innerWidth;
   const height = window.innerHeight;
@@ -95,7 +96,23 @@ export async function exportWallpaperAsPng(): Promise<void> {
     ctx.restore();
   }
 
-  // 2. Draw elements
+  // 2. Draw elements with viewport transform
+  const transform = computeViewportTransform(
+    width,
+    height,
+    1,
+    canvasMode,
+  );
+  ctx.save();
+  ctx.setTransform(
+    dpr * transform.effectiveZoom,
+    0,
+    0,
+    dpr * transform.effectiveZoom,
+    transform.originX * dpr,
+    transform.originY * dpr,
+  );
+
   const rc = rough.canvas(offscreen);
 
   for (const el of elements) {
@@ -226,6 +243,8 @@ export async function exportWallpaperAsPng(): Promise<void> {
 
     ctx.restore();
   }
+
+  ctx.restore(); // Restore viewport transform
 
   // 3. Export to PNG and download
   const dataUrl = offscreen.toDataURL("image/png");

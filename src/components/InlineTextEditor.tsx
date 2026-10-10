@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
 import { Point } from "../elements/types";
-import { TextEditorState } from "../store/useAppStore";
+import { TextEditorState, useAppStore } from "../store/useAppStore";
 import { getFontFamilyString } from "../canvas/geometry";
+import { computeViewportTransform, canvasToScreen } from "../canvas/viewport";
 
 interface InlineTextEditorProps {
   data: TextEditorState;
@@ -74,10 +74,22 @@ export const InlineTextEditor: React.FC<InlineTextEditorProps> = ({
     commit(false);
   };
 
-  // Compute screen coordinates and scaled font metrics
-  const screenX = (data.canvasX - scrollOffset.x) * zoom;
-  const screenY = (data.canvasY - scrollOffset.y) * zoom;
-  const scaledFontSize = Math.max(12, data.fontSize * zoom);
+  // Compute screen coordinates and scaled font metrics using viewport transform
+  const canvasMode = useAppStore((s) => s.canvasMode);
+  const transform = computeViewportTransform(
+    typeof window !== "undefined" ? window.innerWidth : 1920,
+    typeof window !== "undefined" ? window.innerHeight : 1080,
+    zoom,
+    canvasMode,
+  );
+  const screenPos = canvasToScreen(
+    { x: data.canvasX, y: data.canvasY },
+    transform,
+    scrollOffset,
+  );
+  const screenX = screenPos.x;
+  const screenY = screenPos.y;
+  const scaledFontSize = Math.max(12, data.fontSize * transform.effectiveZoom);
   const fontFamily = getFontFamilyString(data.fontFamily);
   const lineHeight = scaledFontSize * 1.25;
 
