@@ -7,14 +7,9 @@ import { LineTool } from "../tools/LineTool";
 import { SelectionTool } from "../tools/SelectionTool";
 import { ShapeTool } from "../tools/ShapeTool";
 import { TextTool, openTextEditor } from "../tools/TextTool";
+import { Tool } from "../tools/types";
 import { CanvasRenderer } from "./CanvasRenderer";
 import { elementContains, getCenter, rotatePoint } from "./geometry";
-import {
-  computeViewportTransform,
-  screenToCanvas as viewportScreenToCanvas,
-  clampScrollOffset,
-  ViewportTransform,
-} from "./viewport";
 
 export function useCanvas(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -47,24 +42,9 @@ export function useCanvas(
     };
     toolsRef.current = tools;
 
-    // Viewport transform helper
-    function getTransform(state = useAppStore.getState()): ViewportTransform {
-      const rect = canvas!.getBoundingClientRect();
-      const isCleanView = state.mode === "wallpaper" || state.isPreviewing;
-      return computeViewportTransform(
-        rect.width,
-        rect.height,
-        isCleanView ? 1 : state.zoom,
-        state.canvasMode,
-      );
-    }
-
     // Handle canvas sizing
     const handleResize = () => {
       renderer.resize(window.innerWidth, window.innerHeight);
-      const state = useAppStore.getState();
-      const transform = getTransform(state);
-      state.setScrollOffset((prev) => clampScrollOffset(prev, transform));
       triggerRender();
     };
     handleResize();
@@ -80,8 +60,6 @@ export function useCanvas(
         selectedIds: isCleanView ? new Set() : state.selectedIds,
         zoom: isCleanView ? 1 : state.zoom,
         scrollOffset: isCleanView ? { x: 0, y: 0 } : state.scrollOffset,
-        canvasMode: state.canvasMode,
-        isCleanView,
         marquee: isCleanView ? null : selectionTool.marqueeState,
         rotationOverlay: isCleanView
           ? null
@@ -98,17 +76,16 @@ export function useCanvas(
       triggerRender();
     };
 
-    // Helper: Screen to canvas coordinates (accounting for viewport auto-fit, zoom, and scroll offset)
+    // Helper: Screen to canvas coordinates (accounting for zoom and scroll offset)
     function screenToCanvas(screenX: number, screenY: number): Point {
       const rect = canvas!.getBoundingClientRect();
-      const state = useAppStore.getState();
-      const transform = getTransform(state);
-      const isCleanView = state.mode === "wallpaper" || state.isPreviewing;
-      return viewportScreenToCanvas(
-        { x: screenX - rect.left, y: screenY - rect.top },
-        transform,
-        isCleanView ? { x: 0, y: 0 } : state.scrollOffset,
-      );
+      const rawX = screenX - rect.left;
+      const rawY = screenY - rect.top;
+      const { zoom, scrollOffset } = useAppStore.getState();
+      return {
+        x: rawX / zoom + scrollOffset.x,
+        y: rawY / zoom + scrollOffset.y,
+      };
     }
 
     // Pointer events
@@ -146,16 +123,12 @@ export function useCanvas(
       if (state.mode !== "drawing" || state.isPreviewing) return;
 
       if (isPanningRef.current) {
-        const transform = getTransform(state);
-        const dx =
-          (e.clientX - panStartRef.current.x) / transform.effectiveZoom;
-        const dy =
-          (e.clientY - panStartRef.current.y) / transform.effectiveZoom;
-        const rawOffset = {
+        const dx = (e.clientX - panStartRef.current.x) / state.zoom;
+        const dy = (e.clientY - panStartRef.current.y) / state.zoom;
+        state.setScrollOffset({
           x: panOriginOffsetRef.current.x - dx,
           y: panOriginOffsetRef.current.y - dy,
-        };
-        state.setScrollOffset(clampScrollOffset(rawOffset, transform));
+        });
         return;
       }
 
@@ -249,67 +222,35 @@ export function useCanvas(
         e.preventDefault();
         const factor = e.deltaY < 0 ? 1.1 : 0.9;
         const rect = canvas!.getBoundingClientRect();
-        const mouseScreenPos = {
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top,
-        };
+        const mouseScreenX = e.clientX - rect.left;
+        const mouseScreenY = e.clientY - rect.top;
 
         const currentZoom = state.zoom;
-        const minZ = state.canvasMode === "viewport" ? 1.0 : 0.5;
-        const newZoom = Math.max(minZ, Math.min(5.0, currentZoom * factor));
+        const newZoom = Math.max(0.5, Math.min(5.0, currentZoom * factor));
 
-        const currentTransform = getTransform(state);
-        // Find canvas point currently under the mouse cursor
-        const mouseCanvas = viewportScreenToCanvas(
-          mouseScreenPos,
-          currentTransform,
-          state.scrollOffset,
-        );
-
-        const newTransform = computeViewportTransform(
-          rect.width,
-          rect.height,
-          newZoom,
-          state.canvasMode,
-        );
-
-        // Keep the canvas point anchored directly under the mouse cursor
-        const newScrollOffset: Point = {
-          x:
-            mouseCanvas.x -
-            (mouseScreenPos.x - newTransform.originX) /
-              newTransform.effectiveZoom,
-          y:
-            mouseCanvas.y -
-            (mouseScreenPos.y - newTransform.originY) /
-              newTransform.effectiveZoom,
-        };
+        // Center zoom on mouse pointer
+        const mouseWorldX = mouseScreenX / currentZoom + state.scrollOffset.x;
+        const mouseWorldY = mouseScreenY / currentZoom + state.scrollOffset.y;
 
         state.setZoom(newZoom);
-        state.setScrollOffset(
-          clampScrollOffset(newScrollOffset, newTransform),
-        );
+        state.setScrollOffset({
+          x: mouseWorldX - mouseScreenX / newZoom,
+          y: mouseWorldY - mouseScreenY / newZoom,
+        });
       } else if (e.shiftKey) {
         // Pan horizontally
         e.preventDefault();
-        const transform = getTransform(state);
-        const delta = (e.deltaX || e.deltaY) / transform.effectiveZoom;
-        const rawOffset = {
-          x: state.scrollOffset.x + delta,
-          y: state.scrollOffset.y,
-        };
-        state.setScrollOffset(clampScrollOffset(rawOffset, transform));
+        state.setScrollOffset((prev) => ({
+          x: prev.x + (e.deltaX || e.deltaY) / state.zoom,
+          y: prev.y,
+        }));
       } else {
         // Default 2-finger trackpad or mouse wheel pan
         e.preventDefault();
-        const transform = getTransform(state);
-        const dx = (e.deltaX || 0) / transform.effectiveZoom;
-        const dy = (e.deltaY || 0) / transform.effectiveZoom;
-        const rawOffset = {
-          x: state.scrollOffset.x + dx,
-          y: state.scrollOffset.y + dy,
-        };
-        state.setScrollOffset(clampScrollOffset(rawOffset, transform));
+        state.setScrollOffset((prev) => ({
+          x: prev.x + (e.deltaX || 0) / state.zoom,
+          y: prev.y + (e.deltaY || 0) / state.zoom,
+        }));
       }
     };
 

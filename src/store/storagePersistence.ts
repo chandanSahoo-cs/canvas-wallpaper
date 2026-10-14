@@ -19,7 +19,6 @@ export function sanitizeCanvasElements(raw: any): CanvasElement[] {
 export function saveAppStoreToStorage(
   elements: CanvasElement[],
   background: BackgroundConfig,
-  canvasMode: "viewport" | "infinite" = "viewport",
 ): void {
   try {
     if (
@@ -30,12 +29,10 @@ export function saveAppStoreToStorage(
       chrome.storage.local.set({
         wallpaperElements: JSON.stringify(elements),
         wallpaperBackground: JSON.stringify(background),
-        wallpaperCanvasMode: canvasMode,
       });
     } else {
       localStorage.setItem("wallpaperElements", JSON.stringify(elements));
       localStorage.setItem("wallpaperBackground", JSON.stringify(background));
-      localStorage.setItem("wallpaperCanvasMode", canvasMode);
     }
   } catch (e) {
     console.error("Storage save error", e);
@@ -48,7 +45,6 @@ export function loadAppStoreFromStorage(
     elements?: CanvasElement[];
     background?: BackgroundConfig;
     nextStroke?: string;
-    canvasMode?: "viewport" | "infinite";
   }) => void,
 ): void {
   try {
@@ -58,18 +54,13 @@ export function loadAppStoreFromStorage(
       chrome.storage.local
     ) {
       chrome.storage.local.get(
-        ["wallpaperElements", "wallpaperBackground", "wallpaperCanvasMode"],
+        ["wallpaperElements", "wallpaperBackground"],
         (result: Record<string, any>) => {
           const update: {
             elements?: CanvasElement[];
             background?: BackgroundConfig;
             nextStroke?: string;
-            canvasMode?: "viewport" | "infinite";
           } = {};
-
-          if (result.wallpaperCanvasMode === "viewport" || result.wallpaperCanvasMode === "infinite") {
-            update.canvasMode = result.wallpaperCanvasMode;
-          }
 
           if (result.wallpaperElements) {
             try {
@@ -118,13 +109,7 @@ export function loadAppStoreFromStorage(
         elements?: CanvasElement[];
         background?: BackgroundConfig;
         nextStroke?: string;
-        canvasMode?: "viewport" | "infinite";
       } = {};
-
-      const rawMode = localStorage.getItem("wallpaperCanvasMode");
-      if (rawMode === "viewport" || rawMode === "infinite") {
-        update.canvasMode = rawMode;
-      }
 
       const rawEl = localStorage.getItem("wallpaperElements");
       if (rawEl) {
