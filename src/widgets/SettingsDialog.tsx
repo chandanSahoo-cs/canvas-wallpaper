@@ -8,6 +8,8 @@ import {
   LayoutGrid,
   Move,
   RotateCcw,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useWidgetStore } from "../store/useWidgetStore";
 import { PrivacyPolicyDialog } from "../components/PrivacyPolicyDialog";
@@ -49,8 +51,14 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   const showQuickLinks = useWidgetStore((s) => s.showQuickLinks);
   const setShowQuickLinks = useWidgetStore((s) => s.setShowQuickLinks);
 
+  const turnOffAllWidgets = useWidgetStore((s) => s.turnOffAllWidgets);
+  const turnOnAllWidgets = useWidgetStore((s) => s.turnOnAllWidgets);
+  const toggleAllWidgets = useWidgetStore((s) => s.toggleAllWidgets);
+
   const setIsLayoutMode = useWidgetStore((s) => s.setIsLayoutMode);
   const resetWidgetPositions = useWidgetStore((s) => s.resetWidgetPositions);
+
+  const allWidgetsOff = !showClock && !showDate && !showSearch && !showQuickLinks;
 
   if (!isOpen) return null;
 
@@ -84,6 +92,51 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
         </div>
 
         <div className="flex flex-col gap-5 py-4">
+          {/* Master Control: Turn off / on every widget */}
+          <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
+            <div className="flex items-center gap-2.5">
+              {allWidgetsOff ? (
+                <EyeOff className="w-4 h-4 text-neutral-400 mt-0.5" />
+              ) : (
+                <Eye className="w-4 h-4 text-neutral-500 mt-0.5" />
+              )}
+              <div>
+                <div className="text-sm font-semibold text-neutral-900">
+                  All Widgets
+                </div>
+                <div className="text-xs text-neutral-500">
+                  {allWidgetsOff
+                    ? "All widgets are turned off (clean wallpaper)"
+                    : "Turn off every widget with one click"}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  allWidgetsOff ? turnOnAllWidgets() : turnOffAllWidgets()
+                }
+                className={`text-xs px-2.5 py-1 rounded-xl font-medium transition-all active:scale-95 cursor-pointer ${
+                  allWidgetsOff
+                    ? "bg-neutral-900 text-white hover:bg-neutral-800 shadow-xs"
+                    : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                }`}
+              >
+                {allWidgetsOff ? "Turn on all" : "Turn off all"}
+              </button>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={!allWidgetsOff}
+                  onChange={(e) => toggleAllWidgets(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
+              </label>
+            </div>
+          </div>
+
           {/* Clock Settings */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2.5">

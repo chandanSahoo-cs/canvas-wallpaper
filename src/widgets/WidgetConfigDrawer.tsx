@@ -8,6 +8,8 @@ import {
   Link2,
   Trash2,
   Plus,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useWidgetStore, MAX_QUICK_LINKS } from "../store/useWidgetStore";
 import { PrivacyPolicyDialog } from "../components/PrivacyPolicyDialog";
@@ -58,9 +60,14 @@ export const WidgetConfigDrawer: React.FC<WidgetConfigDrawerProps> = ({
 
   const showQuickLinks = useWidgetStore((s) => s.showQuickLinks);
   const setShowQuickLinks = useWidgetStore((s) => s.setShowQuickLinks);
+  const turnOffAllWidgets = useWidgetStore((s) => s.turnOffAllWidgets);
+  const turnOnAllWidgets = useWidgetStore((s) => s.turnOnAllWidgets);
+  const toggleAllWidgets = useWidgetStore((s) => s.toggleAllWidgets);
   const quickLinks = useWidgetStore((s) => s.quickLinks);
   const addQuickLink = useWidgetStore((s) => s.addQuickLink);
   const removeQuickLink = useWidgetStore((s) => s.removeQuickLink);
+
+  const allWidgetsOff = !showClock && !showDate && !showSearch && !showQuickLinks;
 
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -94,6 +101,30 @@ export const WidgetConfigDrawer: React.FC<WidgetConfigDrawerProps> = ({
 
         {/* Section 1: Toggle Widgets */}
         <div className="py-3 flex flex-col gap-0 border-b border-neutral-100 text-xs divide-y divide-neutral-100">
+          {/* Master All Widgets Toggle */}
+          <div className="flex items-center justify-between py-2.5">
+            <div className="flex items-center gap-2.5">
+              {allWidgetsOff ? (
+                <EyeOff className="w-3.5 h-3.5 text-neutral-400" />
+              ) : (
+                <Eye className="w-3.5 h-3.5 text-neutral-400" />
+              )}
+              <span className="font-semibold text-neutral-800">All Widgets</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() =>
+                  allWidgetsOff ? turnOnAllWidgets() : turnOffAllWidgets()
+                }
+                className="text-[11px] font-medium text-neutral-500 hover:text-neutral-900 px-2 py-0.5 rounded-lg bg-neutral-100 hover:bg-neutral-200 transition-colors cursor-pointer"
+              >
+                {allWidgetsOff ? "Turn on all" : "Turn off all"}
+              </button>
+              <Toggle checked={!allWidgetsOff} onChange={toggleAllWidgets} />
+            </div>
+          </div>
+
           {/* Clock Toggle */}
           <div className="flex items-center justify-between py-2.5">
             <div className="flex items-center gap-2.5">

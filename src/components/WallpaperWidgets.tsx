@@ -28,15 +28,19 @@ export const WallpaperWidgets: React.FC<WallpaperWidgetsProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  if (!showClock && !showSearch && !showQuickLinks) {
+    return null;
+  }
+
   return (
     <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden">
       {isNarrowScreen ? (
         /* Narrow Viewport Fallback: Centered Stack */
         <div className="absolute inset-0 flex flex-col items-center justify-center p-6 gap-8">
           <div className="pointer-events-auto flex flex-col items-center gap-6 w-full max-w-xl">
-            <ClockWidget isLight={isLight} />
-            <SearchBar isLight={isLight} />
-            <QuickLinks isLight={isLight} />
+            {showClock && <ClockWidget isLight={isLight} />}
+            {showSearch && <SearchBar isLight={isLight} />}
+            {showQuickLinks && <QuickLinks isLight={isLight} />}
           </div>
         </div>
       ) : (

@@ -47,6 +47,16 @@ export interface WidgetSettings {
   setSearchEngine: (engine: "google" | "duckduckgo" | "bing" | "brave") => void;
   setShowQuickLinks: (show: boolean) => void;
 
+  turnOffAllWidgets: () => void;
+  turnOnAllWidgets: () => void;
+  toggleAllWidgets: (enabled: boolean) => void;
+  lastEnabledWidgets?: {
+    showClock: boolean;
+    showDate: boolean;
+    showSearch: boolean;
+    showQuickLinks: boolean;
+  };
+
   addQuickLink: (title: string, url: string) => void;
   removeQuickLink: (id: string) => void;
   updateQuickLink: (id: string, title: string, url: string) => void;
@@ -113,6 +123,62 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
   setShowQuickLinks: (show) => {
     set({ showQuickLinks: show });
     get().saveToStorage();
+  },
+
+  turnOffAllWidgets: () => {
+    const { showClock, showDate, showSearch, showQuickLinks } = get();
+    const hasAnyOn = showClock || showDate || showSearch || showQuickLinks;
+    set({
+      ...(hasAnyOn
+        ? {
+            lastEnabledWidgets: {
+              showClock,
+              showDate,
+              showSearch,
+              showQuickLinks,
+            },
+          }
+        : {}),
+      showClock: false,
+      showDate: false,
+      showSearch: false,
+      showQuickLinks: false,
+    });
+    get().saveToStorage();
+  },
+
+  turnOnAllWidgets: () => {
+    const { lastEnabledWidgets } = get();
+    if (
+      lastEnabledWidgets &&
+      (lastEnabledWidgets.showClock ||
+        lastEnabledWidgets.showDate ||
+        lastEnabledWidgets.showSearch ||
+        lastEnabledWidgets.showQuickLinks)
+    ) {
+      set({
+        showClock: lastEnabledWidgets.showClock,
+        showDate: lastEnabledWidgets.showDate,
+        showSearch: lastEnabledWidgets.showSearch,
+        showQuickLinks: lastEnabledWidgets.showQuickLinks,
+      });
+    } else {
+      set({
+        showClock: true,
+        showDate: true,
+        showSearch: true,
+        showQuickLinks: true,
+      });
+    }
+    get().saveToStorage();
+  },
+
+  toggleAllWidgets: (enabled) => {
+    if (enabled) {
+      get().turnOnAllWidgets();
+    } else {
+      get().turnOffAllWidgets();
+    }
   },
 
   addQuickLink: (title, url) => {
@@ -200,6 +266,7 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
       showQuickLinks,
       quickLinks,
       widgetPositions,
+      lastEnabledWidgets: get().lastEnabledWidgets,
     };
     lastWidgetLocalSaveTime = Date.now();
     try {
