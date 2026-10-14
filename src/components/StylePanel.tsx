@@ -152,7 +152,7 @@ export const StylePanel: React.FC = () => {
           <span>
             {hasSelection
               ? `Selected (${selectedMembers.length})`
-              : "Tool Styles"}
+              : "Styles"}
           </span>
         </button>
         <button

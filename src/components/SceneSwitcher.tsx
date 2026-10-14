@@ -117,24 +117,26 @@ export const SceneSwitcher: React.FC = () => {
             "w-7 h-7 rounded-xl flex items-center justify-center transition-all",
             isAtLimit
               ? "text-neutral-300 cursor-not-allowed opacity-50"
-              : "text-indigo-600 hover:bg-indigo-50 active:scale-95 cursor-pointer",
+              : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 active:scale-95 cursor-pointer",
           )}
         >
           <Plus className="w-4 h-4" />
         </button>
       </div>
 
-      {/* Glassmorphic Dropdown Popover */}
+      {/* Dropdown Popover */}
       {isOpen && (
         <div className="absolute top-12 left-0 w-64 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-2xl rounded-2xl p-2 flex flex-col gap-1 text-xs animate-in fade-in zoom-in-95 duration-150">
-          <div className="px-2 py-1 flex items-center justify-between text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">
-            <span>Wallpapers</span>
+          <div className="px-2 py-1 flex items-center justify-between">
+            <span className="text-[11px] font-medium text-neutral-400">
+              Scenes
+            </span>
             <span
               className={cn(
                 "px-1.5 py-0.5 rounded-full font-mono text-[9px] transition-colors",
                 isAtLimit
                   ? "bg-amber-100 text-amber-800 font-semibold"
-                  : "bg-neutral-100 text-neutral-600",
+                  : "bg-neutral-100 text-neutral-500",
               )}
             >
               {scenes.length}/{MAX_SCENES}
@@ -150,7 +152,7 @@ export const SceneSwitcher: React.FC = () => {
                 return (
                   <div
                     key={s.id}
-                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl bg-indigo-50/80 border border-indigo-200"
+                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl bg-neutral-50 border border-neutral-200"
                   >
                     <input
                       ref={inputRef}
@@ -161,11 +163,11 @@ export const SceneSwitcher: React.FC = () => {
                         if (e.key === "Enter") handleSaveRename(s.id);
                         if (e.key === "Escape") setEditingId(null);
                       }}
-                      className="flex-1 bg-white text-xs font-medium text-neutral-800 px-2 py-1 rounded-lg border border-indigo-300 outline-none"
+                      className="flex-1 bg-white text-xs font-medium text-neutral-800 px-2 py-1 rounded-lg border border-neutral-300 outline-none focus:border-neutral-500"
                     />
                     <button
                       onClick={() => handleSaveRename(s.id)}
-                      className="p-1 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"
+                      className="p-1 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700"
                     >
                       <Check className="w-3.5 h-3.5" />
                     </button>
@@ -183,8 +185,8 @@ export const SceneSwitcher: React.FC = () => {
                   className={cn(
                     "group flex items-center justify-between px-2.5 py-2 rounded-xl transition-all cursor-pointer text-xs",
                     isActive
-                      ? "bg-indigo-50 text-indigo-950 font-semibold shadow-xs"
-                      : "hover:bg-neutral-100 text-neutral-700",
+                      ? "bg-neutral-100 text-neutral-900 font-semibold"
+                      : "hover:bg-neutral-50 text-neutral-700",
                   )}
                 >
                   <div className="flex items-center gap-2 min-w-0">
@@ -219,7 +221,7 @@ export const SceneSwitcher: React.FC = () => {
                     )}
 
                     {isActive && (
-                      <Check className="w-3.5 h-3.5 text-indigo-600 ml-0.5 shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-neutral-900 ml-0.5 shrink-0" />
                     )}
                   </div>
                 </div>
@@ -235,9 +237,9 @@ export const SceneSwitcher: React.FC = () => {
             ) : (
               <button
                 onClick={handleCreate}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-700 text-white font-medium text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" /> Blank Wallpaper
+                <Plus className="w-3.5 h-3.5" /> New scene
               </button>
             )}
           </div>
