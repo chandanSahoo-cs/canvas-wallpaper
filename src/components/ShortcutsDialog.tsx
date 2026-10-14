@@ -74,6 +74,8 @@ const SHORTCUT_SECTIONS: ShortcutSection[] = [
         description: "Ungroup selected elements",
       },
       { keys: ["Ctrl", "Shift", "L"], description: "Lock or unlock element" },
+      { keys: ["Shift", "H"], description: "Flip selected horizontally" },
+      { keys: ["Shift", "V"], description: "Flip selected vertically" },
       { keys: ["Ctrl", "]"], description: "Bring forward" },
       { keys: ["Ctrl", "["], description: "Send backward" },
     ],

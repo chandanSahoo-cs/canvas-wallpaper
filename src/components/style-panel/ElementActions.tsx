@@ -3,6 +3,8 @@ import {
   ArrowDownToLine,
   ArrowUpToLine,
   Copy,
+  FlipHorizontal,
+  FlipVertical,
   Group,
   Lock,
   Trash2,
@@ -29,6 +31,8 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
   const ungroupSelected = useAppStore((s) => s.ungroupSelected);
   const sendBackward = useAppStore((s) => s.sendBackward);
   const sendForward = useAppStore((s) => s.sendForward);
+  const flipSelectedHorizontal = useAppStore((s) => s.flipSelectedHorizontal);
+  const flipSelectedVertical = useAppStore((s) => s.flipSelectedVertical);
 
   const hasGroups = selectedMembers.some(
     (el) => (el.groupIds?.length ?? 0) > 0,
@@ -100,6 +104,26 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
           className="py-1 px-2 rounded-lg border border-neutral-200 hover:bg-neutral-50 flex items-center justify-center gap-1 text-neutral-700 text-[11px]"
         >
           <ArrowUpToLine className="w-3.5 h-3.5" /> Front
+        </button>
+      </div>
+
+      {/* Flip elements */}
+      <div className="grid grid-cols-2 gap-1">
+        <button
+          title="Flip Horizontal (Shift+H)"
+          onClick={flipSelectedHorizontal}
+          disabled={isLocked}
+          className="py-1 px-2 rounded-lg border border-neutral-200 hover:bg-neutral-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-1 text-neutral-700 text-[11px] active:scale-95 transition-all"
+        >
+          <FlipHorizontal className="w-3.5 h-3.5" /> Flip H
+        </button>
+        <button
+          title="Flip Vertical (Shift+V)"
+          onClick={flipSelectedVertical}
+          disabled={isLocked}
+          className="py-1 px-2 rounded-lg border border-neutral-200 hover:bg-neutral-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-1 text-neutral-700 text-[11px] active:scale-95 transition-all"
+        >
+          <FlipVertical className="w-3.5 h-3.5" /> Flip V
         </button>
       </div>
     </div>

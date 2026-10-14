@@ -20,6 +20,7 @@ import {
   loadAppStoreFromStorage,
   saveAppStoreToStorage,
 } from "./storagePersistence";
+import { flipElements } from "../lib/flipElements";
 
 export const HISTORY_LIMIT = 50;
 
@@ -116,6 +117,9 @@ export interface AppState {
   ungroupSelected: () => void;
   sendBackward: () => void;
   sendForward: () => void;
+  flipSelected: (direction: "horizontal" | "vertical") => void;
+  flipSelectedHorizontal: () => void;
+  flipSelectedVertical: () => void;
   clearCanvas: () => void;
 
   // History actions
@@ -564,6 +568,23 @@ export const useAppStore = create<AppState>((set, get) => ({
       return { elements: els };
     });
     get().saveToStorage();
+  },
+
+  flipSelected: (direction: "horizontal" | "vertical") => {
+    const { elements, selectedIds } = get();
+    if (selectedIds.size === 0) return;
+    get().pushHistory();
+    const nextElements = flipElements(elements, selectedIds, direction);
+    set({ elements: nextElements });
+    get().saveToStorage();
+  },
+
+  flipSelectedHorizontal: () => {
+    get().flipSelected("horizontal");
+  },
+
+  flipSelectedVertical: () => {
+    get().flipSelected("vertical");
   },
 
   clearCanvas: () => {

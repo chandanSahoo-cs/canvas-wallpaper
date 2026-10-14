@@ -66,6 +66,8 @@ export function useKeyboardShortcuts({
   const toggleLockSelected = useAppStore((s) => s.toggleLockSelected);
   const pushHistory = useAppStore((s) => s.pushHistory);
   const saveToStorage = useAppStore((s) => s.saveToStorage);
+  const flipSelectedHorizontal = useAppStore((s) => s.flipSelectedHorizontal);
+  const flipSelectedVertical = useAppStore((s) => s.flipSelectedVertical);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -184,7 +186,21 @@ export function useKeyboardShortcuts({
         return;
       }
 
-      if (key === "h" && !mod && !e.altKey) {
+      // Flip selected elements horizontally / vertically
+      if (e.shiftKey && !mod && !e.altKey && selectedIds.size > 0) {
+        if (key === "h") {
+          e.preventDefault();
+          flipSelectedHorizontal();
+          return;
+        }
+        if (key === "v") {
+          e.preventDefault();
+          flipSelectedVertical();
+          return;
+        }
+      }
+
+      if (key === "h" && !mod && !e.altKey && !e.shiftKey) {
         e.preventDefault();
         togglePreview();
         return;
