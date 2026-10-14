@@ -68,6 +68,9 @@ export function useKeyboardShortcuts({
   const saveToStorage = useAppStore((s) => s.saveToStorage);
   const flipSelectedHorizontal = useAppStore((s) => s.flipSelectedHorizontal);
   const flipSelectedVertical = useAppStore((s) => s.flipSelectedVertical);
+  const resetZoom = useAppStore((s) => s.resetZoom);
+  const centerToOrigin = useAppStore((s) => s.centerToOrigin);
+  const setZoom = useAppStore((s) => s.setZoom);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -203,6 +206,45 @@ export function useKeyboardShortcuts({
       if (key === "h" && !mod && !e.altKey && !e.shiftKey) {
         e.preventDefault();
         togglePreview();
+        return;
+      }
+
+      // Reset zoom & center canvas to (0,0) with Ctrl+0 / Cmd+0
+      if (mod && (key === "0" || e.code === "Digit0" || e.code === "Numpad0")) {
+        e.preventDefault();
+        resetZoom();
+        return;
+      }
+
+      // Zoom in with Ctrl++ / Ctrl+=
+      if (
+        mod &&
+        (key === "=" || key === "+" || e.code === "Equal" || e.code === "NumpadAdd")
+      ) {
+        e.preventDefault();
+        setZoom((z) => Math.min(5.0, z + 0.25));
+        return;
+      }
+
+      // Zoom out with Ctrl+- / Ctrl+_
+      if (
+        mod &&
+        (key === "-" || key === "_" || e.code === "Minus" || e.code === "NumpadSubtract")
+      ) {
+        e.preventDefault();
+        setZoom((z) => Math.max(0.5, z - 0.25));
+        return;
+      }
+
+      // Center canvas to (0,0) with Shift+0 (maintaining current zoom)
+      if (
+        e.shiftKey &&
+        !mod &&
+        !e.altKey &&
+        (key === "0" || e.code === "Digit0" || e.code === "Numpad0" || e.key === ")")
+      ) {
+        e.preventDefault();
+        centerToOrigin(false);
         return;
       }
 

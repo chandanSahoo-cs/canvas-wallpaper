@@ -79,6 +79,7 @@ export interface AppState {
   setZoom: (zoom: number | ((prev: number) => number)) => void;
   setScrollOffset: (offset: Point | ((prev: Point) => Point)) => void;
   resetZoom: () => void;
+  centerToOrigin: (resetZoom?: boolean) => void;
 
   setBackground: (bg: Partial<BackgroundConfig> | string) => void;
   setCurrentStyles: (
@@ -307,6 +308,13 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   resetZoom: () => set({ zoom: 1.0, scrollOffset: { x: 0, y: 0 } }),
+  centerToOrigin: (resetZoom = true) => {
+    if (resetZoom) {
+      set({ zoom: 1.0, scrollOffset: { x: 0, y: 0 } });
+    } else {
+      set({ scrollOffset: { x: 0, y: 0 } });
+    }
+  },
 
   setBackground: (bg) => {
     const prevBg = get().background;

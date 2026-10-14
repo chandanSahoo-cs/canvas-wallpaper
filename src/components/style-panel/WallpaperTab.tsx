@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Image as ImageIcon, RotateCcw } from "lucide-react";
+import { Image as ImageIcon, RotateCcw, Crosshair } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAppStore } from "../../store/useAppStore";
 
@@ -23,6 +23,7 @@ export const WallpaperTab: React.FC = () => {
   const background = useAppStore((s) => s.background);
   const setBackground = useAppStore((s) => s.setBackground);
   const clearCanvas = useAppStore((s) => s.clearCanvas);
+  const centerToOrigin = useAppStore((s) => s.centerToOrigin);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleBackgroundImageUpload = (
@@ -124,13 +125,19 @@ export const WallpaperTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Quick Clear Wallpaper */}
-      <div className="pt-1 border-t border-neutral-100">
+      {/* Quick Actions */}
+      <div className="pt-1 border-t border-neutral-100 flex flex-col gap-1.5">
+        <button
+          onClick={() => centerToOrigin(true)}
+          className="w-full py-2 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-700 transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs font-medium cursor-pointer"
+        >
+          <Crosshair className="w-3.5 h-3.5" /> Center canvas to (0,0)
+        </button>
         <button
           onClick={() => {
             if (confirm("Clear the whole wallpaper?")) clearCanvas();
           }}
-          className="w-full py-2 px-3 rounded-xl border border-neutral-200 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 text-neutral-500 transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs font-medium"
+          className="w-full py-2 px-3 rounded-xl border border-neutral-200 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 text-neutral-500 transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs font-medium cursor-pointer"
         >
           <RotateCcw className="w-3.5 h-3.5" /> Clear wallpaper
         </button>
