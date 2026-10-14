@@ -21,6 +21,11 @@ export function saveAppStoreToStorage(
   background: BackgroundConfig,
 ): void {
   try {
+    if (background.color) {
+      try {
+        localStorage.setItem("papertab_bg_color", background.color);
+      } catch (e) {}
+    }
     if (
       typeof chrome !== "undefined" &&
       chrome.storage &&

@@ -136,6 +136,12 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     const { scenes, activeSceneId } = get();
     lastLocalSaveTime = Date.now();
     try {
+      const activeScene = scenes.find((s) => s.id === activeSceneId) || scenes[0];
+      if (activeScene?.background?.color) {
+        try {
+          localStorage.setItem("papertab_bg_color", activeScene.background.color);
+        } catch (e) {}
+      }
       if (
         typeof chrome !== "undefined" &&
         chrome.storage &&
@@ -264,7 +270,13 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         );
         appStore.setSelectedIds(validSelected);
         appStore.setElements(elementsToLoad || []);
-        appStore.setBackground(currentScene.background || fallbackBg);
+        const effectiveBg = currentScene.background || fallbackBg;
+        if (effectiveBg?.color) {
+          try {
+            localStorage.setItem("papertab_bg_color", effectiveBg.color);
+          } catch (e) {}
+        }
+        appStore.setBackground(effectiveBg);
         setTimeout(() => {
           isHydrating = false;
         }, 50);
