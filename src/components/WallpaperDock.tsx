@@ -20,61 +20,53 @@ export const WallpaperDock: React.FC<WallpaperDockProps> = ({
   return (
     <div
       className={cn(
-        "fixed bottom-6 right-6 z-20 flex items-center p-1 rounded-full backdrop-blur-xl border transition-all duration-200 shadow-2xl",
+        "fixed bottom-6 right-6 z-20 flex items-center rounded-full backdrop-blur-xl border transition-all duration-200 shadow-2xl",
         isLight
           ? "bg-neutral-900/90 text-white border-neutral-700/60 shadow-black/25"
-          : "bg-black/45 text-white border-white/20 shadow-black/40",
+          : "bg-black/50 text-white border-white/15 shadow-black/40",
       )}
     >
-      <button
-        title="Keyboard Shortcuts (?)"
-        aria-label="Keyboard Shortcuts"
-        onClick={onOpenShortcuts}
-        className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 text-white active:scale-95 transition-colors cursor-pointer"
-      >
-        <Keyboard className="w-4 h-4" />
-      </button>
-      <div
-        className={cn(
-          "w-px h-4 mx-0.5",
-          isLight ? "bg-white/20" : "bg-white/30",
-        )}
-      />
-      <button
-        title="Settings & Privacy"
-        aria-label="Settings and Privacy"
-        onClick={onOpenSettings}
-        className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 text-white active:scale-95 transition-colors cursor-pointer"
-      >
-        <Settings className="w-4 h-4" />
-      </button>
-      <div
-        className={cn(
-          "w-px h-4 mx-0.5",
-          isLight ? "bg-white/20" : "bg-white/30",
-        )}
-      />
-      <button
-        title="Widget Layout & Accessories (Drag anywhere on grid)"
-        onClick={onOpenLayout}
-        className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-white/15 text-white active:scale-95 transition-colors"
-      >
-        <LayoutGrid className="w-4 h-4" />
-      </button>
-      <div
-        className={cn(
-          "w-px h-4 mx-0.5",
-          isLight ? "bg-white/20" : "bg-white/30",
-        )}
-      />
-      <button
-        title="Customize Wallpaper (Press E or click)"
-        onClick={onEnterDrawMode}
-        className="h-9 px-3.5 rounded-full flex items-center justify-center gap-2 hover:bg-white/15 text-white text-xs font-semibold active:scale-95 transition-colors leading-none"
-      >
-        <Pencil className="w-4 h-4" />
-        <span className="leading-none">Draw</span>
-      </button>
+      {/* Utility icons */}
+      <div className="flex items-center p-1">
+        <button
+          title="Keyboard Shortcuts (?)"
+          aria-label="Keyboard Shortcuts"
+          onClick={onOpenShortcuts}
+          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/60 hover:text-white active:scale-95 transition-all cursor-pointer"
+        >
+          <Keyboard className="w-3.5 h-3.5" />
+        </button>
+        <button
+          title="Settings & Privacy"
+          aria-label="Settings and Privacy"
+          onClick={onOpenSettings}
+          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/60 hover:text-white active:scale-95 transition-all cursor-pointer"
+        >
+          <Settings className="w-3.5 h-3.5" />
+        </button>
+        <button
+          title="Widget Layout & Accessories (Drag anywhere on grid)"
+          onClick={onOpenLayout}
+          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/60 hover:text-white active:scale-95 transition-all cursor-pointer"
+        >
+          <LayoutGrid className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      {/* Divider */}
+      <div className="w-px h-5 bg-white/15 shrink-0" />
+
+      {/* Draw CTA — solid, high contrast */}
+      <div className="p-1 pl-1.5">
+        <button
+          title="Customize Wallpaper (Press E or click)"
+          onClick={onEnterDrawMode}
+          className="h-8 px-4 rounded-full flex items-center gap-2 bg-white text-neutral-900 hover:bg-neutral-100 font-semibold text-xs active:scale-95 transition-all cursor-pointer shadow-sm"
+        >
+          <Pencil className="w-3.5 h-3.5" />
+          <span className="leading-none">Draw</span>
+        </button>
+      </div>
     </div>
   );
 };
