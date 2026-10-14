@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { X, Keyboard, Command } from "lucide-react";
+import { X, Command } from "lucide-react";
 
 interface ShortcutsDialogProps {
   isOpen: boolean;
@@ -101,30 +101,25 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4"
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-3xl p-6 w-full max-w-2xl shadow-2xl border border-neutral-200 text-neutral-800 animate-in fade-in zoom-in-95 duration-150 max-h-[85vh] flex flex-col"
+        className="bg-white rounded-2xl p-6 w-full max-w-2xl shadow-2xl border border-neutral-200 text-neutral-800 animate-in fade-in zoom-in-95 duration-150 max-h-[85vh] flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-neutral-100 shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
-              <Keyboard className="w-4 h-4" />
-            </div>
-            <div>
-              <h2 className="text-base font-semibold leading-tight">
-                Keyboard Shortcuts
-              </h2>
-              <p className="text-xs text-neutral-500">
-                Quick controls to boost your workflow
-              </p>
-            </div>
+          <div>
+            <h2 className="text-sm font-semibold text-neutral-900 leading-tight">
+              Keyboard Shortcuts
+            </h2>
+            <p className="text-xs text-neutral-400 mt-0.5">
+              Quick controls to boost your workflow
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+            className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
@@ -133,22 +128,22 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
         {/* Content: 2-Column Grid */}
         <div className="overflow-y-auto pr-1 py-4 grid grid-cols-1 md:grid-cols-2 gap-6 select-none">
           {SHORTCUT_SECTIONS.map((sec) => (
-            <div key={sec.title} className="flex flex-col gap-2.5">
-              <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 px-1">
+            <div key={sec.title} className="flex flex-col gap-2">
+              <div className="text-[11px] font-semibold text-neutral-400 px-1">
                 {sec.title}
               </div>
-              <div className="flex flex-col gap-1.5 bg-neutral-50/80 border border-neutral-200/60 rounded-2xl p-2.5">
+              <div className="flex flex-col bg-neutral-50 border border-neutral-100 rounded-xl overflow-hidden">
                 {sec.shortcuts.map((sc, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between py-1 px-1.5 rounded-lg text-xs"
+                    className="flex items-center justify-between px-3 py-2 text-xs border-b border-neutral-100 last:border-0"
                   >
-                    <span className="text-neutral-700">{sc.description}</span>
+                    <span className="text-neutral-600">{sc.description}</span>
                     <div className="flex items-center gap-1 shrink-0 ml-2">
                       {sc.keys.map((k, kIdx) => (
                         <kbd
                           key={kIdx}
-                          className="px-2 py-0.5 bg-white border border-neutral-200/90 rounded-md text-[11px] font-mono font-medium text-neutral-800 shadow-2xs"
+                          className="px-1.5 py-0.5 bg-white border border-neutral-200 rounded-md text-[11px] font-mono font-medium text-neutral-700 shadow-2xs"
                         >
                           {k}
                         </kbd>
@@ -169,7 +164,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium transition-colors"
+            className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-700 text-white text-xs font-semibold transition-colors cursor-pointer"
           >
             Done
           </button>
