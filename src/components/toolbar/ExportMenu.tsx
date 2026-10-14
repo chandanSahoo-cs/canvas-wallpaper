@@ -52,8 +52,8 @@ export const ExportMenu: React.FC = () => {
         className={cn(
           "w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 cursor-pointer",
           isOpen
-            ? "bg-indigo-50 text-indigo-600"
-            : "text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900",
+            ? "bg-neutral-900 text-white shadow-sm"
+            : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900",
         )}
       >
         <Download className="w-4 h-4" />
@@ -68,7 +68,7 @@ export const ExportMenu: React.FC = () => {
             }}
             className="w-full px-2.5 py-2 rounded-xl hover:bg-neutral-100 text-left flex items-center gap-2.5 text-neutral-700 hover:text-neutral-900 font-medium transition-colors cursor-pointer"
           >
-            <Download className="w-4 h-4 text-indigo-600 shrink-0" />
+            <Download className="w-4 h-4 text-neutral-600 shrink-0" />
             <span>Save as PNG Image</span>
           </button>
           <button
@@ -78,7 +78,7 @@ export const ExportMenu: React.FC = () => {
             }}
             className="w-full px-2.5 py-2 rounded-xl hover:bg-neutral-100 text-left flex items-center gap-2.5 text-neutral-700 hover:text-neutral-900 font-medium transition-colors cursor-pointer"
           >
-            <FileCode className="w-4 h-4 text-rose-500 shrink-0" />
+            <FileCode className="w-4 h-4 text-neutral-600 shrink-0" />
             <span>Export as SVG Vector</span>
           </button>
           <div className="w-full h-px bg-neutral-100 my-0.5" />
@@ -86,7 +86,7 @@ export const ExportMenu: React.FC = () => {
             onClick={handleExportJson}
             className="w-full px-2.5 py-2 rounded-xl hover:bg-neutral-100 text-left flex items-center gap-2.5 text-neutral-700 hover:text-neutral-900 font-medium transition-colors cursor-pointer"
           >
-            <FileJson className="w-4 h-4 text-amber-500 shrink-0" />
+            <FileJson className="w-4 h-4 text-neutral-600 shrink-0" />
             <span>Export Wallpaper File</span>
           </button>
           <button
@@ -96,7 +96,7 @@ export const ExportMenu: React.FC = () => {
             }}
             className="w-full px-2.5 py-2 rounded-xl hover:bg-neutral-100 text-left flex items-center gap-2.5 text-neutral-700 hover:text-neutral-900 font-medium transition-colors cursor-pointer"
           >
-            <Upload className="w-4 h-4 text-emerald-600 shrink-0" />
+            <Upload className="w-4 h-4 text-neutral-600 shrink-0" />
             <span>Import Wallpaper File...</span>
           </button>
         </div>

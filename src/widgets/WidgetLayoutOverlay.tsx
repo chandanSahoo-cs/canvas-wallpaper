@@ -1,17 +1,18 @@
-import React, { useState, useRef } from "react";
+import React, { useRef, useState } from "react";
 import {
-  GripHorizontal,
-  Check,
   RotateCcw,
+  Check,
   LayoutGrid,
+  GripHorizontal,
   SlidersHorizontal,
 } from "lucide-react";
 import { useWidgetStore } from "../store/useWidgetStore";
+import { useAppStore } from "../store/useAppStore";
 import { ClockWidget } from "./ClockWidget";
 import { SearchBar } from "./SearchBar";
 import { QuickLinks } from "./QuickLinks";
 import { WidgetConfigDrawer } from "./WidgetConfigDrawer";
-import { cn } from "../lib/utils";
+import { cn, isColorLight } from "../lib/utils";
 
 interface WidgetLayoutOverlayProps {
   isLight?: boolean;
@@ -20,7 +21,7 @@ interface WidgetLayoutOverlayProps {
 type WidgetKey = "clock" | "search" | "quickLinks";
 
 export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({
-  isLight,
+  isLight: propIsLight,
 }) => {
   const isLayoutMode = useWidgetStore((s) => s.isLayoutMode);
   const setIsLayoutMode = useWidgetStore((s) => s.setIsLayoutMode);
@@ -31,6 +32,13 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({
   const showClock = useWidgetStore((s) => s.showClock);
   const showSearch = useWidgetStore((s) => s.showSearch);
   const showQuickLinks = useWidgetStore((s) => s.showQuickLinks);
+
+  const background = useAppStore((s) => s.background);
+  const isLight =
+    propIsLight !== undefined
+      ? propIsLight
+      : !(background?.type === "image" && background?.imageUrl) &&
+        isColorLight(background?.color || "#14141a");
 
   const [activeDrag, setActiveDrag] = useState<WidgetKey | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
@@ -108,21 +116,21 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({
         className="absolute inset-0 pointer-events-none opacity-20"
         style={{
           backgroundImage: `
-            linear-gradient(to right, rgba(99, 102, 241, 0.4) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(99, 102, 241, 0.4) 1px, transparent 1px)
+            linear-gradient(to right, rgba(255, 255, 255, 0.3) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(255, 255, 255, 0.3) 1px, transparent 1px)
           `,
           backgroundSize: "4% 4%",
         }}
       />
 
       {/* Screen Center Crosshairs */}
-      <div className="absolute top-0 bottom-0 left-1/2 w-px bg-indigo-500/30 pointer-events-none" />
-      <div className="absolute left-0 right-0 top-1/2 h-px bg-indigo-500/30 pointer-events-none" />
+      <div className="absolute top-0 bottom-0 left-1/2 w-px bg-white/20 pointer-events-none" />
+      <div className="absolute left-0 right-0 top-1/2 h-px bg-white/20 pointer-events-none" />
 
       {/* Floating Header Controller Bar */}
       <div className="absolute top-5 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-neutral-900/95 hover:bg-neutral-900 text-white backdrop-blur-xl px-4 py-2 rounded-2xl shadow-2xl border border-white/20 text-xs animate-in fade-in slide-in-from-top-4 duration-200">
         <div className="flex items-center gap-2 pr-3 border-r border-white/20">
-          <LayoutGrid className="w-4 h-4 text-indigo-400" />
+          <LayoutGrid className="w-4 h-4 text-white/80" />
           <span className="font-semibold">Widget Alignment</span>
           <span className="text-[10px] text-white/60 bg-white/10 px-2 py-0.5 rounded-full font-mono">
             Drag Anywhere
@@ -135,7 +143,7 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({
           className={cn(
             "flex items-center gap-1.5 px-3 py-1 rounded-xl font-medium active:scale-95 transition-all cursor-pointer",
             isConfigOpen
-              ? "bg-indigo-600 text-white shadow-sm"
+              ? "bg-white text-neutral-900 shadow-sm font-semibold"
               : "bg-white/10 hover:bg-white/20 text-white",
           )}
           title="Toggle widgets on/off and add quick links"
@@ -156,7 +164,7 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({
         <button
           onClick={() => setIsLayoutMode(false)}
           title="Save layout and exit"
-          className="flex items-center gap-1.5 px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl shadow-md active:scale-95 transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-3.5 py-1 bg-white hover:bg-neutral-100 text-neutral-900 font-semibold rounded-xl shadow-md active:scale-95 transition-all cursor-pointer"
         >
           <Check className="w-3.5 h-3.5" />
           <span>Done</span>
@@ -182,12 +190,12 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({
           className={cn(
             "absolute cursor-grab active:cursor-grabbing p-4 rounded-3xl border-2 border-dashed transition-shadow flex flex-col items-center group",
             activeDrag === "clock"
-              ? "border-indigo-500 bg-indigo-500/20 shadow-2xl scale-102 z-40"
-              : "border-indigo-400/80 bg-indigo-500/10 hover:bg-indigo-500/15 hover:border-indigo-500 z-30",
+              ? "border-white bg-white/20 shadow-2xl scale-102 z-40"
+              : "border-white/40 bg-white/10 hover:bg-white/15 hover:border-white/60 z-30",
           )}
         >
           {/* Drag Handle Label Badge */}
-          <div className="flex items-center gap-1.5 mb-2 px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-semibold tracking-wider uppercase shadow-sm pointer-events-none">
+          <div className="flex items-center gap-1.5 mb-2 px-2 py-0.5 rounded-full bg-neutral-900 border border-white/20 text-white text-[10px] font-semibold tracking-wider uppercase shadow-sm pointer-events-none">
             <GripHorizontal className="w-3 h-3" />
             <span>Clock</span>
             <span className="font-mono opacity-80">
@@ -215,12 +223,12 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({
           className={cn(
             "absolute cursor-grab active:cursor-grabbing p-3 rounded-3xl border-2 border-dashed transition-shadow flex flex-col items-center group w-full max-w-md",
             activeDrag === "search"
-              ? "border-indigo-500 bg-indigo-500/20 shadow-2xl scale-102 z-40"
-              : "border-indigo-400/80 bg-indigo-500/10 hover:bg-indigo-500/15 hover:border-indigo-500 z-30",
+              ? "border-white bg-white/20 shadow-2xl scale-102 z-40"
+              : "border-white/40 bg-white/10 hover:bg-white/15 hover:border-white/60 z-30",
           )}
         >
           {/* Drag Handle Label Badge */}
-          <div className="flex items-center gap-1.5 mb-2 px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-semibold tracking-wider uppercase shadow-sm pointer-events-none">
+          <div className="flex items-center gap-1.5 mb-2 px-2 py-0.5 rounded-full bg-neutral-900 border border-white/20 text-white text-[10px] font-semibold tracking-wider uppercase shadow-sm pointer-events-none">
             <GripHorizontal className="w-3 h-3" />
             <span>Search Bar</span>
             <span className="font-mono opacity-80">
@@ -248,12 +256,12 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({
           className={cn(
             "absolute cursor-grab active:cursor-grabbing p-3 rounded-3xl border-2 border-dashed transition-shadow flex flex-col items-center group max-w-xl",
             activeDrag === "quickLinks"
-              ? "border-indigo-500 bg-indigo-500/20 shadow-2xl scale-102 z-40"
-              : "border-indigo-400/80 bg-indigo-500/10 hover:bg-indigo-500/15 hover:border-indigo-500 z-30",
+              ? "border-white bg-white/20 shadow-2xl scale-102 z-40"
+              : "border-white/40 bg-white/10 hover:bg-white/15 hover:border-white/60 z-30",
           )}
         >
           {/* Drag Handle Label Badge */}
-          <div className="flex items-center gap-1.5 mb-2 px-2 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-semibold tracking-wider uppercase shadow-sm pointer-events-none">
+          <div className="flex items-center gap-1.5 mb-2 px-2 py-0.5 rounded-full bg-neutral-900 border border-white/20 text-white text-[10px] font-semibold tracking-wider uppercase shadow-sm pointer-events-none">
             <GripHorizontal className="w-3 h-3" />
             <span>Quick Links</span>
             <span className="font-mono opacity-80">

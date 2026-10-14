@@ -64,8 +64,8 @@ export const SearchEngineDropdown: React.FC = () => {
               className={cn(
                 "w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition-colors cursor-pointer",
                 searchEngine === eng.id
-                  ? "bg-indigo-50 text-indigo-600 font-semibold"
-                  : "text-neutral-700 hover:bg-neutral-100",
+                  ? "bg-neutral-100 text-neutral-900 font-semibold"
+                  : "text-neutral-700 hover:bg-neutral-50",
               )}
             >
               <span>{eng.label}</span>

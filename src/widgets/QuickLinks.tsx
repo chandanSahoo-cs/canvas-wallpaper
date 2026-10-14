@@ -179,7 +179,7 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="e.g. GitHub"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
                 />
               </div>
               <div>
@@ -192,7 +192,7 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({
                   onChange={(e) => setNewUrl(e.target.value)}
                   placeholder="https://..."
                   required
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
                 />
               </div>
               <div className="flex justify-end gap-2 mt-2">
@@ -205,7 +205,7 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 text-xs bg-indigo-600 text-white font-medium rounded-xl hover:bg-indigo-700 shadow-sm"
+                  className="px-4 py-1.5 text-xs bg-neutral-900 text-white font-medium rounded-xl hover:bg-neutral-800 shadow-sm transition-colors cursor-pointer"
                 >
                   Add Shortcut
                 </button>
