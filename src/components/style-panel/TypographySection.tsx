@@ -32,8 +32,8 @@ export const TypographySection: React.FC<TypographySectionProps> = ({
     <>
       {/* Font Family */}
       <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-1.5">
-          Font Family
+        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+          Font
         </div>
         <div className="grid grid-cols-3 gap-1">
           {FONT_FAMILIES.map((f) => (
@@ -43,7 +43,7 @@ export const TypographySection: React.FC<TypographySectionProps> = ({
               className={cn(
                 "py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95 cursor-pointer",
                 activeFontFamily === f.id
-                  ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                  ? "bg-neutral-900 border-neutral-900 text-white"
                   : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
               )}
             >
@@ -55,8 +55,8 @@ export const TypographySection: React.FC<TypographySectionProps> = ({
 
       {/* Font Size */}
       <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-1.5">
-          Font Size
+        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+          Size
         </div>
         <div className="grid grid-cols-4 gap-1">
           {FONT_SIZES.map((s) => (
@@ -66,7 +66,7 @@ export const TypographySection: React.FC<TypographySectionProps> = ({
               className={cn(
                 "py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95 cursor-pointer",
                 activeFontSize === s.size
-                  ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                  ? "bg-neutral-900 border-neutral-900 text-white"
                   : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
               )}
             >

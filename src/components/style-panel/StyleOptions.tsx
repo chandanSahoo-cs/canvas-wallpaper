@@ -81,9 +81,9 @@ export const StyleOptions: React.FC<StyleOptionsProps> = ({
 
       {/* Opacity */}
       <div>
-        <div className="flex items-center justify-between text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-1">
-          <span>Opacity</span>
-          <span>{activeOpacity}%</span>
+        <div className="flex items-center justify-between mb-1">
+          <span className="text-[11px] font-medium text-neutral-500">Opacity</span>
+          <span className="text-[11px] font-medium text-neutral-500">{activeOpacity}%</span>
         </div>
         <input
           type="range"
@@ -91,7 +91,7 @@ export const StyleOptions: React.FC<StyleOptionsProps> = ({
           max="100"
           value={activeOpacity}
           onChange={(e) => onOpacityChange(Number(e.target.value))}
-          className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+          className="w-full h-1.5 bg-neutral-200 rounded-lg appearance-none cursor-pointer accent-neutral-900"
         />
       </div>
     </>

@@ -45,8 +45,8 @@ export const WallpaperTab: React.FC = () => {
     <div className="flex flex-col gap-4">
       {/* Background Color */}
       <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
-          Background Color
+        <div className="text-[11px] font-medium text-neutral-500 mb-2">
+          Background
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
           {BG_PRESETS.map((c) => (
@@ -57,7 +57,7 @@ export const WallpaperTab: React.FC = () => {
                 "w-6 h-6 rounded-full border-2 transition-transform active:scale-90",
                 (background.color || "#14141a").toLowerCase() ===
                   c.toLowerCase()
-                  ? "border-indigo-600 scale-110 shadow-sm"
+                  ? "border-neutral-900 scale-110 shadow-sm"
                   : "border-black/10 hover:scale-105",
               )}
               style={{ backgroundColor: c }}
@@ -86,7 +86,7 @@ export const WallpaperTab: React.FC = () => {
             className={cn(
               "w-6 h-6 rounded-full border border-neutral-200 hover:bg-neutral-100 flex items-center justify-center text-neutral-600 transition-transform active:scale-90",
               background.type === "image" &&
-                "border-indigo-600 text-indigo-600 bg-indigo-50",
+                "border-neutral-900 text-neutral-900 bg-neutral-100",
             )}
           >
             <ImageIcon className="w-3.5 h-3.5" />
@@ -103,8 +103,8 @@ export const WallpaperTab: React.FC = () => {
 
       {/* Pattern Overlays */}
       <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-2">
-          Texture Pattern
+        <div className="text-[11px] font-medium text-neutral-500 mb-2">
+          Pattern
         </div>
         <div className="grid grid-cols-4 gap-1">
           {PATTERN_OPTIONS.map((p) => (
@@ -114,7 +114,7 @@ export const WallpaperTab: React.FC = () => {
               className={cn(
                 "py-1.5 rounded-lg border text-[11px] font-medium transition-all active:scale-95 text-center",
                 (background.pattern ?? "none") === p.id
-                  ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                  ? "bg-neutral-900 border-neutral-900 text-white"
                   : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
               )}
             >
@@ -125,14 +125,14 @@ export const WallpaperTab: React.FC = () => {
       </div>
 
       {/* Quick Clear Wallpaper */}
-      <div className="pt-2 border-t border-neutral-100">
+      <div className="pt-1 border-t border-neutral-100">
         <button
           onClick={() => {
             if (confirm("Clear the whole wallpaper?")) clearCanvas();
           }}
-          className="w-full py-2 px-3 rounded-xl border border-neutral-200 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 text-neutral-600 transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs font-medium"
+          className="w-full py-2 px-3 rounded-xl border border-neutral-200 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 text-neutral-500 transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs font-medium"
         >
-          <RotateCcw className="w-3.5 h-3.5" /> Clear Wallpaper
+          <RotateCcw className="w-3.5 h-3.5" /> Clear wallpaper
         </button>
       </div>
     </div>

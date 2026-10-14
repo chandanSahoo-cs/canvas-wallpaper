@@ -195,10 +195,10 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
 }) => {
   return (
     <>
-      {/* Fill Style with Visual SVG Icons */}
+      {/* Fill Style */}
       <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-1.5">
-          Fill Style
+        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+          Fill style
         </div>
         <div className="grid grid-cols-3 gap-1">
           {FILL_STYLES.map((f) => (
@@ -209,7 +209,7 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
               className={cn(
                 "py-1.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer",
                 activeFillStyle === f.id
-                  ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                  ? "bg-neutral-900 border-neutral-900 text-white"
                   : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
               )}
             >
@@ -222,10 +222,10 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
         </div>
       </div>
 
-      {/* Stroke Style with Visual SVG Lines */}
+      {/* Stroke Style */}
       <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-1.5">
-          Stroke Style
+        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+          Stroke style
         </div>
         <div className="grid grid-cols-3 gap-1">
           {STROKE_STYLES.map((s) => (
@@ -236,7 +236,7 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
               className={cn(
                 "py-1.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer",
                 activeStrokeStyle === s.id
-                  ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                  ? "bg-neutral-900 border-neutral-900 text-white"
                   : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
               )}
             >
@@ -249,9 +249,9 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
         </div>
       </div>
 
-      {/* Roughness / Aesthetic */}
+      {/* Roughness */}
       <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-1.5">
+        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
           Aesthetic
         </div>
         <div className="grid grid-cols-3 gap-1">
@@ -262,7 +262,7 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
               className={cn(
                 "py-1.5 rounded-lg border text-[11px] font-medium transition-all active:scale-95 cursor-pointer",
                 Math.abs(activeRoughness - r.val) < 0.3
-                  ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                  ? "bg-neutral-900 border-neutral-900 text-white"
                   : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
               )}
             >
@@ -274,8 +274,8 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
 
       {/* Stroke Width */}
       <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-1.5">
-          Stroke Width
+        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+          Stroke width
         </div>
         <div className="flex items-center gap-1">
           {STROKE_WIDTH_OPTIONS.map((s) => (
@@ -286,7 +286,7 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
               className={cn(
                 "flex-1 py-1.5 rounded-lg flex items-center justify-center border transition-all active:scale-95 cursor-pointer",
                 activeStrokeWidth === s.size
-                  ? "bg-indigo-50 border-indigo-300 text-indigo-700"
+                  ? "bg-neutral-900 border-neutral-900 text-white"
                   : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
               )}
             >

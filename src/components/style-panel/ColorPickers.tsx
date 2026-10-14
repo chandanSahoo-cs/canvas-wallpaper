@@ -33,7 +33,7 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({
     <>
       {/* Stroke Color */}
       <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-1.5">
+        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
           Stroke
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -44,7 +44,7 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({
               className={cn(
                 "w-6 h-6 rounded-full border-2 transition-transform active:scale-90",
                 activeStrokeColor === c
-                  ? "border-indigo-600 scale-110 shadow-sm"
+                  ? "border-neutral-900 scale-110 shadow-sm"
                   : "border-black/10 hover:scale-105",
               )}
               style={{ backgroundColor: c }}
@@ -63,7 +63,7 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({
 
       {/* Fill Color */}
       <div>
-        <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase mb-1.5">
+        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
           Fill
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -74,7 +74,7 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({
               className={cn(
                 "w-6 h-6 rounded-full border-2 transition-transform active:scale-90",
                 activeFillColor === c
-                  ? "border-indigo-600 scale-110 shadow-sm"
+                  ? "border-neutral-900 scale-110 shadow-sm"
                   : "border-black/10 hover:scale-105",
                 c === "transparent" &&
                   "bg-[radial-gradient(#e2e2e6_1px,transparent_1px)] [background-size:4px_4px] bg-white",
