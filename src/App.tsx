@@ -89,7 +89,7 @@ export const App: React.FC = () => {
       {isLayoutMode && <WidgetLayoutOverlay isLight={isLight} />}
 
       {/* Floating Action Micro-Dock (Wallpaper Mode) */}
-      {mode === "wallpaper" && (
+      {mode === "wallpaper" && !isLayoutMode && (
         <WallpaperDock
           isLight={isLight}
           onOpenShortcuts={() => setIsShortcutsOpen(true)}
