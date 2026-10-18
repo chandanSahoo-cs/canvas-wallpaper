@@ -3,7 +3,6 @@ import {
   X,
   ChevronRight,
   ChevronLeft,
-  Sparkles,
   Pencil,
   LayoutGrid,
   Layers,
@@ -181,9 +180,6 @@ export const OnboardingTour: React.FC = () => {
           aria-modal="true"
           className="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-neutral-200/90 text-neutral-800 animate-in zoom-in-95 duration-200 relative overflow-hidden"
         >
-          {/* Subtle gradient accent header */}
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-violet-500" />
-
           {/* Close X */}
           <button
             onClick={() => closeWelcomeModal(true)}
@@ -195,8 +191,12 @@ export const OnboardingTour: React.FC = () => {
 
           {/* Icon & Title */}
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-2xl bg-neutral-900 text-white flex items-center justify-center shadow-md">
-              <Sparkles className="w-5 h-5 text-amber-300" />
+            <div className="w-10 h-10 rounded-2xl bg-neutral-100 border border-neutral-200/80 flex items-center justify-center shadow-xs overflow-hidden p-1.5">
+              <img
+                src="/icon/48.png"
+                alt="PaperTab"
+                className="w-full h-full object-contain"
+              />
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-wider font-semibold text-neutral-400">
