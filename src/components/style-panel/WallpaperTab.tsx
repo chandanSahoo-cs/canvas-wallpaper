@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { Image as ImageIcon, RotateCcw, Crosshair } from "lucide-react";
+import { Image as ImageIcon, RotateCcw, Crosshair, SquareDashed } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { useAppStore } from "../../store/useAppStore";
 
@@ -24,6 +24,8 @@ export const WallpaperTab: React.FC = () => {
   const setBackground = useAppStore((s) => s.setBackground);
   const clearCanvas = useAppStore((s) => s.clearCanvas);
   const centerToOrigin = useAppStore((s) => s.centerToOrigin);
+  const showBoundaryMarker = useAppStore((s) => s.showBoundaryMarker);
+  const toggleBoundaryMarker = useAppStore((s) => s.toggleBoundaryMarker);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleBackgroundImageUpload = (
@@ -127,6 +129,23 @@ export const WallpaperTab: React.FC = () => {
 
       {/* Quick Actions */}
       <div className="pt-1 border-t border-neutral-100 flex flex-col gap-1.5">
+        <button
+          onClick={toggleBoundaryMarker}
+          className={cn(
+            "w-full py-2 px-3 rounded-xl border transition-all active:scale-95 flex items-center justify-between text-xs font-medium cursor-pointer",
+            showBoundaryMarker
+              ? "border-sky-300 bg-sky-50/60 text-sky-800"
+              : "border-neutral-200 hover:bg-neutral-100 text-neutral-700",
+          )}
+        >
+          <span className="flex items-center gap-1.5">
+            <SquareDashed className="w-3.5 h-3.5 text-sky-500" />
+            <span>Wallpaper Boundary</span>
+          </span>
+          <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-white/90 border border-neutral-200/60">
+            {showBoundaryMarker ? "On" : "Off"}
+          </span>
+        </button>
         <button
           onClick={() => centerToOrigin(true)}
           className="w-full py-2 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-700 transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs font-medium cursor-pointer"

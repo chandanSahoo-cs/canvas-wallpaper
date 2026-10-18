@@ -64,6 +64,11 @@ export function useCanvas(
         rotationOverlay: isCleanView
           ? null
           : selectionTool.getRotationOverlay(),
+        showBoundaryMarker: isCleanView ? false : state.showBoundaryMarker,
+        viewportBoundary: state.viewportBoundary || {
+          w: window.innerWidth,
+          h: window.innerHeight,
+        },
       });
     }
 

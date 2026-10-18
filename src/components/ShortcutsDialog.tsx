@@ -59,6 +59,7 @@ const SHORTCUT_SECTIONS: ShortcutSection[] = [
       { keys: ["Shift", "0"], description: "Center canvas to (0,0)" },
       { keys: ["Shift", "Scroll"], description: "Pan horizontally" },
       { keys: ["H"], description: "Toggle clean preview (hide UI)" },
+      { keys: ["B"], description: "Toggle wallpaper boundary marker" },
       { keys: ["E"], description: "Enter Drawing mode (Wallpaper)" },
       { keys: ["Esc"], description: "Exit Drawing mode / Deselect" },
       { keys: ["?"], description: "Open this shortcuts cheatsheet" },

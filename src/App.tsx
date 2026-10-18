@@ -17,6 +17,8 @@ import { useWallpaperBackground } from "./hooks/useWallpaperBackground";
 import { useTextEditing } from "./hooks/useTextEditing";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useCanvasPaste } from "./hooks/useCanvasPaste";
+import { useViewportRecorder } from "./hooks/useViewportRecorder";
+import { useViewportBoundary } from "./hooks/useViewportBoundary";
 import { cn } from "./lib/utils";
 
 export const App: React.FC = () => {
@@ -46,6 +48,8 @@ export const App: React.FC = () => {
     onToggleShortcuts: () => setIsShortcutsOpen((prev) => !prev),
   });
   useCanvasPaste();
+  useViewportRecorder(mode);
+  useViewportBoundary();
 
   // Initialize storage
   useEffect(() => {

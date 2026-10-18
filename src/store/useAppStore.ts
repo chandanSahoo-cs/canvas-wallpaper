@@ -80,6 +80,12 @@ export interface AppState {
   setScrollOffset: (offset: Point | ((prev: Point) => Point)) => void;
   resetZoom: () => void;
   centerToOrigin: (resetZoom?: boolean) => void;
+  // Boundary marker
+  showBoundaryMarker: boolean;
+  viewportBoundary: { w: number; h: number } | null;
+  setShowBoundaryMarker: (show: boolean) => void;
+  toggleBoundaryMarker: () => void;
+  setViewportBoundary: (vp: { w: number; h: number } | null) => void;
 
   setBackground: (bg: Partial<BackgroundConfig> | string) => void;
   setCurrentStyles: (
@@ -315,6 +321,29 @@ export const useAppStore = create<AppState>((set, get) => ({
       set({ scrollOffset: { x: 0, y: 0 } });
     }
   },
+
+  // Boundary marker state and actions
+  showBoundaryMarker: true,
+  viewportBoundary: null,
+  setShowBoundaryMarker: (show: boolean) => {
+    set({ showBoundaryMarker: show });
+    try {
+      if (
+        typeof chrome !== "undefined" &&
+        chrome.storage &&
+        chrome.storage.local
+      ) {
+        chrome.storage.local.set({ showBoundaryMarker: show });
+      } else {
+        localStorage.setItem("showBoundaryMarker", String(show));
+      }
+    } catch {}
+  },
+  toggleBoundaryMarker: () => {
+    const next = !get().showBoundaryMarker;
+    get().setShowBoundaryMarker(next);
+  },
+  setViewportBoundary: (vp) => set({ viewportBoundary: vp }),
 
   setBackground: (bg) => {
     const prevBg = get().background;

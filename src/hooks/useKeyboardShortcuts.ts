@@ -209,6 +209,13 @@ export function useKeyboardShortcuts({
         return;
       }
 
+      // Toggle wallpaper boundary marker with B
+      if (key === "b" && !mod && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        useAppStore.getState().toggleBoundaryMarker();
+        return;
+      }
+
       // Reset zoom & center canvas to (0,0) with Ctrl+0 / Cmd+0
       if (mod && (key === "0" || e.code === "Digit0" || e.code === "Numpad0")) {
         e.preventDefault();

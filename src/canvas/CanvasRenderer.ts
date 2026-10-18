@@ -14,6 +14,7 @@ import {
   drawSelectionOverlays,
   drawMarquee,
 } from "./renderer/overlayDrawing";
+import { drawBoundaryMarker } from "./renderer/boundaryDrawing";
 
 type RoughCanvas = ReturnType<typeof rough.canvas>;
 
@@ -47,6 +48,8 @@ export class CanvasRenderer {
     scrollOffset = { x: 0, y: 0 },
     marquee,
     rotationOverlay,
+    showBoundaryMarker = false,
+    viewportBoundary = null,
   }: {
     elements: CanvasElement[];
     draft: CanvasElement | null;
@@ -55,6 +58,8 @@ export class CanvasRenderer {
     scrollOffset?: Point;
     marquee?: { start: Point; current: Point } | null;
     rotationOverlay?: RotationOverlay | null;
+    showBoundaryMarker?: boolean;
+    viewportBoundary?: { w: number; h: number } | null;
   }): void {
     const dpr = window.devicePixelRatio || 1;
 
@@ -76,6 +81,11 @@ export class CanvasRenderer {
     const all = draft ? [...elements, draft] : elements;
     for (const el of all) {
       this.drawElement(el);
+    }
+
+    // Draw wallpaper boundary marker (editor view)
+    if (showBoundaryMarker && viewportBoundary) {
+      drawBoundaryMarker(this.ctx, viewportBoundary, zoom);
     }
 
     // Draw lock badges on unselected locked elements

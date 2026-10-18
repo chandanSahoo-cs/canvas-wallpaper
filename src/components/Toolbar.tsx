@@ -15,6 +15,7 @@ import {
   Eye,
   Image as ImageIcon,
   Keyboard,
+  SquareDashed,
 } from "lucide-react";
 import { insertImageFromFile } from "../lib/imageInsert";
 import { useAppStore } from "../store/useAppStore";
@@ -100,6 +101,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
   const redo = useAppStore((s) => s.redo);
   const history = useAppStore((s) => s.history);
   const future = useAppStore((s) => s.future);
+  const showBoundaryMarker = useAppStore((s) => s.showBoundaryMarker);
+  const toggleBoundaryMarker = useAppStore((s) => s.toggleBoundaryMarker);
 
   return (
     <div className="fixed top-4 left-1/2 -translate-x-1/2 z-30 bg-white/95 backdrop-blur-xl border border-neutral-200/80 shadow-xl rounded-2xl p-1.5 flex items-center gap-1 select-none">
@@ -195,6 +198,21 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
             <Keyboard className="w-3.5 h-3.5" />
           </button>
         )}
+
+        {/* Wallpaper Boundary Marker Toggle */}
+        <button
+          title={`Wallpaper Boundary: ${showBoundaryMarker ? "Visible" : "Hidden"} (B)`}
+          aria-label="Toggle wallpaper boundary marker"
+          onClick={toggleBoundaryMarker}
+          className={cn(
+            "w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 cursor-pointer",
+            showBoundaryMarker
+              ? "text-sky-600 bg-sky-50 hover:bg-sky-100"
+              : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100",
+          )}
+        >
+          <SquareDashed className="w-3.5 h-3.5" />
+        </button>
 
         {/* Preview Wallpaper — utility, visually secondary */}
         <button
