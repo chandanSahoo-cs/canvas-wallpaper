@@ -83,16 +83,77 @@ const DEFAULT_QUICK_LINKS: QuickLink[] = [
 
 let lastWidgetLocalSaveTime = 0;
 
-export const useWidgetStore = create<WidgetSettings>((set, get) => ({
-  showClock: true,
-  clockFormat: "12h",
-  showDate: true,
-  showSearch: true,
-  searchEngine: "google",
-  showQuickLinks: true,
-  quickLinks: DEFAULT_QUICK_LINKS,
+function getInitialWidgetState() {
+  const defaults = {
+    showClock: true,
+    clockFormat: "12h" as const,
+    showDate: true,
+    showSearch: true,
+    searchEngine: "google" as const,
+    showQuickLinks: true,
+    quickLinks: DEFAULT_QUICK_LINKS,
+    widgetPositions: DEFAULT_WIDGET_POSITIONS,
+    lastEnabledWidgets: undefined as
+      | { clock: boolean; search: boolean; quickLinks: boolean }
+      | undefined,
+  };
 
-  widgetPositions: DEFAULT_WIDGET_POSITIONS,
+  try {
+    const raw =
+      typeof localStorage !== "undefined"
+        ? localStorage.getItem("wallpaperWidgets")
+        : null;
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (Array.isArray(data.quickLinks)) {
+        data.quickLinks = data.quickLinks
+          .map((l: any) => ({
+            id: String(l.id || newId()),
+            title: String(l.title || "Link"),
+            url: sanitizeWebUrl(l.url),
+          }))
+          .filter((l: any) => Boolean(l.url))
+          .slice(0, MAX_QUICK_LINKS);
+      }
+      return {
+        showClock:
+          typeof data.showClock === "boolean"
+            ? data.showClock
+            : defaults.showClock,
+        clockFormat:
+          data.clockFormat === "24h" ? ("24h" as const) : defaults.clockFormat,
+        showDate:
+          typeof data.showDate === "boolean"
+            ? data.showDate
+            : defaults.showDate,
+        showSearch:
+          typeof data.showSearch === "boolean"
+            ? data.showSearch
+            : defaults.showSearch,
+        searchEngine: data.searchEngine || defaults.searchEngine,
+        showQuickLinks:
+          typeof data.showQuickLinks === "boolean"
+            ? data.showQuickLinks
+            : defaults.showQuickLinks,
+        quickLinks: Array.isArray(data.quickLinks)
+          ? data.quickLinks
+          : defaults.quickLinks,
+        widgetPositions: {
+          ...DEFAULT_WIDGET_POSITIONS,
+          ...(data.widgetPositions || {}),
+        },
+        lastEnabledWidgets: data.lastEnabledWidgets,
+      };
+    }
+  } catch (e) {}
+
+  return defaults;
+}
+
+const initialWidgetState = getInitialWidgetState();
+
+export const useWidgetStore = create<WidgetSettings>((set, get) => ({
+  ...initialWidgetState,
   isLayoutMode: false,
 
   setShowClock: (show) => {
@@ -270,14 +331,19 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
     };
     lastWidgetLocalSaveTime = Date.now();
     try {
+      const serialized = JSON.stringify(data);
+      // Synchronously write to localStorage for instant, zero-flicker new tab rendering
+      try {
+        localStorage.setItem("wallpaperWidgets", serialized);
+      } catch (e) {}
+
+      // Asynchronously persist to chrome.storage.local
       if (
         typeof chrome !== "undefined" &&
         chrome.storage &&
         chrome.storage.local
       ) {
-        chrome.storage.local.set({ wallpaperWidgets: JSON.stringify(data) });
-      } else {
-        localStorage.setItem("wallpaperWidgets", JSON.stringify(data));
+        chrome.storage.local.set({ wallpaperWidgets: serialized });
       }
     } catch (e) {
       console.error("Widget settings save error", e);
@@ -310,6 +376,16 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
       } catch (e) {}
     };
 
+    // 1. Immediately apply any synchronous localStorage cache
+    try {
+      const localRaw =
+        typeof localStorage !== "undefined"
+          ? localStorage.getItem("wallpaperWidgets")
+          : null;
+      if (localRaw) apply(localRaw);
+    } catch (e) {}
+
+    // 2. Fetch from chrome.storage.local to reconcile across tabs / browser profiles
     try {
       if (
         typeof chrome !== "undefined" &&
@@ -319,11 +395,17 @@ export const useWidgetStore = create<WidgetSettings>((set, get) => ({
         chrome.storage.local.get(
           ["wallpaperWidgets"],
           (res: Record<string, any>) => {
-            if (res.wallpaperWidgets) apply(res.wallpaperWidgets as string);
+            if (res.wallpaperWidgets) {
+              apply(res.wallpaperWidgets as string);
+              try {
+                localStorage.setItem(
+                  "wallpaperWidgets",
+                  res.wallpaperWidgets as string,
+                );
+              } catch (e) {}
+            }
           },
         );
-      } else {
-        apply(localStorage.getItem("wallpaperWidgets"));
       }
     } catch (e) {
       console.error("Widget settings load error", e);
@@ -342,3 +424,8 @@ if (typeof chrome !== "undefined" && chrome.storage?.onChanged) {
     }
   });
 }
+
+// Preload storage as early as possible on module execution
+try {
+  useWidgetStore.getState().loadFromStorage();
+} catch (e) {}
