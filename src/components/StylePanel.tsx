@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Paintbrush, Palette } from "lucide-react";
 import { FONT_SIZE_MAP } from "../canvas/geometry";
 import {
+  DRAWING_TOOLS,
   FillStyle,
   FontFamily,
   StrokeStyle,
@@ -26,6 +27,8 @@ export const StylePanel: React.FC = () => {
   const background = useAppStore((s) => s.background);
   const selectedIds = useAppStore((s) => s.selectedIds);
   const elements = useAppStore((s) => s.elements);
+  const activeTab = useAppStore((s) => s.stylePanelTab);
+  const setActiveTab = useAppStore((s) => s.setStylePanelTab);
 
   const setCurrentStyles = useAppStore((s) => s.setCurrentStyles);
   const updateSelectedElements = useAppStore((s) => s.updateSelectedElements);
@@ -34,16 +37,17 @@ export const StylePanel: React.FC = () => {
   const hasSelection = selectedMembers.length > 0;
   const isLocked = hasSelection && selectedMembers.every((el) => el.locked);
 
-  // Tab state: 'styles' | 'wallpaper'
-  const [activeTab, setActiveTab] = useState<"styles" | "wallpaper">(
-    "wallpaper",
-  );
-
   useEffect(() => {
     if (hasSelection) {
       setActiveTab("styles");
     }
-  }, [hasSelection]);
+  }, [hasSelection, setActiveTab]);
+
+  useEffect(() => {
+    if (DRAWING_TOOLS.has(currentTool)) {
+      setActiveTab("styles");
+    }
+  }, [currentTool, setActiveTab]);
 
   const isLightBg = isColorLight(background.color || "#14141a");
 

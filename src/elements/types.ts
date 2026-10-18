@@ -99,6 +99,16 @@ export type ToolType =
   | "text"
   | "eraser";
 
+export const DRAWING_TOOLS: Set<ToolType> = new Set([
+  "freedraw",
+  "text",
+  "rectangle",
+  "diamond",
+  "ellipse",
+  "arrow",
+  "line",
+]);
+
 export type BackgroundType = "color" | "gradient" | "image";
 export type PatternType = "none" | "dots" | "grid" | "lines";
 

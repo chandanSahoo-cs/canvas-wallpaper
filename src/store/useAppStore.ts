@@ -2,6 +2,7 @@ import { create } from "zustand";
 import {
   BackgroundConfig,
   CanvasElement,
+  DRAWING_TOOLS,
   FillStyle,
   FontFamily,
   Point,
@@ -84,6 +85,10 @@ export interface AppState {
   setScrollOffset: (offset: Point | ((prev: Point) => Point)) => void;
   resetZoom: () => void;
   centerToOrigin: (resetZoom?: boolean) => void;
+  // Style panel active tab
+  stylePanelTab: "styles" | "wallpaper";
+  setStylePanelTab: (tab: "styles" | "wallpaper") => void;
+
   // Boundary marker
   showBoundaryMarker: boolean;
   viewportBoundary: { w: number; h: number } | null;
@@ -177,6 +182,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   history: [],
   future: [],
 
+  stylePanelTab: "wallpaper",
+  setStylePanelTab: (tab) => set({ stylePanelTab: tab }),
+
   setMode: (mode) => {
     set({
       mode,
@@ -190,10 +198,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   togglePreview: () => set((state) => ({ isPreviewing: !state.isPreviewing })),
 
   setTool: (tool) => {
+    const isDrawingTool = DRAWING_TOOLS.has(tool);
     set({
       currentTool: tool,
       draft: null,
       selectedIds: tool === "selection" ? get().selectedIds : new Set(),
+      ...(isDrawingTool ? { stylePanelTab: "styles" } : {}),
     });
   },
 
@@ -209,6 +219,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     if (firstSelected) {
       set({
         selectedIds: next,
+        stylePanelTab: "styles",
         currentStrokeColor:
           firstSelected.strokeColor ?? get().currentStrokeColor,
         currentFillColor: firstSelected.fillColor ?? get().currentFillColor,
@@ -273,6 +284,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       if (firstSelected) {
         set({
           selectedIds: next,
+          stylePanelTab: "styles",
           currentStrokeColor:
             firstSelected.strokeColor ?? get().currentStrokeColor,
           currentFillColor: firstSelected.fillColor ?? get().currentFillColor,
@@ -292,6 +304,7 @@ export const useAppStore = create<AppState>((set, get) => ({
     } else {
       set({
         selectedIds: groupMembers,
+        stylePanelTab: "styles",
         currentStrokeColor: hit.strokeColor ?? get().currentStrokeColor,
         currentFillColor: hit.fillColor ?? get().currentFillColor,
         currentStrokeWidth: hit.strokeWidth ?? get().currentStrokeWidth,

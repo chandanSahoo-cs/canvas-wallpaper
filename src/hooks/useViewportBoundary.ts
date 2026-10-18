@@ -79,10 +79,11 @@ export function useViewportBoundary(): void {
     ) => {
       if (areaName === "local") {
         if (changes.lastViewport?.newValue) {
-          const val = changes.lastViewport.newValue;
+          const val = changes.lastViewport.newValue as
+            | { w?: unknown; h?: unknown }
+            | undefined;
           if (
-            typeof val === "object" &&
-            val !== null &&
+            val &&
             typeof val.w === "number" &&
             typeof val.h === "number"
           ) {
