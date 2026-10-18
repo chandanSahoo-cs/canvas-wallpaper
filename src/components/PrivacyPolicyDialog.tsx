@@ -143,11 +143,13 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
           <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200/80 space-y-1.5">
             <div className="flex items-center gap-2 text-neutral-800 font-semibold text-xs">
               <CreditCard className="w-4 h-4 text-neutral-700" />
-              <span>Completely Free & Ad-Free</span>
+              <span>Payments & Future Upgrades</span>
             </div>
             <p className="leading-relaxed text-neutral-600">
-              PaperTab does not display advertisements, sell sponsored search
-              results, or accept payments inside the extension.
+              If optional premium features or upgrades are introduced in the
+              future, transactions will be processed securely through standard
+              payment providers. PaperTab does not store or process your financial
+              credentials.
             </p>
           </div>
         </div>
@@ -155,7 +157,7 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
         {/* Footer */}
         <div className="pt-3 border-t border-neutral-100 flex items-center justify-between text-xs text-neutral-500 shrink-0">
           <span className="text-[11px] text-neutral-400">
-            Last updated: March 2026
+            Last updated: September 2026
           </span>
           <button
             onClick={onClose}
