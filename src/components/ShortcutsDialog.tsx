@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
-import { X, Command } from "lucide-react";
+import { X, Command, Compass } from "lucide-react";
+import { useOnboardingStore } from "../store/useOnboardingStore";
 
 interface ShortcutsDialogProps {
   isOpen: boolean;
@@ -164,9 +165,21 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
 
         {/* Footer */}
         <div className="pt-3 border-t border-neutral-100 flex items-center justify-between text-xs text-neutral-500 shrink-0">
-          <div className="flex items-center gap-1.5 text-neutral-400">
-            <Command className="w-3.5 h-3.5" />
-            <span>Use Cmd instead of Ctrl on macOS</span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5 text-neutral-400">
+              <Command className="w-3.5 h-3.5" />
+              <span>Use Cmd instead of Ctrl on macOS</span>
+            </div>
+            <button
+              onClick={() => {
+                onClose();
+                useOnboardingStore.getState().resetTour();
+              }}
+              className="flex items-center gap-1.5 text-neutral-500 hover:text-neutral-900 transition-colors cursor-pointer"
+            >
+              <Compass className="w-3.5 h-3.5" />
+              <span>Feature Tour</span>
+            </button>
           </div>
           <button
             onClick={onClose}

@@ -105,7 +105,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
   const toggleBoundaryMarker = useAppStore((s) => s.toggleBoundaryMarker);
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-30 bg-white/95 backdrop-blur-xl border border-neutral-200/80 shadow-xl rounded-2xl p-1.5 flex items-center gap-1 select-none">
+    <div
+      id="tour-toolbar"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-30 bg-white/95 backdrop-blur-xl border border-neutral-200/80 shadow-xl rounded-2xl p-1.5 flex items-center gap-1 select-none"
+    >
       {/* Cluster 1: Primary Tools */}
       <div className="flex items-center gap-0.5">
         {TOOLS.map((t) => (

@@ -10,8 +10,10 @@ import {
   RotateCcw,
   Eye,
   EyeOff,
+  Compass,
 } from "lucide-react";
 import { useWidgetStore } from "../store/useWidgetStore";
+import { useOnboardingStore } from "../store/useOnboardingStore";
 import { PrivacyPolicyDialog } from "../components/PrivacyPolicyDialog";
 import { SearchEngineDropdown } from "./settings/SearchEngineDropdown";
 
@@ -296,6 +298,28 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
             </div>
+          </div>
+
+          {/* Feature Walkthrough Tour */}
+          <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
+            <div className="flex items-center gap-2.5">
+              <Compass className="w-4 h-4 text-neutral-700" />
+              <div>
+                <div className="text-sm font-medium">Feature Walkthrough</div>
+                <div className="text-xs text-neutral-500">
+                  Take the interactive guided tour again
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                onClose();
+                useOnboardingStore.getState().resetTour();
+              }}
+              className="py-1.5 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-medium text-xs border border-neutral-200 active:scale-95 transition-all cursor-pointer"
+            >
+              Start Tour
+            </button>
           </div>
         </div>
 

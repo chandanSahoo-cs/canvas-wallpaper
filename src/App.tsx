@@ -10,6 +10,7 @@ import { WallpaperWidgets } from "./components/WallpaperWidgets";
 import { PreviewPill } from "./components/PreviewPill";
 import { SettingsDialog } from "./widgets/SettingsDialog";
 import { WidgetLayoutOverlay } from "./widgets/WidgetLayoutOverlay";
+import { OnboardingTour } from "./components/OnboardingTour";
 import { useAppStore } from "./store/useAppStore";
 import { useSceneStore } from "./store/useSceneStore";
 import { useWidgetStore } from "./store/useWidgetStore";
@@ -128,6 +129,9 @@ export const App: React.FC = () => {
       {mode === "drawing" && isPreviewing && (
         <PreviewPill onExitPreview={togglePreview} />
       )}
+
+      {/* Feature Onboarding Tour & Welcome Modal */}
+      <OnboardingTour />
     </div>
   );
 };

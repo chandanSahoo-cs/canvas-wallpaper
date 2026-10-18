@@ -140,7 +140,10 @@ export const StylePanel: React.FC = () => {
   };
 
   return (
-    <div className="fixed top-20 left-4 z-20 w-60 max-h-[calc(100vh-6rem)] bg-white/95 backdrop-blur-xl border border-neutral-200/80 shadow-xl rounded-2xl p-3.5 flex flex-col gap-3.5 text-xs select-none overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-neutral-200 hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+    <div
+      id="tour-style-panel"
+      className="fixed top-20 left-4 z-20 w-60 max-h-[calc(100vh-6rem)] bg-white/95 backdrop-blur-xl border border-neutral-200/80 shadow-xl rounded-2xl p-3.5 flex flex-col gap-3.5 text-xs select-none overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-neutral-200 hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300 [&::-webkit-scrollbar-thumb]:rounded-full"
+    >
       {/* Top Tabs: Tool / Element Styles vs Wallpaper Canvas */}
       <div className="flex items-center bg-neutral-100 p-0.5 rounded-xl shrink-0">
         <button

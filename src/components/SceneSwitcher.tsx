@@ -80,7 +80,10 @@ export const SceneSwitcher: React.FC = () => {
   return (
     <div ref={popoverRef} className="fixed top-4 left-4 z-30 select-none">
       {/* Trigger Button */}
-      <div className="flex items-center gap-1 bg-white/95 backdrop-blur-md border border-neutral-200/80 shadow-md hover:shadow-lg rounded-2xl p-1 transition-all duration-200">
+      <div
+        id="tour-scene-switcher"
+        className="flex items-center gap-1 bg-white/95 backdrop-blur-md border border-neutral-200/80 shadow-md hover:shadow-lg rounded-2xl p-1 transition-all duration-200"
+      >
         <button
           onClick={() => setIsOpen((prev) => !prev)}
           className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-neutral-100/80 text-neutral-800 transition-colors"
