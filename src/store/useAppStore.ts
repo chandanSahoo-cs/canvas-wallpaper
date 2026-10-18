@@ -8,7 +8,11 @@ import {
   StrokeStyle,
   ToolType,
 } from "../elements/types";
-import { getDefaultWallpaperElements } from "../lib/defaultWallpaperPreset";
+import {
+  getDefaultWallpaperElements,
+  getElementsBoundingBox,
+  shiftElements,
+} from "../lib/defaultWallpaperPreset";
 import {
   getConnectedGroupElementIds,
   groupElements,
@@ -127,6 +131,7 @@ export interface AppState {
   flipSelected: (direction: "horizontal" | "vertical") => void;
   flipSelectedHorizontal: () => void;
   flipSelectedVertical: () => void;
+  centerArtworkToScreen: (targetW?: number, targetH?: number) => void;
   clearCanvas: () => void;
 
   // History actions
@@ -622,6 +627,37 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   flipSelectedVertical: () => {
     get().flipSelected("vertical");
+  },
+
+  centerArtworkToScreen: (targetW, targetH) => {
+    const { elements } = get();
+    if (!elements || elements.length === 0) return;
+    const bbox = getElementsBoundingBox(elements);
+    if (!bbox) return;
+
+    const w =
+      typeof targetW === "number" && targetW > 0
+        ? targetW
+        : typeof window !== "undefined" && window.innerWidth > 0
+          ? window.innerWidth
+          : 1466;
+
+    const h =
+      typeof targetH === "number" && targetH > 0
+        ? targetH
+        : typeof window !== "undefined" && window.innerHeight > 0
+          ? window.innerHeight
+          : 748;
+
+    const dx = w / 2 - bbox.centerX;
+    const dy = h / 2 - bbox.centerY;
+
+    if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+
+    get().pushHistory();
+    const nextElements = shiftElements(elements, dx, dy);
+    set({ elements: nextElements });
+    get().saveToStorage();
   },
 
   clearCanvas: () => {

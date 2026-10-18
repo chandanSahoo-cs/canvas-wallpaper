@@ -17130,6 +17130,135 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   }
 ];
 
-export function getDefaultWallpaperElements(): CanvasElement[] {
-  return JSON.parse(JSON.stringify(DEFAULT_WALLPAPER_ELEMENTS));
+export const ORIGINAL_PRESET_CENTER = {
+  x: 733.27,
+  y: 374.07,
+};
+
+export function shiftElements(
+  elements: CanvasElement[],
+  dx: number,
+  dy: number,
+): CanvasElement[] {
+  return elements.map((el) => {
+    if ("points" in el && Array.isArray(el.points)) {
+      return {
+        ...el,
+        points: el.points.map((p) => ({ x: p.x + dx, y: p.y + dy })),
+      };
+    }
+    if ("x" in el && "y" in el) {
+      return {
+        ...el,
+        x: el.x + dx,
+        y: el.y + dy,
+      };
+    }
+    return el;
+  });
+}
+
+export function getElementsBoundingBox(elements: CanvasElement[]): {
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+  centerX: number;
+  centerY: number;
+  width: number;
+  height: number;
+} | null {
+  if (!elements || elements.length === 0) return null;
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  for (const el of elements) {
+    if ("points" in el && Array.isArray(el.points) && el.points.length > 0) {
+      for (const p of el.points) {
+        if (p.x < minX) minX = p.x;
+        if (p.x > maxX) maxX = p.x;
+        if (p.y < minY) minY = p.y;
+        if (p.y > maxY) maxY = p.y;
+      }
+    } else if (typeof (el as any).x === "number" && typeof (el as any).y === "number") {
+      const x = (el as any).x;
+      const y = (el as any).y;
+      const w = (el as any).width || 0;
+      const h = (el as any).height || 0;
+      if (x < minX) minX = x;
+      if (x + w > maxX) maxX = x + w;
+      if (y < minY) minY = y;
+      if (y + h > maxY) maxY = y + h;
+    }
+  }
+
+  if (!isFinite(minX) || !isFinite(maxX)) return null;
+
+  return {
+    minX,
+    maxX,
+    minY,
+    maxY,
+    centerX: (minX + maxX) / 2,
+    centerY: (minY + maxY) / 2,
+    width: maxX - minX,
+    height: maxY - minY,
+  };
+}
+
+export function isDefaultPresetAtOriginalPosition(
+  elements: CanvasElement[],
+): boolean {
+  if (!elements || elements.length !== DEFAULT_WALLPAPER_ELEMENTS.length) {
+    return false;
+  }
+  if (
+    elements[0]?.id !== DEFAULT_WALLPAPER_ELEMENTS[0].id ||
+    elements[10]?.id !== DEFAULT_WALLPAPER_ELEMENTS[10].id
+  ) {
+    return false;
+  }
+  const bbox = getElementsBoundingBox(elements);
+  if (!bbox) return false;
+  return (
+    Math.abs(bbox.centerX - ORIGINAL_PRESET_CENTER.x) < 5 &&
+    Math.abs(bbox.centerY - ORIGINAL_PRESET_CENTER.y) < 5
+  );
+}
+
+export function getDefaultWallpaperElements(
+  targetWidth?: number,
+  targetHeight?: number,
+): CanvasElement[] {
+  const elements: CanvasElement[] = JSON.parse(
+    JSON.stringify(DEFAULT_WALLPAPER_ELEMENTS),
+  );
+
+  const w =
+    typeof targetWidth === "number" && targetWidth > 0
+      ? targetWidth
+      : typeof window !== "undefined" && window.innerWidth > 0
+        ? window.innerWidth
+        : 1466;
+
+  const h =
+    typeof targetHeight === "number" && targetHeight > 0
+      ? targetHeight
+      : typeof window !== "undefined" && window.innerHeight > 0
+        ? window.innerHeight
+        : 748;
+
+  const targetCenterX = w / 2;
+  const targetCenterY = h / 2;
+
+  const dx = targetCenterX - ORIGINAL_PRESET_CENTER.x;
+  const dy = targetCenterY - ORIGINAL_PRESET_CENTER.y;
+
+  if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) {
+    return elements;
+  }
+
+  return shiftElements(elements, dx, dy);
 }

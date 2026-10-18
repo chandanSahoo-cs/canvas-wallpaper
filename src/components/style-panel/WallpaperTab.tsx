@@ -24,6 +24,7 @@ export const WallpaperTab: React.FC = () => {
   const setBackground = useAppStore((s) => s.setBackground);
   const clearCanvas = useAppStore((s) => s.clearCanvas);
   const centerToOrigin = useAppStore((s) => s.centerToOrigin);
+  const centerArtworkToScreen = useAppStore((s) => s.centerArtworkToScreen);
   const showBoundaryMarker = useAppStore((s) => s.showBoundaryMarker);
   const toggleBoundaryMarker = useAppStore((s) => s.toggleBoundaryMarker);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -145,6 +146,12 @@ export const WallpaperTab: React.FC = () => {
           <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-white/90 border border-neutral-200/60">
             {showBoundaryMarker ? "On" : "Off"}
           </span>
+        </button>
+        <button
+          onClick={() => centerArtworkToScreen()}
+          className="w-full py-2 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-700 transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs font-medium cursor-pointer"
+        >
+          <Crosshair className="w-3.5 h-3.5 text-neutral-600" /> Center artwork on screen
         </button>
         <button
           onClick={() => centerToOrigin(true)}

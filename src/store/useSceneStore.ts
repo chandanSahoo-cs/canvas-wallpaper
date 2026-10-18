@@ -2,7 +2,12 @@ import { create } from "zustand";
 import { CanvasElement, BackgroundConfig } from "../elements/types";
 import { newId } from "../lib/utils";
 import { useAppStore } from "./useAppStore";
-import { getDefaultWallpaperElements } from "../lib/defaultWallpaperPreset";
+import {
+  getDefaultWallpaperElements,
+  isDefaultPresetAtOriginalPosition,
+  shiftElements,
+  ORIGINAL_PRESET_CENTER,
+} from "../lib/defaultWallpaperPreset";
 
 export interface Scene {
   id: string;
@@ -259,6 +264,31 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         } else if (!elementsToLoad) {
           elementsToLoad = [];
           currentScene.elements = elementsToLoad;
+        }
+
+        // Auto-center default preset on new or different machines if still at original author coordinates
+        if (isDefaultPresetAtOriginalPosition(elementsToLoad)) {
+          const targetW =
+            typeof window !== "undefined" && window.innerWidth > 0
+              ? window.innerWidth
+              : 1466;
+          const targetH =
+            typeof window !== "undefined" && window.innerHeight > 0
+              ? window.innerHeight
+              : 748;
+          const dx = targetW / 2 - ORIGINAL_PRESET_CENTER.x;
+          const dy = targetH / 2 - ORIGINAL_PRESET_CENTER.y;
+          if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+            elementsToLoad = shiftElements(elementsToLoad, dx, dy);
+            currentScene.elements = elementsToLoad;
+            scenes = scenes.map((s) =>
+              s.id === currentScene.id ? { ...s, elements: elementsToLoad } : s,
+            );
+            set({ scenes });
+            setTimeout(() => {
+              get().saveScenesToStorage();
+            }, 50);
+          }
         }
 
         isHydrating = true;
