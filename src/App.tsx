@@ -1,4 +1,5 @@
-import { requestStoragePersistence, runAssetGarbageCollection } from "./lib/assets";
+import { requestStoragePersistence, runAssetGarbageCollection, backfillManager } from "./lib/assets";
+import { BackfillProgressIndicator } from "./components/ui/BackfillProgressIndicator";
 import { ImageElement } from "./elements/types";
 import React, { useEffect, useRef, useState } from "react";
 import { useCanvas } from "./canvas/useCanvas";
@@ -81,6 +82,7 @@ export const App: React.FC = () => {
         }
       }
       await runAssetGarbageCollection(referenced);
+      await backfillManager.scanAndStart();
     }, 2000);
   }, [loadScenesFromStorage]);
 
@@ -178,6 +180,9 @@ export const App: React.FC = () => {
 
       {/* Feature Onboarding Tour & Welcome Modal */}
       <OnboardingTour />
+
+      {/* Idle Metadata Backfill Progress */} 
+      <BackfillProgressIndicator />
     </div>
   );
 };

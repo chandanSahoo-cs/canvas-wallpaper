@@ -42,6 +42,13 @@ const {
   getLodTier,
   MAX_CACHE_BYTES,
   THUMBNAIL_MAX_SCREEN_EDGE,
+  rgbToOklab,
+  oklabToRgb,
+  hexDistanceOklab,
+  extractPaletteFromImageData,
+  computeDHashFromGrayscale,
+  hammingDistance,
+  backfillManager,
 } = jiti('../src/lib/assets/index.ts');
 
 const {
@@ -206,7 +213,7 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
 
   // --- SECTION 10: Scalable Scene Persistence & Discrete Keys ---
   console.log('\n--- SECTION 10: Scalable Scene Persistence (Phase 2) ---');
-  assert(SCHEMA_VERSION === 2, 'Schema version is bumped to 2 for discrete scene storage');
+  assert(SCHEMA_VERSION === 3, 'Schema version is bumped to 3 for metadata pipeline');
   assert(SCENE_INDEX_KEY === 'scenes_index', 'Scene index key is scenes_index');
   assert(SCENE_KEY_PREFIX === 'scene:', 'Scene discrete key prefix is scene:');
   assert(MAX_SCENES === 100, 'MAX_SCENES is raised to 100');
@@ -292,6 +299,96 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   // Insufficient Selection Protection
   const singleArranged = autoArrangeElements(testEls, new Set(['a']), 'row', 20);
   assert(singleArranged === testEls, 'Arranging fewer than 2 elements returns original list unchanged');
+
+  // --- SECTION 13: Metadata Pipeline & Color/Hash Logic (Phase 1) ---
+  console.log('\n--- SECTION 13: Metadata Pipeline & Color/Hash Logic (Phase 1) ---');
+
+  // 1. OKLab conversion and roundtrip
+  const okWhite = rgbToOklab(255, 255, 255);
+  const rgbWhite = oklabToRgb(okWhite.L, okWhite.a, okWhite.b);
+  assert(rgbWhite.r === 255 && rgbWhite.g === 255 && rgbWhite.b === 255, 'sRGB <-> OKLab roundtrip preserves pure white');
+
+  const okBlack = rgbToOklab(0, 0, 0);
+  const rgbBlack = oklabToRgb(okBlack.L, okBlack.a, okBlack.b);
+  assert(rgbBlack.r === 0 && rgbBlack.g === 0 && rgbBlack.b === 0, 'sRGB <-> OKLab roundtrip preserves pure black');
+
+  // 2. OKLab perceptual distance matching
+  const distIdentical = hexDistanceOklab('#46BAEB', '#46BAEB');
+  assert(distIdentical === 0, 'Distance between identical colors is 0');
+
+  const distBlueGreen = hexDistanceOklab('#46BAEB', '#00BF63');
+  assert(distBlueGreen > 0.05 && distBlueGreen < 0.35, 'Perceptual distance between Brand Blue and Brand Green is within expected range (~0.15)');
+
+  const distWhiteBlack = hexDistanceOklab('#FFFFFF', '#000000');
+  assert(distWhiteBlack > 0.9, 'Perceptual distance between White and Black is maximal (~1.0)');
+
+  // 3. Deterministic palette extraction
+  // Create a synthetic 8x8 RGBA array (64 pixels, 4 colors: blue, green, white, near-transparent)
+  const syntheticPixels = new Uint8ClampedArray(64 * 4);
+  for (let i = 0; i < 64; i++) {
+    const offset = i * 4;
+    if (i < 24) {
+      // 24 pixels Brand Blue
+      syntheticPixels[offset] = 0x46;
+      syntheticPixels[offset + 1] = 0xBA;
+      syntheticPixels[offset + 2] = 0xEB;
+      syntheticPixels[offset + 3] = 255;
+    } else if (i < 44) {
+      // 20 pixels Brand Green
+      syntheticPixels[offset] = 0x00;
+      syntheticPixels[offset + 1] = 0xBF;
+      syntheticPixels[offset + 2] = 0x63;
+      syntheticPixels[offset + 3] = 255;
+    } else if (i < 54) {
+      // 10 pixels White
+      syntheticPixels[offset] = 255;
+      syntheticPixels[offset + 1] = 255;
+      syntheticPixels[offset + 2] = 255;
+      syntheticPixels[offset + 3] = 255;
+    } else {
+      // 10 transparent pixels (alpha = 20) -> should be skipped!
+      syntheticPixels[offset] = 0;
+      syntheticPixels[offset + 1] = 0;
+      syntheticPixels[offset + 2] = 0;
+      syntheticPixels[offset + 3] = 20;
+    }
+  }
+
+  const palette1 = extractPaletteFromImageData(syntheticPixels, 5);
+  const palette2 = extractPaletteFromImageData(syntheticPixels, 5);
+
+  assert(palette1.length === palette2.length, 'Palette extraction produces identical number of swatches');
+  assert(JSON.stringify(palette1) === JSON.stringify(palette2), 'Palette extraction is strictly deterministic across runs');
+  assert(palette1.length > 0 && palette1[0].weight >= palette1[1]?.weight, 'Palette sorts by dominant color weight descending');
+
+  // 4. 64-bit dHash (9x8 grayscale) and Hamming distance
+  const grayBase = new Uint8Array(9 * 8);
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 9; c++) {
+      grayBase[r * 9 + c] = (r * 15 + c * 10) % 256;
+    }
+  }
+  const hashBase = computeDHashFromGrayscale(grayBase);
+  assert(typeof hashBase === 'string' && hashBase.length === 16, 'dHash produces 16-hex char 64-bit fingerprint');
+  assert(hammingDistance(hashBase, hashBase) === 0, 'Hamming distance with identical hash is 0');
+
+  // Create near-duplicate (tweak 2 pixels slightly)
+  const grayNear = new Uint8Array(grayBase);
+  grayNear[0] = grayNear[0] + 5;
+  grayNear[10] = grayNear[10] + 5;
+  const hashNear = computeDHashFromGrayscale(grayNear);
+  const nearDist = hammingDistance(hashBase, hashNear);
+  assert(nearDist <= 5, 'Near duplicate retains Hamming distance <= 5 (near-duplicate threshold)');
+
+  // Create inverted image
+  const grayInverted = new Uint8Array(grayBase.map(v => 255 - v));
+  const hashInverted = computeDHashFromGrayscale(grayInverted);
+  const invDist = hammingDistance(hashBase, hashInverted);
+  assert(invDist >= 50, 'Inverted/dissimilar image produces high Hamming distance (>= 50)');
+
+  // 5. Backfill Manager progress state
+  const backfillProg = backfillManager.getProgress();
+  assert(typeof backfillProg.isBackfilling === 'boolean' && typeof backfillProg.total === 'number', 'Backfill manager reports valid progress state');
 
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 

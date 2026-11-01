@@ -1,5 +1,6 @@
 import { newId } from "../utils";
 import { getAssetByHash, saveAsset } from "./db";
+import { extractAssetMetadata } from "./metadata";
 import {
   ALLOWED_IMAGE_MIME_TYPES,
   AssetSource,
@@ -129,7 +130,10 @@ export async function ingestImage(
       quality: 0.82,
     });
 
-    // 8. Construct StoredAsset record
+    // 8. Compute metadata (palette and 64-bit dHash) from thumbnail
+    const { palette, phash } = extractAssetMetadata(thumbCanvas);
+
+    // 9. Construct StoredAsset record
     const asset: StoredAsset = {
       id: newId(),
       kind: "image",
@@ -142,9 +146,12 @@ export async function ingestImage(
       hash,
       createdAt: Date.now(),
       source,
+      tags: [],
+      palette,
+      phash,
     };
 
-    // 9. Persist to IndexedDB
+    // 10. Persist to IndexedDB
     await saveAsset(asset);
     return asset;
   } finally {

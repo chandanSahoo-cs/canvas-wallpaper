@@ -4,6 +4,11 @@ export interface AssetSource {
   savedAt?: number;
 }
 
+export interface PaletteColor {
+  hex: string;
+  weight: number;
+}
+
 export interface StoredAsset {
   id: string;
   kind: "image";
@@ -16,6 +21,13 @@ export interface StoredAsset {
   hash: string; // SHA-256 hex string of the stored blob
   createdAt: number;
   source?: AssetSource;
+
+  // Metadata pipeline extensions
+  tags: string[];
+  note?: string;
+  palette: PaletteColor[];
+  phash: string; // 64-bit dHash (16 hex chars)
+  labelColor?: string;
 }
 
 export const ALLOWED_IMAGE_MIME_TYPES = new Set([

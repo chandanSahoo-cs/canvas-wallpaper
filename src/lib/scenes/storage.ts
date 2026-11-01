@@ -2,7 +2,7 @@ import { BackgroundConfig, CanvasElement } from "../../elements/types";
 import { Scene } from "../../store/useSceneStore";
 import { getDefaultWallpaperElements } from "../defaultWallpaperPreset";
 
-export const SCHEMA_VERSION = 2;
+export const SCHEMA_VERSION = 3;
 export const SCENE_INDEX_KEY = "scenes_index";
 export const SCENE_KEY_PREFIX = "scene:";
 export const INSTANT_PREVIEW_KEY = "papertab_active_scene_preview";

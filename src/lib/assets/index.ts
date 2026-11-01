@@ -5,3 +5,7 @@ export * from "./gc";
 export * from "./urls";
 export * from "./serialize";
 export * from "./loader";
+export * from "./color";
+export * from "./hash";
+export * from "./metadata";
+export * from "./backfill";
