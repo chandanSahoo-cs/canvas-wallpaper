@@ -14,6 +14,7 @@ import { LibraryToolbar } from "./LibraryToolbar";
 import { VirtualizedGrid } from "./VirtualizedGrid";
 import { LibrarySelectionBar } from "./LibrarySelectionBar";
 import { TagManagerModal } from "./TagManagerModal";
+import { DuplicatesView } from "./DuplicatesView";
 
 export const LibraryModal: React.FC = () => {
   const isOpen = useLibraryStore((s) => s.isOpen);
@@ -183,20 +184,28 @@ export const LibraryModal: React.FC = () => {
           onOpenTagManager={() => setIsTagManagerOpen(true)}
         />
 
-        {/* Virtualized Grid */}
-        <VirtualizedGrid
-          items={displayItems}
-          selectedIds={selectedIds}
-          onToggleSelect={toggleSelect}
-          onSelectRange={(targetId) =>
-            selectRange(
-              displayItems.map((it) => it.id),
-              targetId,
-            )
-          }
-          onLocate={handleLocate}
-          onTagClick={(tag) => setFilter("tag", tag)}
-        />
+        {/* Virtualized Grid or Duplicates Side-by-Side View */}
+        {filters.duplicatesOnly ? (
+          <DuplicatesView
+            items={displayItems}
+            onRefreshItems={refreshItems}
+            onLocate={handleLocate}
+          />
+        ) : (
+          <VirtualizedGrid
+            items={displayItems}
+            selectedIds={selectedIds}
+            onToggleSelect={toggleSelect}
+            onSelectRange={(targetId) =>
+              selectRange(
+                displayItems.map((it) => it.id),
+                targetId,
+              )
+            }
+            onLocate={handleLocate}
+            onTagClick={(tag) => setFilter("tag", tag)}
+          />
+        )}
 
         {/* Multi-Select Action Bar */}
         <LibrarySelectionBar

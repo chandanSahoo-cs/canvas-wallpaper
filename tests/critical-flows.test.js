@@ -76,6 +76,11 @@ const {
 } = jiti('../src/lib/library/crossReference.ts');
 
 const {
+  findDuplicateGroups,
+  mergeDuplicateAssets,
+} = jiti('../src/lib/library/duplicates.ts');
+
+const {
   tokenize,
   LocalSearchIndex,
   highlightMatches,
@@ -101,6 +106,7 @@ const {
 
 const {
   MAX_SCENES,
+  useSceneStore,
 } = jiti('../src/store/useSceneStore.ts');
 
 let passed = 0;
@@ -621,6 +627,148 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   const normalFilter = filterLibraryItems(colorItems, { colorHex: '#46BAEB', colorTolerance: 0.18 });
   assert(normalFilter.some(it => it.id === 'brand-blue-item') && normalFilter.some(it => it.id === 'cyan-item'), 'Normal tolerance (0.18) matches perceptually close colors');
   assert(!normalFilter.some(it => it.id === 'coral-item'), 'Normal tolerance strictly excludes perceptually distant coral color');
+
+  
+  // --- SECTION 17: Near-Duplicate Grouping & Merge Repointing (Phase 5) ---
+  console.log('\n--- SECTION 17: Near-Duplicate Grouping & Merge Repointing (Phase 5) ---');
+
+  // Base 64-bit dHash (16 hex chars)
+  const baseHash = 'a1b2c3d4e5f60718';
+  // 2 bit flips -> Hamming distance 2 <= 5 (near duplicate)
+  const nearHash1 = 'a1b2c3d4e5f6071b'; // flipped last hex
+  // 3 bit flips -> Hamming distance 3 <= 5 (near duplicate)
+  const nearHash2 = 'a1b2c3d4e5f6071e';
+  // Completely different hash -> distance ~32 > 5
+  const distinctHash = '0000ffff0000ffff';
+
+  const testItems = [
+    {
+      id: 'keeper-1',
+      assetId: 'keeper-1',
+      type: 'image',
+      title: 'Original Logo Image',
+      phash: baseHash,
+      tags: [],
+      palette: [],
+      placements: [{ sceneId: 'board-1', sceneName: 'Board 1', caption: 'Logo Caption A' }],
+      createdAt: 1000,
+    },
+    {
+      id: 'dup-1',
+      assetId: 'dup-1',
+      type: 'image',
+      title: 'Compressed Copy Logo',
+      phash: nearHash1,
+      tags: [],
+      palette: [],
+      placements: [{ sceneId: 'board-2', sceneName: 'Board 2', caption: 'Custom Caption on Board 2' }],
+      createdAt: 2000,
+    },
+    {
+      id: 'dup-2',
+      assetId: 'dup-2',
+      type: 'image',
+      title: 'Resized Copy Logo',
+      phash: nearHash2,
+      tags: [],
+      palette: [],
+      placements: [{ sceneId: 'board-1', sceneName: 'Board 1', caption: 'Another Placement Caption' }],
+      createdAt: 3000,
+    },
+    {
+      id: 'distinct-item',
+      assetId: 'distinct-item',
+      type: 'image',
+      title: 'Unrelated Sunset Photo',
+      phash: distinctHash,
+      tags: [],
+      palette: [],
+      placements: [],
+      createdAt: 4000,
+    },
+  ];
+
+  // 1. Grouping verification
+  const dupGroups = findDuplicateGroups(testItems, 5);
+  assert(dupGroups.length === 1, 'findDuplicateGroups accurately groups near duplicates into 1 cluster');
+  assert(dupGroups[0].items.length === 3, 'Duplicate cluster contains all 3 near-duplicate items');
+  assert(!dupGroups[0].items.some(it => it.id === 'distinct-item'), 'Distinct image is strictly excluded from duplicate cluster');
+
+  // 2. Merge repointing logic verification
+  const mockScenes = [
+    {
+      id: 'board-1',
+      name: 'Main Board',
+      elements: [
+        {
+          id: 'el-1',
+          type: 'image',
+          assetId: 'keeper-1',
+          caption: 'Logo Caption A',
+          x: 10,
+          y: 20,
+        },
+        {
+          id: 'el-2',
+          type: 'image',
+          assetId: 'dup-2',
+          caption: 'Another Placement Caption',
+          x: 100,
+          y: 100,
+        },
+        {
+          id: 'el-text',
+          type: 'text',
+          text: 'Unaffected Note',
+        },
+      ],
+      background: {
+        type: 'color',
+        color: '#FFFFFF',
+      },
+    },
+    {
+      id: 'board-2',
+      name: 'Secondary Board',
+      elements: [
+        {
+          id: 'el-3',
+          type: 'image',
+          assetId: 'dup-1',
+          caption: 'Custom Caption on Board 2',
+          x: 200,
+          y: 200,
+        },
+      ],
+      background: {
+        type: 'image',
+        imageAssetId: 'dup-1',
+      },
+    },
+  ];
+
+  const mergeResult = await mergeDuplicateAssets('keeper-1', ['dup-1', 'dup-2'], mockScenes);
+  assert(mergeResult.repointedElementsCount === 3, 'Repointed exactly 3 elements/backgrounds');
+  assert(mergeResult.affectedBoards.length === 2, 'Reported 2 affected boards in summary');
+
+  // Check state in useSceneStore
+  const updatedScenes = useSceneStore.getState().scenes;
+  const board1 = updatedScenes.find(s => s.id === 'board-1');
+  const board2 = updatedScenes.find(s => s.id === 'board-2');
+
+  const el2 = board1.elements.find(e => e.id === 'el-2');
+  assert(el2.assetId === 'keeper-1', 'Element pointing to dup-2 was repointed to keeper-1');
+  assert(el2.caption === 'Another Placement Caption', 'Custom caption on el-2 was strictly preserved during merge');
+
+  const el3 = board2.elements.find(e => e.id === 'el-3');
+  assert(el3.assetId === 'keeper-1', 'Element pointing to dup-1 was repointed to keeper-1');
+  assert(el3.caption === 'Custom Caption on Board 2', 'Custom caption on el-3 was strictly preserved during merge');
+
+  assert(board2.background.imageAssetId === 'keeper-1', 'Scene background image pointing to duplicate was repointed to keeper-1');
+
+  // Verify non-image element is untouched
+  const elText = board1.elements.find(e => e.id === 'el-text');
+  assert(elText.text === 'Unaffected Note', 'Non-image elements remain untouched');
 
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 
