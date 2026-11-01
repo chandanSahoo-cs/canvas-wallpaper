@@ -523,6 +523,11 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   const prefixSearch = testIndex.search('paper');
   assert(prefixSearch.length === 2, 'Prefix search matches docs containing tokens starting with "paper"');
 
+  // Single character search responsiveness
+  const singleCharSearch = testIndex.search('p');
+  assert(singleCharSearch.length === 2, 'Single-character query ("p") immediately matches corresponding documents starting with or containing "p"');
+  assert(singleCharSearch[0].id === 'doc-tag-match', 'Tag prefix matches rank higher on single-character queries');
+
   // Highlighting
   const highlightSegments = highlightMatches('PaperTab hand-crafted notebook', 'papertab');
   assert(highlightSegments.some(s => s.isMatch && s.text.toLowerCase() === 'papertab'), 'Highlight matches accurately identifies matching segment tokens');

@@ -103,43 +103,93 @@ export class LocalSearchIndex {
   }
 
   /**
-   * Fast full-text and prefix search with relevance ranking.
+   * Fast full-text, prefix, and substring search with relevance ranking.
+   * Responsive from the very first character (active when qTok.length >= 1).
    * Runs in under 10ms for 5,000+ items.
    */
   public search(query: string): SearchResult[] {
-    const qTokens = tokenize(query);
+    const trimmed = query.trim().toLowerCase();
+    if (!trimmed) return [];
+
+    // Support #tag search
+    const isTagSearch = trimmed.startsWith("#");
+    const cleanQuery = isTagSearch ? trimmed.slice(1).trim() : trimmed;
+
+    // If query is simply "#", return all tagged items
+    if (isTagSearch && !cleanQuery) {
+      const results: SearchResult[] = [];
+      for (const doc of this.docs.values()) {
+        if (doc.tags && doc.tags.length > 0) {
+          results.push({
+            id: doc.id,
+            score: 10,
+            doc,
+            matchedFields: ["tag"],
+          });
+        }
+      }
+      return results;
+    }
+
+    const qTokens = tokenize(cleanQuery);
+    if (qTokens.length === 0 && cleanQuery) {
+      qTokens.push(cleanQuery);
+    }
     if (qTokens.length === 0) return [];
 
     const scores = new Map<string, number>();
     const matchedTokensByDoc = new Map<string, Set<string>>();
 
+    const recordScore = (docId: string, weight: number, token: string) => {
+      scores.set(docId, (scores.get(docId) || 0) + weight);
+      let set = matchedTokensByDoc.get(docId);
+      if (!set) {
+        set = new Set();
+        matchedTokensByDoc.set(docId, set);
+      }
+      set.add(token);
+    };
+
     for (const qTok of qTokens) {
-      // 1. Exact token match
+      // 1. Exact token match (highest priority)
       const exactPostings = this.invertedIndex.get(qTok);
       if (exactPostings) {
         for (const [docId, weight] of exactPostings.entries()) {
-          scores.set(docId, (scores.get(docId) || 0) + weight);
-          const set = matchedTokensByDoc.get(docId) || new Set();
-          set.add(qTok);
-          matchedTokensByDoc.set(docId, set);
+          recordScore(docId, weight * 1.5, qTok);
         }
       }
 
-      // 2. Prefix token match (if token length >= 2)
-      if (qTok.length >= 2) {
-        for (const [indexTok, postings] of this.invertedIndex.entries()) {
-          if (indexTok !== qTok && indexTok.startsWith(qTok)) {
-            const prefixMultiplier = 0.7; // prefix matches score slightly lower
-            for (const [docId, weight] of postings.entries()) {
-              scores.set(
-                docId,
-                (scores.get(docId) || 0) + weight * prefixMultiplier,
-              );
-              const set = matchedTokensByDoc.get(docId) || new Set();
-              set.add(indexTok);
-              matchedTokensByDoc.set(docId, set);
-            }
+      // 2. Prefix & Substring matching across inverted index (active from the 1st character!)
+      for (const [indexTok, postings] of this.invertedIndex.entries()) {
+        if (indexTok === qTok) continue;
+
+        if (indexTok.startsWith(qTok)) {
+          // Token starts with query (e.g. "p" -> "paper")
+          const prefixMultiplier = qTok.length === 1 ? 0.7 : 0.9;
+          for (const [docId, weight] of postings.entries()) {
+            recordScore(docId, weight * prefixMultiplier, indexTok);
           }
+        } else if (qTok.length >= 2 && indexTok.includes(qTok)) {
+          // Token contains query as substring (e.g. "tab" -> "papertab")
+          const subMultiplier = 0.4;
+          for (const [docId, weight] of postings.entries()) {
+            recordScore(docId, weight * subMultiplier, indexTok);
+          }
+        }
+      }
+    }
+
+    // Direct fallback for titles, notes, text, and tags containing query substring
+    for (const doc of this.docs.values()) {
+      if (!scores.has(doc.id)) {
+        if (doc.title && doc.title.toLowerCase().includes(cleanQuery)) {
+          recordScore(doc.id, 5, cleanQuery);
+        } else if (doc.tags && doc.tags.some((t) => t.toLowerCase().includes(cleanQuery))) {
+          recordScore(doc.id, 8, cleanQuery);
+        } else if (doc.textContent && doc.textContent.toLowerCase().includes(cleanQuery)) {
+          recordScore(doc.id, 4, cleanQuery);
+        } else if (doc.captions && doc.captions.some((c) => c.toLowerCase().includes(cleanQuery))) {
+          recordScore(doc.id, 5, cleanQuery);
         }
       }
     }

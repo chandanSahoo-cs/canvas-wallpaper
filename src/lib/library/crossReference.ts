@@ -224,6 +224,22 @@ export function filterLibraryItems(
 
   // Fast ranked full-text & prefix search via SearchIndex
   if (filters.query && filters.query.trim()) {
+    if (searchIndex.size() === 0 && result.length > 0) {
+      searchIndex.rebuild(
+        result.map((it) => ({
+          id: it.id,
+          type: it.type,
+          title: it.title,
+          tags: it.tags,
+          note: it.note,
+          captions: it.placements.map((p) => p.caption).filter(Boolean) as string[],
+          sourceUrl: it.sourceUrl,
+          boardNames: it.placements.map((p) => p.sceneName),
+          textContent: it.textContent,
+          createdAt: it.createdAt,
+        })),
+      );
+    }
     const searchResults = searchIndex.search(filters.query);
     const scoreMap = new Map(searchResults.map((r) => [r.id, r.score]));
     result = result.filter((it) => scoreMap.has(it.id));
