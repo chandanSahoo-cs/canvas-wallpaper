@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ALLOWED_IMAGE_MIME_TYPES, ingestImage } from "../lib/assets";
 import { ImageElement } from "../elements/types";
 import { useAppStore } from "../store/useAppStore";
+import { placeInboxItemOnBoard } from "../lib/inbox/placement";
 
 interface UseCanvasDropOptions {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -46,6 +47,18 @@ export function useCanvasDrop({ canvasRef }: UseCanvasDropOptions) {
       const { zoom, scrollOffset } = useAppStore.getState();
       const dropX = (e.clientX - rect.left) / zoom + scrollOffset.x;
       const dropY = (e.clientY - rect.top) / zoom + scrollOffset.y;
+
+      // Path 0: Dropped from PaperTab Inbox Tray
+      const inboxData = dt.getData("application/papertab-inbox-item");
+      if (inboxData) {
+        try {
+          const item = JSON.parse(inboxData);
+          await placeInboxItemOnBoard(item, { x: dropX, y: dropY });
+          return;
+        } catch (err) {
+          console.warn("Failed to drop inbox item:", err);
+        }
+      }
 
       const rawFiles = Array.from(dt.files || []);
       const imageFiles = rawFiles.filter((f) =>

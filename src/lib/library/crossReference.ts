@@ -3,6 +3,7 @@ import { hexDistanceOklab, hexToRgb, rgbToOklab } from "../assets/color";
 import { hammingDistance } from "../assets/hash";
 import { Scene, useSceneStore } from "../../store/useSceneStore";
 import { ImageElement, TextElement } from "../../elements/types";
+import { getInboxItems } from "../inbox/storage";
 import { searchIndex, SearchDoc } from "../search/searchIndex";
 import {
   BoardPlacement,
@@ -45,6 +46,11 @@ export async function loadAllLibraryItems(
 
   // 1. Build map of assetId -> BoardPlacement[]
   const placementMap = new Map<string, BoardPlacement[]>();
+  const inboxItems = await getInboxItems();
+  const inboxAssetMap = new Map<string, (typeof inboxItems)[0]>();
+  for (const it of inboxItems) {
+    if (it.assetId) inboxAssetMap.set(it.assetId, it);
+  }
 
   for (const scene of allScenes) {
     if (scene.background?.type === "image" && scene.background.imageAssetId) {
@@ -78,6 +84,7 @@ export async function loadAllLibraryItems(
   // 2. Build LibraryItem records for stored assets (images)
   const items: LibraryItem[] = assets.map((a) => {
     const placements = placementMap.get(a.id) || [];
+    const inboxEntry = inboxAssetMap.get(a.id);
     return {
       id: a.id,
       type: "image",
@@ -96,8 +103,31 @@ export async function loadAllLibraryItems(
       labelColor: a.labelColor,
       sourceUrl: a.source?.url,
       placements,
+      isInbox: Boolean(inboxEntry),
+      inboxState: inboxEntry?.state,
+      inboxId: inboxEntry?.id,
     };
   });
+
+  // Collect non-asset Inbox items (links and text notes)
+  for (const it of inboxItems) {
+    if (!it.assetId) {
+      items.push({
+        id: `inbox-${it.id}`,
+        type: "text",
+        title: it.title || it.url || (it.text ? it.text.slice(0, 30) : "Inbox Item"),
+        createdAt: it.createdAt,
+        tags: ["inbox"],
+        palette: [],
+        sourceUrl: it.url || it.source?.url,
+        textContent: it.text || it.url,
+        placements: [],
+        isInbox: true,
+        inboxState: it.state,
+        inboxId: it.id,
+      });
+    }
+  }
 
   // 3. Collect Text Elements across all boards as searchable library items
   for (const scene of allScenes) {
@@ -174,6 +204,11 @@ export function filterLibraryItems(
   // Unplaced only ("not on any board")
   if (filters.unplacedOnly) {
     result = result.filter((it) => it.placements.length === 0);
+  }
+
+  // Inbox only filter
+  if (filters.inboxOnly) {
+    result = result.filter((it) => it.isInbox && it.inboxState !== "dismissed");
   }
 
   // Date range filter

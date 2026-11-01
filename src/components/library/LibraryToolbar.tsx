@@ -5,6 +5,7 @@ import {
   ChevronDown,
   Copy,
   Filter,
+  Inbox,
   Layers,
   Palette,
   Search,
@@ -73,7 +74,8 @@ export const LibraryToolbar: React.FC<LibraryToolbarProps> = ({
     Boolean(filters.colorHex) ||
     (filters.dateRange && filters.dateRange !== "all") ||
     Boolean(filters.unplacedOnly) ||
-    Boolean(filters.duplicatesOnly);
+    Boolean(filters.duplicatesOnly) ||
+    Boolean(filters.inboxOnly);
 
   return (
     <div className="flex flex-col gap-2 p-3 bg-surface border-b-2 border-line shrink-0 select-none">
@@ -342,6 +344,22 @@ export const LibraryToolbar: React.FC<LibraryToolbarProps> = ({
           <span>Duplicates</span>
         </button>
 
+        {/* Toggle: Inbox */}
+        <button
+          onClick={() =>
+            onFilterChange("inboxOnly", !filters.inboxOnly || undefined)
+          }
+          className={cn(
+            "px-2 py-0.5 rounded-sk border font-hand font-bold transition-all cursor-pointer flex items-center gap-1 text-[11px]",
+            filters.inboxOnly
+              ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+              : "bg-paper text-ink/70 border-line/30 hover:border-line hover:text-ink",
+          )}
+        >
+          <Inbox className="w-3 h-3" />
+          <span>Inbox</span>
+        </button>
+
         {/* Date Filter selector */}
         <select
           value={filters.dateRange || "all"}
@@ -395,6 +413,19 @@ export const LibraryToolbar: React.FC<LibraryToolbarProps> = ({
             </span>
             <button
               onClick={() => onClearFilter("colorHex")}
+              className="hover:text-danger cursor-pointer ml-0.5"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          </span>
+        )}
+
+        {filters.inboxOnly && (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-sk bg-brand-blue/15 text-blue-text border border-brand-blue font-hand text-[11px]">
+            <Inbox className="w-3 h-3" />
+            <span>Inbox Items</span>
+            <button
+              onClick={() => onClearFilter("inboxOnly")}
               className="hover:text-danger cursor-pointer ml-0.5"
             >
               <X className="w-3 h-3" />

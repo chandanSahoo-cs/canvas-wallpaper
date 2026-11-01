@@ -29,6 +29,10 @@ export interface LibraryItem {
   phash?: string;
   labelColor?: string;
   sourceUrl?: string;
+  // Inbox reference
+  isInbox?: boolean;
+  inboxState?: "new" | "placed" | "dismissed";
+  inboxId?: string;
   // Text-specific
   textContent?: string;
   fontFamily?: string;
@@ -46,4 +50,5 @@ export interface LibraryFilters {
   dateRange?: "all" | "today" | "week" | "month";
   unplacedOnly?: boolean;
   duplicatesOnly?: boolean;
+  inboxOnly?: boolean;
 }

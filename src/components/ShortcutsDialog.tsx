@@ -59,6 +59,8 @@ const SHORTCUT_SECTIONS: ShortcutSection[] = [
       { keys: ["Ctrl", "0"], description: "Reset zoom & center canvas to (0,0)" },
       { keys: ["Shift", "0"], description: "Center canvas to (0,0)" },
       { keys: ["Shift", "Scroll"], description: "Pan horizontally" },
+      { keys: ["M"], description: "Open Library & Search" },
+      { keys: ["I"], description: "Toggle Web Capture Inbox" },
       { keys: ["H"], description: "Toggle clean preview (hide UI)" },
       { keys: ["B"], description: "Toggle wallpaper boundary marker" },
       { keys: ["E"], description: "Enter Drawing mode (Wallpaper)" },

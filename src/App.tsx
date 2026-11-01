@@ -16,6 +16,7 @@ import { WidgetLayoutOverlay } from "./widgets/WidgetLayoutOverlay";
 import { OnboardingTour } from "./components/OnboardingTour";
 import { PresetGalleryDialog } from "./components/PresetGalleryDialog";
 import { LibraryModal } from "./components/library/LibraryModal";
+import { InboxTray } from "./components/inbox/InboxTray";
 import { useAppStore } from "./store/useAppStore";
 import { useSceneStore } from "./store/useSceneStore";
 import { useWidgetStore } from "./store/useWidgetStore";
@@ -170,7 +171,10 @@ export const App: React.FC = () => {
         <>
           <Toolbar onOpenShortcuts={() => setIsShortcutsOpen(true)} />
           <StylePanel />
-          <SceneSwitcher />
+          <div className="fixed top-4 left-4 z-30">
+            <SceneSwitcher />
+          </div>
+          <InboxTray onOpenSettings={() => setIsSettingsOpen(true)} />
         </>
       )}
 
