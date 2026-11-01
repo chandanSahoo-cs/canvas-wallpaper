@@ -21,10 +21,6 @@ import {
 } from "../lib/groups";
 import { isColorLight } from "../lib/utils";
 import { duplicateElements, preparePastedElements } from "./clipboardHelpers";
-import {
-  loadAppStoreFromStorage,
-  saveAppStoreToStorage,
-} from "./storagePersistence";
 import { flipElements } from "../lib/flipElements";
 
 const HISTORY_LIMIT = 50;
@@ -721,17 +717,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   saveToStorage: () => {
-    const { elements, background } = get();
-    saveAppStoreToStorage(elements, background);
+    // Canvas elements & background mutations are automatically persisted
+    // to active scene storage via the reactive subscription in useSceneStore.
   },
 
   loadFromStorage: () => {
-    loadAppStoreFromStorage(get().currentStrokeColor, (data) => {
-      const stateUpdate: Partial<AppState> = {};
-      if (data.elements) stateUpdate.elements = data.elements;
-      if (data.background) stateUpdate.background = data.background;
-      if (data.nextStroke) stateUpdate.currentStrokeColor = data.nextStroke;
-      set(stateUpdate);
-    });
+    // Initial scene and element hydration is coordinated via useSceneStore.loadScenesFromStorage().
   },
 }));

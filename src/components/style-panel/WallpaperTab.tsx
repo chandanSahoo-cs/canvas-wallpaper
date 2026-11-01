@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { Image as ImageIcon, RotateCcw, Crosshair, SquareDashed } from "lucide-react";
 import { cn } from "../../lib/utils";
+import { optimizeImageDataUrl } from "../../lib/imageInsert";
 import { useAppStore } from "../../store/useAppStore";
 
 const BG_PRESETS = [
@@ -37,12 +38,18 @@ export const WallpaperTab: React.FC = () => {
     const reader = new FileReader();
     reader.onload = () => {
       const dataUrl = reader.result as string;
-      setBackground({
-        type: "image",
-        imageUrl: dataUrl,
-      });
+      const img = new Image();
+      img.onload = () => {
+        const optimized = optimizeImageDataUrl(img, 1920);
+        setBackground({
+          type: "image",
+          imageUrl: optimized,
+        });
+      };
+      img.src = dataUrl;
     };
     reader.readAsDataURL(file);
+    e.target.value = "";
   };
 
   return (

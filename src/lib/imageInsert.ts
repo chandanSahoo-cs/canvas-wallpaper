@@ -5,11 +5,14 @@ import { useAppStore } from "../store/useAppStore";
 export function optimizeImageDataUrl(
   img: HTMLImageElement,
   maxDimension = 1600,
+  format: "image/webp" | "image/jpeg" | "image/png" = "image/webp",
+  quality = 0.85,
 ): string {
-  if (img.width <= maxDimension && img.height <= maxDimension) {
+  const needsDownscale = img.width > maxDimension || img.height > maxDimension;
+  if (!needsDownscale && img.src.startsWith("data:image/webp")) {
     return img.src;
   }
-  const scale = Math.min(maxDimension / img.width, maxDimension / img.height);
+  const scale = Math.min(maxDimension / img.width, maxDimension / img.height, 1);
   const targetW = Math.round(img.width * scale);
   const targetH = Math.round(img.height * scale);
 
@@ -19,6 +22,12 @@ export function optimizeImageDataUrl(
   const ctx = canvas.getContext("2d");
   if (!ctx) return img.src;
   ctx.drawImage(img, 0, 0, targetW, targetH);
+  try {
+    const dataUrl = canvas.toDataURL(format, quality);
+    if (dataUrl.startsWith(`data:${format}`)) {
+      return dataUrl;
+    }
+  } catch {}
   return canvas.toDataURL("image/png");
 }
 
