@@ -7,6 +7,7 @@ import {
   FONT_SIZE_MAP,
   getFontFamilyString,
 } from "../canvas/geometry";
+import { isColorLight } from "../lib/utils";
 
 export async function exportWallpaperAsPng(): Promise<void> {
   const state = useAppStore.getState();
@@ -194,7 +195,8 @@ export async function exportWallpaperAsPng(): Promise<void> {
         const fontSize =
           textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
         ctx.font = `${fontSize}px ${getFontFamilyString(textEl.fontFamily)}`;
-        ctx.fillStyle = textEl.strokeColor || "#1e1e1e";
+        const isLightBg = isColorLight(background.color || "#14141a");
+        ctx.fillStyle = textEl.strokeColor || (isLightBg ? "#1e1e1e" : "#ffffff");
         ctx.textBaseline = "top";
         const lines = textStr.split("\n");
         const lineHeight = fontSize * 1.25;

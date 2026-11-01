@@ -228,7 +228,7 @@ export function rectsIntersect(a: BoundingBox, b: BoundingBox): boolean {
 }
 
 export function elementContains(el: CanvasElement, localPos: Point): boolean {
-  if (el.type === "rectangle" || el.type === "text" || el.type === "image") {
+  if (el.type === "text" || el.type === "image") {
     const b = getBBox(el);
     return (
       localPos.x >= b.x - 4 &&
@@ -237,27 +237,89 @@ export function elementContains(el: CanvasElement, localPos: Point): boolean {
       localPos.y <= b.y + b.h + 4
     );
   }
+
+  const isFilled =
+    Boolean(el.fillColor) &&
+    el.fillColor !== "transparent" &&
+    el.fillColor !== "none";
+
+  if (el.type === "rectangle") {
+    const b = getBBox(el);
+    const threshold = Math.max(8, (el.strokeWidth || 1) + 6);
+    if (
+      localPos.x < b.x - threshold ||
+      localPos.x > b.x + b.w + threshold ||
+      localPos.y < b.y - threshold ||
+      localPos.y > b.y + b.h + threshold
+    ) {
+      return false;
+    }
+    if (isFilled) return true;
+
+    // For hollow/transparent rectangles, only click near perimeter edges
+    const nearLeft =
+      Math.abs(localPos.x - b.x) <= threshold &&
+      localPos.y >= b.y - threshold &&
+      localPos.y <= b.y + b.h + threshold;
+    const nearRight =
+      Math.abs(localPos.x - (b.x + b.w)) <= threshold &&
+      localPos.y >= b.y - threshold &&
+      localPos.y <= b.y + b.h + threshold;
+    const nearTop =
+      Math.abs(localPos.y - b.y) <= threshold &&
+      localPos.x >= b.x - threshold &&
+      localPos.x <= b.x + b.w + threshold;
+    const nearBottom =
+      Math.abs(localPos.y - (b.y + b.h)) <= threshold &&
+      localPos.x >= b.x - threshold &&
+      localPos.x <= b.x + b.w + threshold;
+    return nearLeft || nearRight || nearTop || nearBottom;
+  }
+
   if (el.type === "ellipse") {
     const b = getBBox(el);
-    const rx = b.w / 2 + 4;
-    const ry = b.h / 2 + 4;
-    if (rx <= 0 || ry <= 0) return false;
+    if (b.w <= 0 || b.h <= 0) return false;
     const cx = b.x + b.w / 2;
     const cy = b.y + b.h / 2;
-    return ((localPos.x - cx) / rx) ** 2 + ((localPos.y - cy) / ry) ** 2 <= 1;
-  }
-  if (el.type === "diamond") {
-    const b = getBBox(el);
     const rx = b.w / 2;
     const ry = b.h / 2;
-    if (rx <= 0 || ry <= 0) return false;
-    const cx = b.x + rx;
-    const cy = b.y + ry;
-    return (
-      Math.abs(localPos.x - cx) / (rx + 4) +
-        Math.abs(localPos.y - cy) / (ry + 4) <=
-      1
-    );
+    if (isFilled) {
+      const rxHit = rx + 4;
+      const ryHit = ry + 4;
+      return (
+        ((localPos.x - cx) / rxHit) ** 2 + ((localPos.y - cy) / ryHit) ** 2 <= 1
+      );
+    }
+    const threshold = Math.max(8, (el.strokeWidth || 1) + 6);
+    const normDist =
+      ((localPos.x - cx) / rx) ** 2 + ((localPos.y - cy) / ry) ** 2;
+    const rMean = (rx + ry) / 2;
+    const radialDist = Math.abs(Math.sqrt(normDist) - 1) * rMean;
+    return radialDist <= threshold;
+  }
+
+  if (el.type === "diamond") {
+    const b = getBBox(el);
+    if (b.w <= 0 || b.h <= 0) return false;
+    if (isFilled) {
+      const rx = b.w / 2;
+      const ry = b.h / 2;
+      const cx = b.x + rx;
+      const cy = b.y + ry;
+      return (
+        Math.abs(localPos.x - cx) / (rx + 4) +
+          Math.abs(localPos.y - cy) / (ry + 4) <=
+        1
+      );
+    }
+    const threshold = Math.max(8, (el.strokeWidth || 1) + 6);
+    const pts = diamondPoints(b.x, b.y, b.w, b.h);
+    for (let i = 0; i < 4; i++) {
+      const p1 = { x: pts[i][0], y: pts[i][1] };
+      const p2 = { x: pts[(i + 1) % 4][0], y: pts[(i + 1) % 4][1] };
+      if (distanceToSegment(localPos, p1, p2) <= threshold) return true;
+    }
+    return false;
   }
   if (el.type === "line" || el.type === "arrow") {
     for (let i = 0; i < el.points.length - 1; i++) {

@@ -7,7 +7,7 @@ import {
   FONT_SIZE_MAP,
   getFontFamilyString,
 } from "../canvas/geometry";
-import { escapeXml } from "../lib/utils";
+import { escapeXml, isColorLight } from "../lib/utils";
 
 export function exportWallpaperAsSvg(): void {
   const { elements, background } = useAppStore.getState();
@@ -147,7 +147,8 @@ export function exportWallpaperAsSvg(): void {
         const fontFamily = escapeXml(
           getFontFamilyString(textEl.fontFamily).replace(/"/g, "'"),
         );
-        const textColor = escapeXml(textEl.strokeColor || "#1e1e1e");
+        const isLightBg = isColorLight(background.color || "#14141a");
+        const textColor = escapeXml(textEl.strokeColor || (isLightBg ? "#1e1e1e" : "#ffffff"));
         svgParts.push(
           `<text x="${textEl.x ?? 0}" y="${
             (textEl.y ?? 0) + fontSize
