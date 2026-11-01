@@ -22,6 +22,8 @@ import { useAppStore } from "../store/useAppStore";
 import { ToolType } from "../elements/types";
 import { cn } from "../lib/utils";
 import { ExportMenu } from "./toolbar/ExportMenu";
+import { FolderOpen } from "lucide-react";
+import { useLibraryStore } from "../lib/library/store";
 import { ZoomControls } from "./toolbar/ZoomControls";
 import { StressTestButton } from "./toolbar/StressTestButton";
 
@@ -193,6 +195,14 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
 
       {/* Cluster 3: Utilities + Done */}
       <div className="flex items-center gap-0.5">
+        <button
+          title="Library & Search (M)"
+          aria-label="Open library and search"
+          onClick={() => useLibraryStore.getState().toggleOpen()}
+          className="w-8 h-8 rounded-sk flex items-center justify-center text-ink/70 hover:text-ink hover:bg-paper hover:border-line/30 border-2 border-transparent transition-all duration-150 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer"
+        >
+          <FolderOpen className="w-4 h-4 text-brand-blue" />
+        </button>
         <ExportMenu />
         <StressTestButton />
 

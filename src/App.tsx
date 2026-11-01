@@ -15,6 +15,7 @@ import { SettingsDialog } from "./widgets/SettingsDialog";
 import { WidgetLayoutOverlay } from "./widgets/WidgetLayoutOverlay";
 import { OnboardingTour } from "./components/OnboardingTour";
 import { PresetGalleryDialog } from "./components/PresetGalleryDialog";
+import { LibraryModal } from "./components/library/LibraryModal";
 import { useAppStore } from "./store/useAppStore";
 import { useSceneStore } from "./store/useSceneStore";
 import { useWidgetStore } from "./store/useWidgetStore";
@@ -179,6 +180,7 @@ export const App: React.FC = () => {
       )}
 
       {/* Feature Onboarding Tour & Welcome Modal */}
+      <LibraryModal />
       <OnboardingTour />
 
       {/* Idle Metadata Backfill Progress */} 

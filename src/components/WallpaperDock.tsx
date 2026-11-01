@@ -1,5 +1,6 @@
 import React from "react";
-import { Keyboard, Settings, LayoutGrid, Pencil, LayoutTemplate } from "lucide-react";
+import { Keyboard, Settings, LayoutGrid, Pencil, LayoutTemplate, FolderOpen } from "lucide-react";
+import { useLibraryStore } from "../lib/library/store";
 import { cn } from "../lib/utils";
 
 interface WallpaperDockProps {

@@ -60,6 +60,11 @@ const {
 } = jiti('../src/lib/arrange.ts');
 
 const {
+  filterLibraryItems,
+  sortLibraryItems,
+} = jiti('../src/lib/library/crossReference.ts');
+
+const {
   SCHEMA_VERSION,
   SCENE_INDEX_KEY,
   SCENE_KEY_PREFIX,
@@ -389,6 +394,66 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   // 5. Backfill Manager progress state
   const backfillProg = backfillManager.getProgress();
   assert(typeof backfillProg.isBackfilling === 'boolean' && typeof backfillProg.total === 'number', 'Backfill manager reports valid progress state');
+
+  // --- SECTION 14: Library View, Cross-Referencing & Filtering (Phase 2) ---
+  console.log('\n--- SECTION 14: Library View, Cross-Referencing & Filtering (Phase 2) ---');
+
+  const mockItems = [
+    {
+      id: 'img-1',
+      type: 'image',
+      title: 'Inspiration Board',
+      createdAt: 1000,
+      bytes: 204800,
+      tags: ['design', 'mockup'],
+      palette: [{ hex: '#46BAEB', weight: 0.6 }],
+      placements: [{ sceneId: 'board-1', sceneName: 'Main Wallpaper' }],
+    },
+    {
+      id: 'img-2',
+      type: 'image',
+      title: 'Texture Pattern',
+      createdAt: 2000,
+      bytes: 512000,
+      tags: ['textures'],
+      palette: [{ hex: '#00BF63', weight: 0.8 }],
+      placements: [],
+    },
+    {
+      id: 'text-1',
+      type: 'text',
+      title: 'Quick Meeting Notes',
+      textContent: 'Remember to ship paper ink redesign',
+      createdAt: 3000,
+      tags: [],
+      palette: [],
+      placements: [{ sceneId: 'board-2', sceneName: 'Sprint Board' }],
+    },
+  ];
+
+  // Tag filter
+  const designFiltered = filterLibraryItems(mockItems, { tag: 'design' });
+  assert(designFiltered.length === 1 && designFiltered[0].id === 'img-1', 'Tag filter returns matching items');
+
+  // Board filter
+  const boardFiltered = filterLibraryItems(mockItems, { boardId: 'board-2' });
+  assert(boardFiltered.length === 1 && boardFiltered[0].id === 'text-1', 'Board filter returns items placed on specified board');
+
+  // Unplaced filter
+  const unplacedFiltered = filterLibraryItems(mockItems, { unplacedOnly: true });
+  assert(unplacedFiltered.length === 1 && unplacedFiltered[0].id === 'img-2', 'Unplaced filter returns items not on any board');
+
+  // Type filter
+  const textFiltered = filterLibraryItems(mockItems, { type: 'text' });
+  assert(textFiltered.length === 1 && textFiltered[0].type === 'text', 'Type filter isolates text elements');
+
+  // Sort by newest
+  const sortedNewest = sortLibraryItems(mockItems, 'newest');
+  assert(sortedNewest[0].id === 'text-1' && sortedNewest[2].id === 'img-1', 'Sort by newest orders descending by timestamp');
+
+  // Sort by size
+  const sortedSize = sortLibraryItems(mockItems, 'size');
+  assert(sortedSize[0].id === 'img-2' && sortedSize[1].id === 'img-1', 'Sort by size orders by bytes descending');
 
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 

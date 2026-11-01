@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useAppStore } from "../store/useAppStore";
 import { openTextEditor } from "../tools/TextTool";
 import { TextElement, ToolType } from "../elements/types";
+import { useLibraryStore } from "../lib/library/store";
 
 const TOOL_SHORTCUT_MAP: Record<string, ToolType> = {
   v: "selection",
@@ -96,6 +97,13 @@ export function useKeyboardShortcuts({
           setMode("drawing");
           return;
         }
+      }
+
+      // Toggle Library modal with M
+      if ((e.key === "m" || e.key === "M") && !e.ctrlKey && !e.metaKey && !e.altKey && !e.shiftKey) {
+        e.preventDefault();
+        useLibraryStore.getState().toggleOpen();
+        return;
       }
 
       if (mode !== "drawing") return;
