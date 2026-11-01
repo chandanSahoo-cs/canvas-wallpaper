@@ -10,6 +10,7 @@ import {
   angleToDegrees,
 } from "../geometry";
 import { useAppStore } from "../../store/useAppStore";
+import { getCanvasOverlayTheme } from "./canvasTheme";
 
 function drawRoundedRect(
   ctx: CanvasRenderingContext2D,
@@ -38,23 +39,20 @@ function drawLockMarker(
   x: number,
   y: number,
 ): void {
+  const theme = getCanvasOverlayTheme();
   ctx.save();
-  // Circular badge with subtle shadow
-  ctx.shadowColor = "rgba(0, 0, 0, 0.12)";
-  ctx.shadowBlur = 4;
-  ctx.shadowOffsetY = 1;
-  ctx.fillStyle = "#ffffff";
+  // Badge with border
+  ctx.fillStyle = theme.surface;
   ctx.beginPath();
   ctx.arc(x, y, 11, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.shadowColor = "transparent";
-  ctx.strokeStyle = "#94a3b8";
-  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = theme.line;
+  ctx.lineWidth = 1.5;
   ctx.stroke();
 
   // Padlock shackle
-  ctx.strokeStyle = "#475569";
+  ctx.strokeStyle = theme.ink;
   ctx.lineWidth = 1.6;
   ctx.lineCap = "round";
   ctx.beginPath();
@@ -65,16 +63,19 @@ function drawLockMarker(
   ctx.stroke();
 
   // Padlock body
-  ctx.fillStyle = "#475569";
+  ctx.fillStyle = theme.warning;
   drawRoundedRect(ctx, x - 5, y - 1, 10, 7.5, 1.5);
   ctx.fill();
+  ctx.strokeStyle = theme.line;
+  ctx.lineWidth = 1;
+  ctx.stroke();
 
-  // Keyhole dot & slit
-  ctx.fillStyle = "#ffffff";
+  // Keyhole
+  ctx.fillStyle = theme.onAccent;
   ctx.beginPath();
   ctx.arc(x, y + 2, 0.9, 0, Math.PI * 2);
   ctx.fill();
-  ctx.strokeStyle = "#ffffff";
+  ctx.strokeStyle = theme.onAccent;
   ctx.lineWidth = 0.9;
   ctx.beginPath();
   ctx.moveTo(x, y + 2);
@@ -89,30 +90,26 @@ function drawGroupMarker(
   x: number,
   y: number,
 ): void {
+  const theme = getCanvasOverlayTheme();
   ctx.save();
-  // Circular badge with subtle shadow
-  ctx.shadowColor = "rgba(0, 0, 0, 0.12)";
-  ctx.shadowBlur = 4;
-  ctx.shadowOffsetY = 1;
-  ctx.fillStyle = "#ffffff";
+  ctx.fillStyle = theme.surface;
   ctx.beginPath();
   ctx.arc(x, y, 11, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.shadowColor = "transparent";
-  ctx.strokeStyle = "#6366f1";
-  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = theme.blue;
+  ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // Group icon: two overlapping squares
-  ctx.strokeStyle = "#818cf8";
-  ctx.lineWidth = 1.2;
+  // Group icon: two overlapping squares in theme blue
+  ctx.strokeStyle = theme.blue;
+  ctx.lineWidth = 1.4;
   drawRoundedRect(ctx, x - 5.5, y - 5.5, 7, 7, 1);
   ctx.stroke();
 
-  ctx.fillStyle = "#ffffff";
-  ctx.strokeStyle = "#4f46e5";
-  ctx.lineWidth = 1.2;
+  ctx.fillStyle = theme.surface;
+  ctx.strokeStyle = theme.ink;
+  ctx.lineWidth = 1.4;
   drawRoundedRect(ctx, x - 1.5, y - 1.5, 7, 7, 1);
   ctx.fill();
   ctx.stroke();
@@ -140,10 +137,10 @@ function drawRotationBadge(
   deg: number,
   frameCenter?: Point,
 ): void {
+  const theme = getCanvasOverlayTheme();
   const text = `${deg}°`;
   ctx.save();
-  ctx.font =
-    '600 11px Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+  ctx.font = '700 11px Excalifont, Virgil, cursive, sans-serif';
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
 
@@ -151,7 +148,7 @@ function drawRotationBadge(
   const paddingX = 8;
   const badgeW = Math.max(textWidth + paddingX * 2, 34);
   const badgeH = 20;
-  const r = 5;
+  const r = 4;
 
   let bx = pos.x;
   let by = pos.y;
@@ -172,24 +169,17 @@ function drawRotationBadge(
   const x = bx - badgeW / 2;
   const y = by - badgeH / 2;
 
-  ctx.shadowColor = "rgba(0, 0, 0, 0.4)";
-  ctx.shadowBlur = 6;
-  ctx.shadowOffsetY = 2;
-
-  ctx.fillStyle = "#18181b";
+  // Background and border
+  ctx.fillStyle = theme.surface;
   drawRoundedRect(ctx, x, y, badgeW, badgeH, r);
   ctx.fill();
 
-  ctx.shadowColor = "transparent";
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetY = 0;
-
-  ctx.strokeStyle = "#6366f1";
-  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = theme.blue;
+  ctx.lineWidth = 1.5;
   drawRoundedRect(ctx, x, y, badgeW, badgeH, r);
   ctx.stroke();
 
-  ctx.fillStyle = "#f4f4f5";
+  ctx.fillStyle = theme.ink;
   ctx.fillText(text, bx, by);
 
   ctx.restore();
@@ -199,15 +189,16 @@ export function drawMarquee(
   ctx: CanvasRenderingContext2D,
   marquee: { start: Point; current: Point },
 ): void {
+  const theme = getCanvasOverlayTheme();
   const x0 = Math.min(marquee.start.x, marquee.current.x);
   const y0 = Math.min(marquee.start.y, marquee.current.y);
   const w = Math.abs(marquee.current.x - marquee.start.x);
   const h = Math.abs(marquee.current.y - marquee.start.y);
 
   ctx.save();
-  ctx.fillStyle = "rgba(105, 101, 219, 0.08)";
-  ctx.strokeStyle = "#6965db";
-  ctx.lineWidth = 1;
+  ctx.fillStyle = "rgba(70, 186, 235, 0.12)";
+  ctx.strokeStyle = theme.blue;
+  ctx.lineWidth = 1.5;
   ctx.fillRect(x0, y0, w, h);
   ctx.strokeRect(x0, y0, w, h);
   ctx.restore();
@@ -219,6 +210,7 @@ export function drawSelectionOverlays(
   selectedIds: Set<string>,
   rotationOverlay?: RotationOverlay | null,
 ): void {
+  const theme = getCanvasOverlayTheme();
   const editingText = useAppStore.getState().editingText;
   const selectedMembers = elements.filter(
     (el) =>
@@ -249,8 +241,8 @@ export function drawSelectionOverlays(
         ctx.translate(-center.x, -center.y);
       }
       ctx.strokeStyle = el.locked
-        ? "rgba(155, 155, 163, 0.7)"
-        : "rgba(105, 101, 219, 0.5)";
+        ? theme.muted
+        : theme.blue;
       ctx.lineWidth = 1;
       ctx.setLineDash([3, 3]);
       ctx.strokeRect(b.x - 3, b.y - 3, b.w + 6, b.h + 6);
@@ -275,7 +267,7 @@ export function drawSelectionOverlays(
       ctx.save();
 
       if (frame.lineElement.points.length > 2) {
-        ctx.strokeStyle = "rgba(99, 102, 241, 0.6)";
+        ctx.strokeStyle = theme.blue;
         ctx.lineWidth = 1;
         ctx.setLineDash([3, 3]);
         ctx.beginPath();
@@ -286,8 +278,8 @@ export function drawSelectionOverlays(
         ctx.setLineDash([]);
       }
 
-      ctx.fillStyle = "#ffffff";
-      ctx.strokeStyle = "#6366f1";
+      ctx.fillStyle = theme.surface;
+      ctx.strokeStyle = theme.blue;
       ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(startPt.x, startPt.y, 6, 0, Math.PI * 2);
@@ -299,8 +291,8 @@ export function drawSelectionOverlays(
       ctx.fill();
       ctx.stroke();
 
-      ctx.fillStyle = "#6366f1";
-      ctx.strokeStyle = "#ffffff";
+      ctx.fillStyle = theme.blue;
+      ctx.strokeStyle = theme.line;
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       ctx.arc(midPt.x, midPt.y, 5, 0, Math.PI * 2);
@@ -331,7 +323,7 @@ export function drawSelectionOverlays(
   ctx.rotate(frame.angle);
   ctx.translate(-frame.center.x, -frame.center.y);
 
-  ctx.strokeStyle = allLocked ? "#9b9ba3" : "#6965db";
+  ctx.strokeStyle = allLocked ? theme.muted : theme.blue;
   ctx.lineWidth = 1.5;
   if (allLocked) {
     ctx.setLineDash([4, 4]);
@@ -350,7 +342,7 @@ export function drawSelectionOverlays(
     ctx.lineTo(midX, y0 - ROTATE_HANDLE_OFFSET);
     ctx.stroke();
 
-    // 8 Resize handle dots
+    // 8 Resize handle dots: surface fill with blue border
     const handlePts = [
       [x0, y0],
       [midX, y0],
@@ -361,8 +353,8 @@ export function drawSelectionOverlays(
       [x0, y1],
       [x0, midY],
     ];
-    ctx.fillStyle = "#ffffff";
-    ctx.strokeStyle = "#6366f1";
+    ctx.fillStyle = theme.surface;
+    ctx.strokeStyle = theme.blue;
     ctx.lineWidth = 1.5;
     for (const [hx, hy] of handlePts) {
       ctx.beginPath();
@@ -371,7 +363,7 @@ export function drawSelectionOverlays(
       ctx.stroke();
     }
 
-    // Rotation circle handle
+    // Rotation circle handle: surface fill with blue border
     ctx.beginPath();
     ctx.arc(midX, y0 - ROTATE_HANDLE_OFFSET, 5.5, 0, Math.PI * 2);
     ctx.fill();

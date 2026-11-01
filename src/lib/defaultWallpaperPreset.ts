@@ -4,7 +4,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-la81mq",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -123,7 +123,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-zxgr4n",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -210,7 +210,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-8jx1li",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -273,7 +273,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-8o3drg",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -392,7 +392,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-mzg8b3",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -455,7 +455,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-x4urfa",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -574,7 +574,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-rklqze",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -661,7 +661,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-7z4icx",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -724,7 +724,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-za3dym",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -843,7 +843,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-b8h29w",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -930,7 +930,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-ufrwd5",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -1001,7 +1001,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-tdq0ti",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -1072,7 +1072,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-pr9mou",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -1191,7 +1191,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-frddbt",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -1278,7 +1278,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-qufsur",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -1357,7 +1357,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-pcs7rb",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -1452,7 +1452,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-ktuj52",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -1515,7 +1515,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-7zrbjw",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -1618,7 +1618,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-t22p7e",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -1737,7 +1737,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-3gvud3",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -1800,7 +1800,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-jtcl9j",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -1919,7 +1919,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-tov68v",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.1,
     "strokeStyle": "solid",
@@ -2006,7 +2006,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-yri01w",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2049,7 +2049,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-rgyf1j",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2084,7 +2084,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-kfbzai",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2115,7 +2115,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-t7oevy",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2142,7 +2142,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-6ssum4",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2169,7 +2169,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-wukcka",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2196,7 +2196,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-2pfwz1",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2223,7 +2223,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-j5q56i",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2266,7 +2266,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-efykhc",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2297,7 +2297,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-z2pr7c",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2324,7 +2324,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-9lq3rg",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2351,7 +2351,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-7xiu50",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2378,7 +2378,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844375-5p37cl",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2421,7 +2421,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-4x8rdp",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2456,7 +2456,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-afbmf5",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2487,7 +2487,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-4ssfn0",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2514,7 +2514,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-ymuy95",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2541,7 +2541,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-tn8i95",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2568,7 +2568,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-hh5qdb",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2595,7 +2595,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-0h8ifk",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2638,7 +2638,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-oc96xt",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2677,7 +2677,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-zar4iu",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2704,7 +2704,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-tzj32u",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2731,7 +2731,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-4vanvz",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2758,7 +2758,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-wh9ek5",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2801,7 +2801,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-uyhg8t",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2836,7 +2836,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-frxddj",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2863,7 +2863,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-tzkt8e",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2890,7 +2890,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-mgmmxc",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2917,7 +2917,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-qoey07",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2948,7 +2948,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-p4nme7",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -2987,7 +2987,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-o7noio",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3014,7 +3014,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-xptpxp",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3041,7 +3041,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-an4r5k",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3080,7 +3080,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-93bw3l",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3123,7 +3123,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-3uhze4",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3154,7 +3154,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-1lunht",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3181,7 +3181,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-si6qs6",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3208,7 +3208,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-2uqrqw",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3235,7 +3235,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-gyz4uy",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3278,7 +3278,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-s6r6f6",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3313,7 +3313,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-w2c6rl",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3340,7 +3340,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-7qs3pe",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3367,7 +3367,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-623a9i",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -3394,7 +3394,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-q7fhdk",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -3541,7 +3541,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-4u37db",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -3624,7 +3624,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-71uyki",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -3771,7 +3771,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-9pwn8y",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -3854,7 +3854,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-mzyf0c",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -4001,7 +4001,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-h1kx2l",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -4084,7 +4084,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-3hf3nf",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -4295,7 +4295,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-sxtlhv",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -4506,7 +4506,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-my81z6",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -4589,7 +4589,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-g6ly3n",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -4736,7 +4736,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-i3b7o5",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -4883,7 +4883,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-d9zinu",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -4966,7 +4966,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-pmzauh",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -5129,7 +5129,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-o37jwg",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -5212,7 +5212,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-87ked1",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 3.5,
     "strokeStyle": "solid",
@@ -5295,7 +5295,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-h544q5",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.5,
     "strokeStyle": "solid",
@@ -5594,7 +5594,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-rir4ds",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -5773,7 +5773,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-ii36b1",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -5920,7 +5920,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-nkkw3q",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -6067,7 +6067,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-ifeich",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -6214,7 +6214,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-fqxn19",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -6361,7 +6361,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-0b9fwz",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -6508,7 +6508,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-pv7vgn",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -6655,7 +6655,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-cf2qbh",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.5,
     "strokeStyle": "solid",
@@ -6802,7 +6802,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-uhl710",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -6949,7 +6949,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-khcvij",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -7096,7 +7096,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-vx22wq",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.5,
     "strokeStyle": "solid",
@@ -7243,7 +7243,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-rn5lly",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -7390,7 +7390,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-iy8j3z",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -7481,7 +7481,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-yvscbr",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -7572,7 +7572,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-r8hqyc",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -7595,7 +7595,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-ckdqa6",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -7618,7 +7618,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-gol8vb",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -7641,7 +7641,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-5xwnu3",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -7664,7 +7664,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-4ztorq",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -7687,7 +7687,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-u8j18f",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -7710,7 +7710,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-n1xrnj",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -7733,7 +7733,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-yxtvqy",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -7756,7 +7756,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-7wkx58",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -7903,7 +7903,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-h9do50",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -8050,7 +8050,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-38cx8l",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -8197,7 +8197,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-xcfdgr",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.5,
     "strokeStyle": "solid",
@@ -8592,7 +8592,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-787114",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.5,
     "strokeStyle": "solid",
@@ -8911,7 +8911,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-9q0hch",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -9002,7 +9002,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-483z3c",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -9029,7 +9029,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-14frhs",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -9176,7 +9176,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-9o9lpi",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.5,
     "strokeStyle": "solid",
@@ -9323,7 +9323,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-bby2je",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -9470,7 +9470,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-hy8e95",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -9617,7 +9617,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-p5c1bo",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -9640,7 +9640,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-4jfn9j",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -9663,7 +9663,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-ybqxvm",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -9754,7 +9754,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-fd035x",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -9781,7 +9781,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-xjh45q",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -9808,7 +9808,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-wj8lzf",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.4,
     "strokeStyle": "solid",
@@ -10051,7 +10051,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-9rma9b",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -10074,7 +10074,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-ff1toe",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -10097,7 +10097,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-95w425",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -10132,7 +10132,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-8wpy04",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -10159,7 +10159,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-iffkk1",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -10186,7 +10186,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-c9jibx",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -10213,7 +10213,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-e9h1ft",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -10240,7 +10240,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-e5f7uv",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -10267,7 +10267,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-1wtafu",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -10294,7 +10294,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-ke7t39",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -10385,7 +10385,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-zcwv5a",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -10476,7 +10476,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792006844376-1rdghd",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -10567,7 +10567,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792007583442-1pyuqe",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.8,
     "strokeStyle": "solid",
@@ -10906,7 +10906,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792007583442-c2kllz",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -11205,7 +11205,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792007583442-ge3vgp",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.4,
     "strokeStyle": "solid",
@@ -11424,7 +11424,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792007583442-llhn9l",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -11523,7 +11523,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792007583443-6orre7",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.4,
     "strokeStyle": "solid",
@@ -11614,7 +11614,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792007583443-96mq81",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.4,
     "strokeStyle": "solid",
@@ -11705,7 +11705,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792007583443-iia33x",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.4,
     "strokeStyle": "solid",
@@ -11796,7 +11796,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792007583443-x1y4me",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.4,
     "strokeStyle": "solid",
@@ -11887,7 +11887,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792007583443-tcg15o",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.4,
     "strokeStyle": "solid",
@@ -11978,7 +11978,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792007583443-79edbk",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -12009,7 +12009,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070875-tdsjk7",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12046,7 +12046,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-bwjy4f",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12083,7 +12083,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-azlar8",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12120,7 +12120,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-p4bdvx",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12157,7 +12157,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-uskrd5",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12194,7 +12194,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-hd1jh3",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -12219,7 +12219,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-jcj1qj",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -12244,7 +12244,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-p0r1we",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12281,7 +12281,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-nqyj7h",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12318,7 +12318,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-bpltbz",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12355,7 +12355,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-e6fgpd",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12392,7 +12392,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-rpa442",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12429,7 +12429,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-khla86",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -12454,7 +12454,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070876-hi7nr9",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -12479,7 +12479,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-wkxfqr",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12516,7 +12516,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-3jdyb7",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12553,7 +12553,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-93x8qj",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12590,7 +12590,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-o9zupk",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12627,7 +12627,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-0bvlyo",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12664,7 +12664,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-b1mq6z",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12701,7 +12701,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-ea1v7h",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12738,7 +12738,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-fb6g2t",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -12763,7 +12763,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-22je1h",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -12788,7 +12788,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-5d7c9l",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12825,7 +12825,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-ejhnu6",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12862,7 +12862,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-y7mtrg",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12899,7 +12899,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-9znzxv",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12936,7 +12936,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-x3dzxz",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -12973,7 +12973,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-irivue",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13010,7 +13010,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-pchlq5",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13047,7 +13047,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-qmyk2i",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13084,7 +13084,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-omcydu",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13121,7 +13121,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-9ipatv",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13158,7 +13158,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-pb2a6h",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -13183,7 +13183,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-jn0n8s",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -13208,7 +13208,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-7ah5ix",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13245,7 +13245,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-j1rdvj",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13282,7 +13282,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-32fh7l",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13319,7 +13319,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070877-nbt7qf",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13356,7 +13356,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-uk7etw",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13393,7 +13393,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-is38h5",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13430,7 +13430,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-k7nh8k",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13467,7 +13467,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-cyu7sr",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13504,7 +13504,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-2bzbq8",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13541,7 +13541,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-ey6yqi",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13578,7 +13578,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-td0fa4",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13615,7 +13615,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-2ht6iv",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13652,7 +13652,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-rb4tv0",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -13677,7 +13677,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-ak06cl",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2,
     "strokeStyle": "solid",
@@ -13702,7 +13702,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-kepa8p",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13739,7 +13739,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-2v2zr9",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13776,7 +13776,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-qq36g2",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13813,7 +13813,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070878-y1bex0",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13850,7 +13850,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070880-ga9qdz",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13887,7 +13887,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070880-ypubzg",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13924,7 +13924,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070880-llyc5g",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13961,7 +13961,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070880-yiotun",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -13998,7 +13998,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070881-cb18w9",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -14115,7 +14115,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070881-auybbq",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -14152,7 +14152,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070881-gyput8",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -14189,7 +14189,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070881-dry21d",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -14226,7 +14226,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070881-r3y9g7",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -14263,7 +14263,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070881-emqr4e",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -14300,7 +14300,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070881-b0yd0a",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -14337,7 +14337,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070881-8mkoxi",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -14374,7 +14374,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070881-t3ooi0",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -14411,7 +14411,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070881-hnftxh",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -14448,7 +14448,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070881-fclh28",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -14485,7 +14485,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-2rlprw",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14512,7 +14512,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-4hyy7b",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14539,7 +14539,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-p1pn72",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14566,7 +14566,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-2h084g",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14593,7 +14593,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-oop17x",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -14616,7 +14616,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-8dcyls",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14643,7 +14643,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-pdqi1m",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14670,7 +14670,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-6dayf4",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14697,7 +14697,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-kdoj89",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14724,7 +14724,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-2kryvz",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -14747,7 +14747,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-vitvg8",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14774,7 +14774,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-gnaxnq",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14801,7 +14801,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-ap26ol",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14828,7 +14828,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-zk8bo3",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14855,7 +14855,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-qsdjej",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -14878,7 +14878,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-cl8yn1",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14905,7 +14905,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-cmhcii",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14932,7 +14932,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-kzyhed",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14959,7 +14959,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-txsfr5",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -14986,7 +14986,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-2cujvn",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -15009,7 +15009,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-x8hywn",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -15036,7 +15036,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-c1pudd",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -15063,7 +15063,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-qww1uq",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -15090,7 +15090,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-y8wcpt",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -15117,7 +15117,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-8029rl",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -15140,7 +15140,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-gzutxs",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -15167,7 +15167,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-7z78rk",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -15194,7 +15194,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-sx1duu",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -15221,7 +15221,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-l4om8l",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.6,
     "strokeStyle": "solid",
@@ -15248,7 +15248,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-3wot3l",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 2.2,
     "strokeStyle": "solid",
@@ -15271,7 +15271,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-ne9y7t",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -15354,7 +15354,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-bux5c1",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -15437,7 +15437,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-eyj9si",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -15520,7 +15520,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070882-b04hsp",
     "type": "freedraw",
-    "strokeColor": "#56adf0",
+    "strokeColor": "#46BAEB",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -15605,7 +15605,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070883-5z1uoa",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -15630,7 +15630,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070883-q6s84z",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -15655,7 +15655,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070883-b9olll",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -15680,7 +15680,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070883-1s6gxm",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -15705,7 +15705,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070883-t5tjfi",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
@@ -15730,7 +15730,7 @@ export const DEFAULT_WALLPAPER_ELEMENTS: CanvasElement[] = [
   {
     "id": "1792008070883-strm37",
     "type": "freedraw",
-    "strokeColor": "#59f056",
+    "strokeColor": "#00BF63",
     "fillColor": "transparent",
     "strokeWidth": 1.8,
     "strokeStyle": "solid",
