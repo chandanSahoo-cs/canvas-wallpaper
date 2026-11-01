@@ -66,6 +66,7 @@ export const InboxTray: React.FC<InboxTrayProps> = ({ onOpenSettings }) => {
   return (
     <div
       id="inbox-tray-panel"
+      data-tour="inbox-tray"
       className="fixed top-20 right-4 z-30 w-80 max-h-[calc(100vh-6rem)] bg-surface text-ink border-2 border-line shadow-hard rounded-sk-lg p-3 flex flex-col gap-2.5 overflow-hidden animate-in fade-in slide-in-from-right-4 duration-150 select-none"
     >
       {/* 1. Header */}

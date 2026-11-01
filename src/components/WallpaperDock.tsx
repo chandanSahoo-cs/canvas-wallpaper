@@ -48,6 +48,7 @@ export const WallpaperDock: React.FC<WallpaperDockProps> = ({
 
       <div
         id="tour-wallpaper-dock"
+        data-tour="wallpaper-dock"
         className={cn(
           "flex items-center rounded-sk-lg backdrop-blur-md border-2 border-line shadow-hard transition-all duration-150 p-1 select-none",
           isLight ? "bg-surface/95 text-ink" : "bg-surface/95 text-ink",

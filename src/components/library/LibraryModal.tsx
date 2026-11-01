@@ -138,6 +138,7 @@ export const LibraryModal: React.FC = () => {
         role="dialog"
         aria-modal="true"
         aria-label="PaperTab Library"
+        data-tour="library-modal"
         onClick={(e) => e.stopPropagation()}
         className="w-[96vw] max-w-6xl h-[90vh] bg-surface text-ink border-2 border-line rounded-sk-lg shadow-hard flex flex-col overflow-hidden relative"
       >
