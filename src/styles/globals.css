@@ -16,6 +16,88 @@
   font-display: swap;
 }
 
+:root,
+:root[data-theme="light"] {
+  --paper: #F6FAF8;
+  --surface: #FFFFFF;
+  --ink: #0E1A1F;
+  --muted: #52636A;
+  --line: #0E1A1F;
+  --blue: #46BAEB;
+  --green: #00BF63;
+  --blue-text: #137298;
+  --green-text: #00834A;
+  --on-accent: #0E1A1F;
+  --danger: #D92D20;
+  --warning: #B54708;
+  --shadow-hard: 3px 3px 0 var(--ink);
+  --shadow-hard-sm: 2px 2px 0 var(--ink);
+  --shadow-hard-pressed: 1px 1px 0 var(--ink);
+}
+
+:root[data-theme="dark"] {
+  --paper: #0E1A1F;
+  --surface: #15262D;
+  --ink: #EAF4F1;
+  --muted: #96AAB0;
+  --line: #3D525A;
+  --blue: #46BAEB;
+  --green: #00BF63;
+  --blue-text: #46BAEB;
+  --green-text: #00BF63;
+  --on-accent: #0E1A1F;
+  --danger: #F97066;
+  --warning: #FDB022;
+  --shadow-hard: 3px 3px 0 #000000;
+  --shadow-hard-sm: 2px 2px 0 #000000;
+  --shadow-hard-pressed: 1px 1px 0 #000000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+    --paper: #0E1A1F;
+    --surface: #15262D;
+    --ink: #EAF4F1;
+    --muted: #96AAB0;
+    --line: #3D525A;
+    --blue: #46BAEB;
+    --green: #00BF63;
+    --blue-text: #46BAEB;
+    --green-text: #00BF63;
+    --on-accent: #0E1A1F;
+    --danger: #F97066;
+    --warning: #FDB022;
+    --shadow-hard: 3px 3px 0 #000000;
+    --shadow-hard-sm: 2px 2px 0 #000000;
+    --shadow-hard-pressed: 1px 1px 0 #000000;
+  }
+}
+
+@theme {
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-brand-blue: var(--blue);
+  --color-brand-green: var(--green);
+  --color-blue-text: var(--blue-text);
+  --color-green-text: var(--green-text);
+  --color-on-accent: var(--on-accent);
+  --color-danger: var(--danger);
+  --color-warning: var(--warning);
+
+  --font-hand: 'Excalifont', 'Virgil', cursive, sans-serif;
+
+  --radius-sk-sm: 4px;
+  --radius-sk: 6px;
+  --radius-sk-lg: 8px;
+
+  --shadow-hard: var(--shadow-hard);
+  --shadow-hard-sm: var(--shadow-hard-sm);
+  --shadow-hard-pressed: var(--shadow-hard-pressed);
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -26,7 +108,33 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background-color: #14141a;
+    background-color: var(--paper);
+    color: var(--ink);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--blue);
+    outline-offset: 2px;
+  }
+}
+
+.sketch-border {
+  border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+
+.active-tilt {
+  transform: rotate(-2.5deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .active-tilt {
+    transform: none !important;
   }
 }

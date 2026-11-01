@@ -11,7 +11,11 @@ import {
   Eye,
   EyeOff,
   Compass,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
+import { useAppStore } from "../store/useAppStore";
 import { useWidgetStore } from "../store/useWidgetStore";
 import { useOnboardingStore } from "../store/useOnboardingStore";
 import { PrivacyPolicyDialog } from "../components/PrivacyPolicyDialog";
@@ -27,6 +31,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   onClose,
 }) => {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const themeMode = useAppStore((s) => s.themeMode);
+  const setThemeMode = useAppStore((s) => s.setThemeMode);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -296,6 +302,59 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                 className="p-2 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-600 active:scale-95 transition-all cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Interface Theme (System / Light / Dark) */}
+          <div className="flex flex-col gap-2 pt-4 border-t border-neutral-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Sun className="w-4 h-4 text-neutral-700" />
+                <div>
+                  <div className="text-sm font-medium">Appearance Theme</div>
+                  <div className="text-xs text-neutral-500">
+                    Switch interface between System, Light, and Dark mode
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 p-1 bg-neutral-100 rounded-xl border border-neutral-200">
+              <button
+                type="button"
+                onClick={() => setThemeMode("system")}
+                className={`py-1.5 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  themeMode === "system"
+                    ? "bg-white text-neutral-900 shadow-sm font-semibold"
+                    : "text-neutral-600 hover:text-neutral-900"
+                }`}
+              >
+                <Monitor className="w-3.5 h-3.5" />
+                <span>System</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setThemeMode("light")}
+                className={`py-1.5 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  themeMode === "light"
+                    ? "bg-white text-neutral-900 shadow-sm font-semibold"
+                    : "text-neutral-600 hover:text-neutral-900"
+                }`}
+              >
+                <Sun className="w-3.5 h-3.5" />
+                <span>Light</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setThemeMode("dark")}
+                className={`py-1.5 px-3 rounded-lg text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  themeMode === "dark"
+                    ? "bg-white text-neutral-900 shadow-sm font-semibold"
+                    : "text-neutral-600 hover:text-neutral-900"
+                }`}
+              >
+                <Moon className="w-3.5 h-3.5" />
+                <span>Dark</span>
               </button>
             </div>
           </div>
