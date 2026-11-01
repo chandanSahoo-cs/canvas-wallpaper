@@ -14,7 +14,14 @@ import {
   Moon,
   Monitor,
   RefreshCw,
+  Globe,
+  Shield,
 } from "lucide-react";
+import {
+  requestHostPermission,
+  removeHostPermission,
+  subscribeHostPermission,
+} from "../lib/permissions";
 import { useSceneStore } from "../store/useSceneStore";
 import { loadAllLibraryItems } from "../lib/library/crossReference";
 import { useWidgetStore } from "../store/useWidgetStore";
@@ -36,6 +43,11 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const [isRebuildingIndex, setIsRebuildingIndex] = useState(false);
   const [indexRebuiltMessage, setIndexRebuiltMessage] = useState(false);
+  const [hasCapturePermission, setHasCapturePermission] = useState(false);
+
+  useEffect(() => {
+    return subscribeHostPermission(setHasCapturePermission);
+  }, []);
 
   const handleRebuildIndex = async () => {
     setIsRebuildingIndex(true);
@@ -362,6 +374,58 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
             >
               {isRebuildingIndex ? "Rebuilding..." : indexRebuiltMessage ? "Done" : "Rebuild"}
             </button>
+          </div>
+
+          {/* Web Capture & Host Permissions */}
+          <div className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Globe className="w-4 h-4 text-brand-blue shrink-0" />
+                <div>
+                  <div className="text-sm font-hand font-bold text-ink flex items-center gap-2">
+                    <span>Web Image Capture</span>
+                    <span
+                      className={cn(
+                        "text-[10px] font-mono px-1.5 py-0.2 rounded-sk-sm border",
+                        hasCapturePermission
+                          ? "bg-brand-green/20 text-brand-green border-brand-green/40 font-bold"
+                          : "bg-paper text-muted border-line/30",
+                      )}
+                    >
+                      {hasCapturePermission ? "Allowed" : "Restricted"}
+                    </span>
+                  </div>
+                  <div className="text-xs font-sans text-muted">
+                    Allow saving images directly from any site. Items are saved 100% locally to your Inbox.
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 mt-0.5">
+              {hasCapturePermission ? (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    await removeHostPermission();
+                    setHasCapturePermission(false);
+                  }}
+                  className="py-1.5 px-3 rounded-sk bg-paper hover:bg-danger/10 text-danger border-2 border-line/30 hover:border-danger font-hand font-bold text-xs active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
+                >
+                  Revoke Permission
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const granted = await requestHostPermission();
+                    setHasCapturePermission(granted);
+                  }}
+                  className="py-1.5 px-3 rounded-sk bg-brand-green text-on-accent border-2 border-line shadow-hard-sm hover:brightness-105 font-hand font-bold text-xs active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
+                >
+                  Allow Saving Images from Any Site
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Feature Walkthrough Tour */}

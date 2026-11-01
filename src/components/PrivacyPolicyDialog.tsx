@@ -108,8 +108,30 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
               outbound web requests made are direct user-initiated actions:
             </p>
             <ul className="list-disc list-inside space-y-0.5 text-muted font-sans pl-1">
-              <li>Web searches you explicitly submit through the Search bar</li>
-              <li>Favicon loading for quick links you manually create</li>
+              <li>
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
+                  storage
+                </code>{" "}
+                — save wallpapers, boards, Inbox items, and widget layouts locally
+              </li>
+              <li>
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
+                  unlimitedStorage
+                </code>{" "}
+                — prevent browser evicting your canvas drawings and IndexedDB assets
+              </li>
+              <li>
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
+                  contextMenus
+                </code>{" "}
+                — right-click menu items to save images, selected text, links, or pages directly to PaperTab
+              </li>
+              <li>
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
+                  optional_host_permissions (https://*/*)
+                </code>{" "}
+                — requested only at runtime if you choose to enable saving images from any website. All items remain strictly on your device; no analytics or telemetry ever leave your machine.
+              </li>
             </ul>
           </div>
 
