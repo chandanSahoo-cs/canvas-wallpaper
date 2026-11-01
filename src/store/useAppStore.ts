@@ -44,6 +44,8 @@ export interface AppState {
   draft: CanvasElement | null;
   editingText: TextEditorState | null;
   isPreviewing: boolean;
+  isPresetsOpen: boolean;
+  setIsPresetsOpen: (open: boolean) => void;
 
   // Camera / Zoom (detail magnification)
   zoom: number;
@@ -157,6 +159,8 @@ export const useAppStore = create<AppState>((set, get) => ({
   draft: null,
   editingText: null,
   isPreviewing: false,
+  isPresetsOpen: false,
+  setIsPresetsOpen: (open) => set({ isPresetsOpen: open }),
 
   zoom: 1.0,
   scrollOffset: { x: 0, y: 0 },

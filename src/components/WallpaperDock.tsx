@@ -1,5 +1,5 @@
 import React from "react";
-import { Keyboard, Settings, LayoutGrid, Pencil } from "lucide-react";
+import { Keyboard, Settings, LayoutGrid, Pencil, Sparkles } from "lucide-react";
 import { cn } from "../lib/utils";
 
 interface WallpaperDockProps {
@@ -7,6 +7,7 @@ interface WallpaperDockProps {
   onOpenShortcuts: () => void;
   onOpenSettings: () => void;
   onOpenLayout: () => void;
+  onOpenPresets: () => void;
   onEnterDrawMode: () => void;
 }
 
@@ -15,6 +16,7 @@ export const WallpaperDock: React.FC<WallpaperDockProps> = ({
   onOpenShortcuts,
   onOpenSettings,
   onOpenLayout,
+  onOpenPresets,
   onEnterDrawMode,
 }) => {
   return (
@@ -29,6 +31,14 @@ export const WallpaperDock: React.FC<WallpaperDockProps> = ({
     >
       {/* Utility icons */}
       <div className="flex items-center p-1">
+        <button
+          title="Wallpaper Presets & Templates"
+          aria-label="Wallpaper Presets and Templates"
+          onClick={onOpenPresets}
+          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/60 hover:text-white active:scale-95 transition-all cursor-pointer"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+        </button>
         <button
           title="Keyboard Shortcuts (?)"
           aria-label="Keyboard Shortcuts"

@@ -1,8 +1,16 @@
 import React, { useRef } from "react";
-import { Image as ImageIcon, RotateCcw, Crosshair, SquareDashed } from "lucide-react";
+import {
+  Image as ImageIcon,
+  RotateCcw,
+  Crosshair,
+  SquareDashed,
+  Sparkles,
+} from "lucide-react";
 import { cn } from "../../lib/utils";
 import { optimizeImageDataUrl } from "../../lib/imageInsert";
 import { useAppStore } from "../../store/useAppStore";
+import { useSceneStore } from "../../store/useSceneStore";
+import { WALLPAPER_PRESETS } from "../../lib/wallpaperPresets";
 
 const BG_PRESETS = [
   "#14141a",
@@ -28,6 +36,10 @@ export const WallpaperTab: React.FC = () => {
   const centerArtworkToScreen = useAppStore((s) => s.centerArtworkToScreen);
   const showBoundaryMarker = useAppStore((s) => s.showBoundaryMarker);
   const toggleBoundaryMarker = useAppStore((s) => s.toggleBoundaryMarker);
+  const setIsPresetsOpen = useAppStore((s) => s.setIsPresetsOpen);
+  const applyPresetToActiveScene = useSceneStore(
+    (s) => s.applyPresetToActiveScene,
+  );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleBackgroundImageUpload = (
@@ -54,8 +66,47 @@ export const WallpaperTab: React.FC = () => {
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Background Color */}
+      {/* Preset Wallpapers & Templates */}
       <div>
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-[11px] font-medium text-neutral-500">
+            Presets & Templates
+          </div>
+          <button
+            onClick={() => setIsPresetsOpen(true)}
+            className="flex items-center gap-1 text-[11px] font-semibold text-sky-600 hover:text-sky-700 hover:underline cursor-pointer"
+          >
+            <Sparkles className="w-3 h-3 text-sky-500" />
+            <span>Browse All (5)</span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-2 gap-1.5">
+          {WALLPAPER_PRESETS.slice(0, 4).map((p) => (
+            <button
+              key={p.id}
+              onClick={() => applyPresetToActiveScene(p)}
+              className="group flex flex-col p-2 rounded-xl border border-neutral-200/90 hover:border-neutral-900 bg-white hover:bg-neutral-50 transition-all text-left cursor-pointer active:scale-95 shadow-2xs"
+            >
+              <div
+                className="w-full h-8 rounded-lg mb-1.5 flex items-center justify-center text-[10px] font-bold text-white shadow-inner"
+                style={{ background: p.previewBg }}
+              >
+                <span className="opacity-90">{p.badge}</span>
+              </div>
+              <span className="text-xs font-semibold text-neutral-800 truncate group-hover:text-neutral-950">
+                {p.title}
+              </span>
+              <span className="text-[10px] text-neutral-400 truncate">
+                {p.category}
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Background Color */}
+      <div className="pt-2 border-t border-neutral-100">
         <div className="text-[11px] font-medium text-neutral-500 mb-2">
           Background
         </div>

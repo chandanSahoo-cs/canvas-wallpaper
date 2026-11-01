@@ -11,6 +11,7 @@ import { PreviewPill } from "./components/PreviewPill";
 import { SettingsDialog } from "./widgets/SettingsDialog";
 import { WidgetLayoutOverlay } from "./widgets/WidgetLayoutOverlay";
 import { OnboardingTour } from "./components/OnboardingTour";
+import { PresetGalleryDialog } from "./components/PresetGalleryDialog";
 import { useAppStore } from "./store/useAppStore";
 import { useSceneStore } from "./store/useSceneStore";
 import { useWidgetStore } from "./store/useWidgetStore";
@@ -37,6 +38,8 @@ export const App: React.FC = () => {
   const background = useAppStore((s) => s.background);
   const zoom = useAppStore((s) => s.zoom);
   const scrollOffset = useAppStore((s) => s.scrollOffset);
+  const isPresetsOpen = useAppStore((s) => s.isPresetsOpen);
+  const setIsPresetsOpen = useAppStore((s) => s.setIsPresetsOpen);
   const loadScenesFromStorage = useSceneStore((s) => s.loadScenesFromStorage);
 
   const isLayoutMode = useWidgetStore((s) => s.isLayoutMode);
@@ -99,6 +102,7 @@ export const App: React.FC = () => {
       {mode === "wallpaper" && !isLayoutMode && (
         <WallpaperDock
           isLight={isLight}
+          onOpenPresets={() => setIsPresetsOpen(true)}
           onOpenShortcuts={() => setIsShortcutsOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
           onOpenLayout={() => setIsLayoutMode(true)}
@@ -116,6 +120,13 @@ export const App: React.FC = () => {
       <ShortcutsDialog
         isOpen={isShortcutsOpen}
         onClose={() => setIsShortcutsOpen(false)}
+      />
+
+      {/* Wallpaper Presets & Templates Gallery Modal */}
+      <PresetGalleryDialog
+        isOpen={isPresetsOpen}
+        onClose={() => setIsPresetsOpen(false)}
+        onEnterDrawMode={() => setMode("drawing")}
       />
 
       {/* Drawing Mode UI Overlays */}

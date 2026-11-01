@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { CanvasElement, BackgroundConfig } from "../elements/types";
 import { newId } from "../lib/utils";
+import { WallpaperPreset } from "../lib/wallpaperPresets";
 import { useAppStore } from "./useAppStore";
 import {
   getDefaultWallpaperElements,
@@ -20,7 +21,12 @@ export interface Scene {
 export interface SceneState {
   scenes: Scene[];
   activeSceneId: string;
-  createScene: (name?: string) => string;
+  createScene: (
+    name?: string,
+    initialElements?: CanvasElement[],
+    initialBackground?: BackgroundConfig,
+  ) => string;
+  applyPresetToActiveScene: (preset: WallpaperPreset) => void;
   switchScene: (id: string) => void;
   deleteScene: (id: string) => void;
   renameScene: (id: string, name: string) => void;
@@ -44,7 +50,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   ],
   activeSceneId: "default",
 
-  createScene: (name) => {
+  createScene: (name, initialElements, initialBackground) => {
     if (get().scenes.length >= MAX_SCENES) {
       return get().activeSceneId;
     }
@@ -69,11 +75,19 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     while (existingNames.has(`Wallpaper ${sceneNumber}`)) {
       sceneNumber++;
     }
+
+    const elements = initialElements
+      ? JSON.parse(JSON.stringify(initialElements))
+      : [];
+    const background: BackgroundConfig = initialBackground
+      ? { ...initialBackground }
+      : { type: "color", color: "#14141a" };
+
     const newScene: Scene = {
       id,
       name: name || `Wallpaper ${sceneNumber}`,
-      elements: [],
-      background: { type: "color", color: "#14141a" },
+      elements,
+      background,
       createdAt: Date.now(),
     };
     set({
@@ -81,10 +95,36 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       activeSceneId: id,
     });
     appStore.resetHistory();
-    appStore.setElements([]);
-    appStore.setBackground({ type: "color", color: "#14141a" });
+    appStore.setElements(elements);
+    appStore.setBackground(background);
     get().saveScenesToStorage();
     return id;
+  },
+
+  applyPresetToActiveScene: (preset) => {
+    const appStore = useAppStore.getState();
+    const w = typeof window !== "undefined" ? window.innerWidth : 1440;
+    const h = typeof window !== "undefined" ? window.innerHeight : 800;
+    const elements = preset.getElements(w, h);
+
+    appStore.pushHistory();
+    appStore.setElements(elements);
+    appStore.setBackground(preset.background);
+
+    const { scenes, activeSceneId } = get();
+    const updatedScenes = scenes.map((s) => {
+      if (s.id === activeSceneId) {
+        return {
+          ...s,
+          elements,
+          background: preset.background,
+        };
+      }
+      return s;
+    });
+
+    set({ scenes: updatedScenes });
+    get().saveScenesToStorage();
   },
 
   switchScene: (id) => {

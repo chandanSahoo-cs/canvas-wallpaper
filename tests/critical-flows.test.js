@@ -27,6 +27,10 @@ const {
   getDefaultWallpaperElements,
 } = jiti('../src/lib/defaultWallpaperPreset.ts');
 
+const {
+  WALLPAPER_PRESETS,
+} = jiti('../src/lib/wallpaperPresets.ts');
+
 let passed = 0;
 let failed = 0;
 
@@ -87,7 +91,24 @@ assert(ORIGINAL_PRESET_CENTER.x === 733.27 && ORIGINAL_PRESET_CENTER.y === 387.2
 const shiftedPreset = getDefaultWallpaperElements(1920, 1080);
 assert(shiftedPreset.length === 251, 'getDefaultWallpaperElements retains element count');
 
-// 4. URL & Input Sanitization (XSS Defense)
+// 4. Multiple Wallpaper Presets Catalog
+assert(Array.isArray(WALLPAPER_PRESETS) && WALLPAPER_PRESETS.length === 5, 'WALLPAPER_PRESETS provides exactly 5 presets');
+for (const p of WALLPAPER_PRESETS) {
+  assert(Boolean(p.id && p.title && p.description && p.category && p.background), `Preset ${p.id} has complete metadata`);
+  const elements = p.getElements(1920, 1080);
+  assert(Array.isArray(elements) && elements.length > 0, `Preset ${p.id} returns non-empty elements array (${elements.length} elements)`);
+  const hasInvalidCoords = elements.some(el => {
+    if ('x' in el && (isNaN(el.x) || !isFinite(el.x))) return true;
+    if ('y' in el && (isNaN(el.y) || !isFinite(el.y))) return true;
+    if ('points' in el && Array.isArray(el.points)) {
+      return el.points.some(pt => isNaN(pt.x) || !isFinite(pt.x) || isNaN(pt.y) || !isFinite(pt.y));
+    }
+    return false;
+  });
+  assert(!hasInvalidCoords, `Preset ${p.id} contains strictly finite, valid coordinates`);
+}
+
+// 5. URL & Input Sanitization (XSS Defense)
 assert(sanitizeWebUrl('javascript:alert(1)') === '', 'sanitizeWebUrl blocks javascript: scheme');
 assert(sanitizeWebUrl('data:text/html,test') === '', 'sanitizeWebUrl blocks data: scheme');
 assert(sanitizeWebUrl('file:///etc/passwd') === '', 'sanitizeWebUrl blocks file: scheme');
@@ -96,15 +117,15 @@ assert(sanitizeWebUrl('about:blank') === '', 'sanitizeWebUrl blocks about: schem
 assert(sanitizeWebUrl('github.com') === 'https://github.com/', 'sanitizeWebUrl auto-prefixes https://');
 assert(sanitizeWebUrl('https://example.com/test?a=1') === 'https://example.com/test?a=1', 'sanitizeWebUrl preserves valid https URLs');
 
-// 5. XML & SVG Escaping
+// 6. XML & SVG Escaping
 assert(escapeXml('<script>alert("xss")&\'') === '&lt;script&gt;alert(&quot;xss&quot;)&amp;&apos;', 'escapeXml escapes <, >, ", &, \'');
 
-// 6. Color Luminance
+// 7. Color Luminance
 assert(isColorLight('#ffffff') === true, 'isColorLight recognizes white as light');
 assert(isColorLight('#14141a') === false, 'isColorLight recognizes #14141a as dark');
 assert(isColorLight('#f5f5f7') === true, 'isColorLight recognizes #f5f5f7 as light');
 
-// 7. Transitive Group Traversal
+// 8. Transitive Group Traversal
 const elA = { id: 'a', groupIds: ['g1'] };
 const elB = { id: 'b', groupIds: ['g1', 'g2'] };
 const elC = { id: 'c', groupIds: ['g2'] };

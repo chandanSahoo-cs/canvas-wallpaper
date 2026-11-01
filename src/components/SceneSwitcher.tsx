@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown, Plus, Trash2, Check, Edit2 } from "lucide-react";
+import { ChevronDown, Plus, Trash2, Check, Edit2, Sparkles } from "lucide-react";
 import { useSceneStore, MAX_SCENES } from "../store/useSceneStore";
+import { useAppStore } from "../store/useAppStore";
 import { cn } from "../lib/utils";
 
 export const SceneSwitcher: React.FC = () => {
@@ -86,7 +87,7 @@ export const SceneSwitcher: React.FC = () => {
       >
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-neutral-100/80 text-neutral-800 transition-colors"
+          className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-neutral-100/80 text-neutral-800 transition-colors cursor-pointer"
           title="Switch Wallpaper Scene"
         >
           {/* Active scene background color indicator */}
@@ -102,38 +103,26 @@ export const SceneSwitcher: React.FC = () => {
           <ChevronDown
             className={cn(
               "w-3.5 h-3.5 text-neutral-400 transition-transform duration-200",
-              isOpen && "rotate-180 text-neutral-600",
+              isOpen && "rotate-180",
             )}
           />
         </button>
 
-        {/* Quick New Scene Button */}
+        {/* Quick Presets Icon Button */}
         <button
-          onClick={handleCreate}
-          disabled={isAtLimit}
-          title={
-            isAtLimit
-              ? `Maximum ${MAX_SCENES} wallpapers reached`
-              : "Add New Wallpaper Scene"
-          }
-          className={cn(
-            "w-7 h-7 rounded-xl flex items-center justify-center transition-all",
-            isAtLimit
-              ? "text-neutral-300 cursor-not-allowed opacity-50"
-              : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 active:scale-95 cursor-pointer",
-          )}
+          onClick={() => useAppStore.getState().setIsPresetsOpen(true)}
+          title="Wallpaper Presets & Templates"
+          className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-neutral-100 text-neutral-500 hover:text-amber-500 transition-colors cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
+          <Sparkles className="w-3.5 h-3.5" />
         </button>
       </div>
 
-      {/* Dropdown Popover */}
+      {/* Popover Menu */}
       {isOpen && (
-        <div className="absolute top-12 left-0 w-64 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-2xl rounded-2xl p-2 flex flex-col gap-1 text-xs animate-in fade-in zoom-in-95 duration-150">
-          <div className="px-2 py-1 flex items-center justify-between">
-            <span className="text-[11px] font-medium text-neutral-400">
-              Scenes
-            </span>
+        <div className="absolute top-full left-0 mt-2 w-64 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-xl rounded-2xl p-2 z-40 animate-in fade-in zoom-in-95 duration-150">
+          <div className="flex items-center justify-between px-2.5 py-1.5 mb-1 text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
+            <span>Wallpapers</span>
             <span
               className={cn(
                 "px-1.5 py-0.5 rounded-full font-mono text-[9px] transition-colors",
@@ -170,7 +159,7 @@ export const SceneSwitcher: React.FC = () => {
                     />
                     <button
                       onClick={() => handleSaveRename(s.id)}
-                      className="p-1 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700"
+                      className="p-1 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 cursor-pointer"
                     >
                       <Check className="w-3.5 h-3.5" />
                     </button>
@@ -207,7 +196,7 @@ export const SceneSwitcher: React.FC = () => {
                     <button
                       onClick={(e) => handleStartRename(e, s.id, s.name)}
                       title="Rename"
-                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-neutral-200 text-neutral-500 hover:text-neutral-800 transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-neutral-200 text-neutral-500 hover:text-neutral-800 transition-opacity cursor-pointer"
                     >
                       <Edit2 className="w-3 h-3" />
                     </button>
@@ -217,7 +206,7 @@ export const SceneSwitcher: React.FC = () => {
                       <button
                         onClick={(e) => handleDelete(e, s.id)}
                         title="Delete Scene"
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-rose-100 text-neutral-400 hover:text-rose-600 transition-opacity"
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-rose-100 text-neutral-400 hover:text-rose-600 transition-opacity cursor-pointer"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -232,18 +221,29 @@ export const SceneSwitcher: React.FC = () => {
             })}
           </div>
 
-          <div className="pt-1.5 mt-1 border-t border-neutral-100">
+          <div className="pt-2 mt-1 border-t border-neutral-100">
             {isAtLimit ? (
               <div className="w-full py-2 px-3 rounded-xl bg-neutral-100 text-neutral-400 text-center font-medium text-[11px] select-none">
                 Maximum {MAX_SCENES} wallpapers reached
               </div>
             ) : (
-              <button
-                onClick={handleCreate}
-                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-neutral-900 hover:bg-neutral-700 text-white font-medium text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" /> New scene
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={handleCreate}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Blank
+                </button>
+                <button
+                  onClick={() => {
+                    setIsOpen(false);
+                    useAppStore.getState().setIsPresetsOpen(true);
+                  }}
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl border border-neutral-300 hover:bg-neutral-100 text-neutral-800 font-medium text-xs transition-all active:scale-95 cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Presets
+                </button>
+              </div>
             )}
           </div>
         </div>
