@@ -18,8 +18,10 @@ import {
   Shield,
   Shuffle,
   Trash2,
+  Archive,
 } from "lucide-react";
 import { useResurfaceStore } from "../lib/resurface/store";
+import { BackupModal } from "../components/backup/BackupModal";
 import {
   requestHostPermission,
   removeHostPermission,
@@ -47,6 +49,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   const [isRebuildingIndex, setIsRebuildingIndex] = useState(false);
   const [indexRebuiltMessage, setIndexRebuiltMessage] = useState(false);
   const [hasCapturePermission, setHasCapturePermission] = useState(false);
+  const [isBackupOpen, setIsBackupOpen] = useState(false);
 
   useEffect(() => {
     return subscribeHostPermission(setHasCapturePermission);
@@ -588,6 +591,25 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
             </div>
           </div>
 
+          {/* Backup & Restore (.zip) */}
+          <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
+            <div className="flex items-center gap-2.5">
+              <Archive className="w-4 h-4 text-brand-blue" />
+              <div>
+                <div className="text-sm font-hand font-bold text-ink">Backup & Restore</div>
+                <div className="text-xs font-sans text-muted">
+                  Export complete .zip archive or restore from file
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsBackupOpen(true)}
+              className="py-1.5 px-3 rounded-sk bg-paper hover:bg-surface text-ink font-hand font-bold text-xs border-2 border-line shadow-hard-sm active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
+            >
+              Manage
+            </button>
+          </div>
+
           {/* Feature Walkthrough Tour */}
           <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
             <div className="flex items-center gap-2.5">
@@ -631,6 +653,11 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
       <PrivacyPolicyDialog
         isOpen={isPrivacyOpen}
         onClose={() => setIsPrivacyOpen(false)}
+      />
+
+      <BackupModal
+        isOpen={isBackupOpen}
+        onClose={() => setIsBackupOpen(false)}
       />
     </div>
   );

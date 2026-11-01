@@ -1042,6 +1042,74 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   assert(useLightboxStore.getState().isOpen === false, "close() closes lightbox");
   assert(useLightboxStore.getState().items.length === 0, "close() clears items list");
 
+  // --- SECTION 23: ZIP Engine, Backup & Security Bounds (Phase 3) ---
+  console.log("\n--- SECTION 23: ZIP Engine, Backup & Security Bounds (Phase 3) ---");
+  const { crc32: testCrc32 } = jiti('../src/lib/backup/crc32.ts');
+  const { ZipWriter } = jiti('../src/lib/backup/zipWriter.ts');
+  const { ZipReader, MAX_BACKUP_ENTRIES, MAX_BACKUP_TOTAL_BYTES } = jiti('../src/lib/backup/zipReader.ts');
+  const { inspectBackupZip } = jiti('../src/lib/backup/import.ts');
+
+  // 1. Standard CRC-32 test vectors
+  const emptyBytes = new Uint8Array(0);
+  assert(testCrc32(emptyBytes) === 0, "CRC-32 of empty bytes is 0");
+  const standardVector = new TextEncoder().encode("123456789");
+  assert(testCrc32(standardVector) === 0xcbf43926, "CRC-32 matches standard test vector 0xCBF43926");
+
+  // 2. Store-only ZIP writer and reader roundtrip
+  const testWriter = new ZipWriter();
+  testWriter.addFile("manifest.json", JSON.stringify({ schemaVersion: 3, appVersion: "1.0.0", exportedAt: 123456789, counts: { scenes: 1, assets: 1, inbox: 0 } }));
+  testWriter.addFile("scenes/main.json", JSON.stringify({ id: "main", name: "Board 1", elements: [] }));
+  testWriter.addFile("assets/photo-1.png", new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x01, 0x02, 0x03]));
+  testWriter.addFile("sources.csv", "Asset ID,Hash,Title,Source URL,Saved At\n1,abc,Test,https://google.com,2026-11-01");
+
+  const zipBytes = testWriter.toUint8Array();
+  assert(zipBytes.length > 200, "ZipWriter generates non-empty binary archive");
+
+  const testReader = new ZipReader(zipBytes);
+  const extractedMap = testReader.extractAll();
+  assert(extractedMap.size === 4, "ZipReader extracts exactly 4 files");
+  assert(extractedMap.has("manifest.json"), "Archive contains manifest.json");
+  assert(extractedMap.has("scenes/main.json"), "Archive contains scenes/main.json");
+  assert(extractedMap.has("assets/photo-1.png"), "Archive contains assets/photo-1.png");
+  assert(extractedMap.has("sources.csv"), "Archive contains sources.csv");
+
+  const decodedManifest = JSON.parse(new TextDecoder().decode(extractedMap.get("manifest.json")));
+  assert(decodedManifest.schemaVersion === 3, "Manifest roundtrip preserves schemaVersion");
+
+  const extractedBinary = extractedMap.get("assets/photo-1.png");
+  assert(extractedBinary.length === 11, "Extracted asset matches exact byte length");
+  assert(extractedBinary[0] === 0x89 && extractedBinary[1] === 0x50, "PNG magic bytes are preserved bit-for-bit");
+
+  // 3. Path Traversal & Security Rejection
+  const maliciousWriter1 = new ZipWriter();
+  maliciousWriter1.addFile("../evil.txt", "pwn");
+  const badZipBytes1 = maliciousWriter1.toUint8Array();
+  let caughtTraversal = false;
+  try {
+    new ZipReader(badZipBytes1).extractAll();
+  } catch (err) {
+    caughtTraversal = true;
+  }
+  assert(caughtTraversal, "ZipReader strictly rejects relative path traversal (../)");
+
+  const maliciousWriter2 = new ZipWriter();
+  maliciousWriter2.addFile("/etc/passwd", "pwn");
+  const badZipBytes2 = maliciousWriter2.toUint8Array();
+  let caughtAbsolute = false;
+  try {
+    new ZipReader(badZipBytes2).extractAll();
+  } catch (err) {
+    caughtAbsolute = true;
+  }
+  assert(caughtAbsolute, "ZipReader strictly rejects absolute paths (/...)");
+
+  // 4. Inspection helper test
+  const inspectionResult = await inspectBackupZip(zipBytes);
+  assert(inspectionResult.manifest.schemaVersion === 3, "inspectBackupZip validates manifest schemaVersion");
+  assert(inspectionResult.sceneCount === 1, "inspectBackupZip detects 1 scene");
+  assert(inspectionResult.assetCount === 1, "inspectBackupZip detects 1 asset");
+  assert(inspectionResult.fileCount === 4, "inspectBackupZip detects 4 total entries");
+
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 
   if (failed > 0) {
