@@ -13,6 +13,8 @@ import { useAppStore } from "../store/useAppStore";
 import { WallpaperTab } from "./style-panel/WallpaperTab";
 import { ElementActions } from "./style-panel/ElementActions";
 import { StyleOptions } from "./style-panel/StyleOptions";
+import { ImageDetailsSection } from "./style-panel/ImageDetailsSection";
+import { ImageElement } from "../elements/types";
 
 export const StylePanel: React.FC = () => {
   const currentTool = useAppStore((s) => s.currentTool);

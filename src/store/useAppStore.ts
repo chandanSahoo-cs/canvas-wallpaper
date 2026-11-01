@@ -19,6 +19,7 @@ import {
   groupElements,
   ungroupElements,
 } from "../lib/groups";
+import { autoArrangeElements, ArrangeLayout } from "../lib/arrange";
 import { isColorLight } from "../lib/utils";
 import { duplicateElements, preparePastedElements } from "./clipboardHelpers";
 import { flipElements } from "../lib/flipElements";
@@ -133,6 +134,7 @@ export interface AppState {
   clipboard: CanvasElement[];
   toggleLockSelected: () => void;
   groupSelected: () => void;
+  arrangeSelected: (layout: ArrangeLayout, spacing?: number) => void;
   ungroupSelected: () => void;
   sendBackward: () => void;
   sendForward: () => void;
@@ -579,6 +581,15 @@ export const useAppStore = create<AppState>((set, get) => ({
         selectedIds.has(el.id) ? { ...el, locked: shouldLock } : el,
       ),
     }));
+    get().saveToStorage();
+  },
+
+  arrangeSelected: (layout: ArrangeLayout, spacing: number = 20) => {
+    const { selectedIds, elements } = get();
+    if (selectedIds.size < 2) return;
+    get().pushHistory();
+    const nextElements = autoArrangeElements(elements, selectedIds, layout, spacing);
+    set({ elements: nextElements });
     get().saveToStorage();
   },
 

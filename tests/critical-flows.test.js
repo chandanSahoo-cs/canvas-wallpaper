@@ -49,6 +49,10 @@ const {
 } = jiti('../src/canvas/geometry.ts');
 
 const {
+  autoArrangeElements,
+} = jiti('../src/lib/arrange.ts');
+
+const {
   SCHEMA_VERSION,
   SCENE_INDEX_KEY,
   SCENE_KEY_PREFIX,
@@ -250,6 +254,44 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   assert(isInVisible, 'Viewport culling correctly identifies elements inside camera viewport');
   assert(!isOutVisible, 'Viewport culling correctly skips elements outside camera viewport');
   assert(isRotVisible, 'Viewport culling correctly accounts for rotated element extents');
+
+  // --- SECTION 12: Auto-Arrange & Organize (Phase 4) ---
+  console.log('\n--- SECTION 12: Auto-Arrange & Organize (Phase 4) ---');
+
+  const elA = { id: 'a', type: 'rectangle', x: 50, y: 50, width: 100, height: 100, locked: false };
+  const elB = { id: 'b', type: 'rectangle', x: 200, y: 50, width: 100, height: 100, locked: false };
+  const elC = { id: 'c', type: 'rectangle', x: 350, y: 50, width: 100, height: 100, locked: false };
+  const elLocked = { id: 'locked', type: 'rectangle', x: 800, y: 800, width: 100, height: 100, locked: true };
+
+  const testEls = [elA, elB, elC, elLocked];
+  const selectedIds = new Set(['a', 'b', 'c', 'locked']);
+
+  // Row Layout Test
+  const rowArranged = autoArrangeElements(testEls, selectedIds, 'row', 20);
+  const arrangedA = rowArranged.find(e => e.id === 'a');
+  const arrangedB = rowArranged.find(e => e.id === 'b');
+  const arrangedC = rowArranged.find(e => e.id === 'c');
+  const arrangedLocked = rowArranged.find(e => e.id === 'locked');
+
+  assert(arrangedA.x === 50, 'First element in Row stays at origin X');
+  assert(arrangedB.x === 50 + 100 + 20, 'Second element in Row is positioned with 20px gap');
+  assert(arrangedC.x === 170 + 100 + 20, 'Third element in Row is positioned with 20px gap');
+  assert(arrangedLocked.x === 800 && arrangedLocked.y === 800, 'Locked element stays strictly put');
+
+  // Column Layout Test
+  const colArranged = autoArrangeElements(testEls, selectedIds, 'column', 15);
+  const colA = colArranged.find(e => e.id === 'a');
+  const colB = colArranged.find(e => e.id === 'b');
+  assert(colA.y === 50, 'First element in Column starts at origin Y');
+  assert(colB.y === 50 + 100 + 15, 'Second element in Column is offset by height + 15px gap');
+
+  // Grid Layout Test
+  const gridArranged = autoArrangeElements(testEls, new Set(['a', 'b', 'c', 'd']), 'grid', 20);
+  assert(gridArranged.length === testEls.length, 'Grid arrangement preserves total element count');
+
+  // Insufficient Selection Protection
+  const singleArranged = autoArrangeElements(testEls, new Set(['a']), 'row', 20);
+  assert(singleArranged === testEls, 'Arranging fewer than 2 elements returns original list unchanged');
 
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 

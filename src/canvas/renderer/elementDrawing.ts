@@ -120,16 +120,23 @@ export function drawImage(
     } catch {
       drawUnavailablePlaceholder(ctx, bx, by, bw, bh);
     }
-    return;
-  }
-
-  if (result.status === "loading") {
+  } else if (result.status === "loading") {
     drawLoadingHatchPlaceholder(ctx, bx, by, bw, bh);
-    return;
+  } else {
+    // Not found or decode error
+    drawUnavailablePlaceholder(ctx, bx, by, bw, bh);
   }
 
-  // Not found or decode error
-  drawUnavailablePlaceholder(ctx, bx, by, bw, bh);
+  // Draw caption below image if enabled
+  if (el.showCaption && el.caption) {
+    ctx.save();
+    ctx.font = "12px Excalifont, system-ui, sans-serif";
+    ctx.fillStyle = el.strokeColor || "rgba(14, 26, 31, 0.85)";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    ctx.fillText(el.caption, bx + bw / 2, by + bh + 4);
+    ctx.restore();
+  }
 }
 
 function drawLoadingHatchPlaceholder(

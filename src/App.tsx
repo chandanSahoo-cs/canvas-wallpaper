@@ -21,6 +21,8 @@ import { useWallpaperBackground } from "./hooks/useWallpaperBackground";
 import { useTextEditing } from "./hooks/useTextEditing";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useCanvasPaste } from "./hooks/useCanvasPaste";
+import { useCanvasDrop } from "./hooks/useCanvasDrop";
+import { Image as ImageIcon } from "lucide-react";
 import { useViewportRecorder } from "./hooks/useViewportRecorder";
 import { useViewportBoundary } from "./hooks/useViewportBoundary";
 import { cn } from "./lib/utils";
@@ -54,6 +56,7 @@ export const App: React.FC = () => {
     onToggleShortcuts: () => setIsShortcutsOpen((prev) => !prev),
   });
   useCanvasPaste();
+  const { isDraggingOver } = useCanvasDrop({ canvasRef });
   useViewportRecorder(mode);
   useViewportBoundary();
 
@@ -98,6 +101,16 @@ export const App: React.FC = () => {
             : "pointer-events-auto",
         )}
       />
+
+      {/* Visual Drop Target Highlight */}
+      {isDraggingOver && (
+        <div className="absolute inset-4 pointer-events-none border-4 border-dashed border-brand-blue bg-brand-blue/10 rounded-sk-lg flex items-center justify-center z-50 animate-in fade-in duration-100">
+          <div className="px-5 py-3 rounded-sk bg-surface border-2 border-line shadow-hard font-hand font-bold text-ink text-sm flex items-center gap-2.5">
+            <ImageIcon className="w-5 h-5 text-blue-text" />
+            <span>Drop images to place on canvas</span>
+          </div>
+        </div>
+      )}
 
       {/* Excalidraw-style inline WYSIWYG text editor */}
       {mode === "drawing" && editingText && !isPreviewing && (
