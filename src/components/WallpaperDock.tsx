@@ -23,58 +23,58 @@ export const WallpaperDock: React.FC<WallpaperDockProps> = ({
     <div
       id="tour-wallpaper-dock"
       className={cn(
-        "fixed bottom-6 right-6 z-20 flex items-center rounded-full backdrop-blur-xl border transition-all duration-200 shadow-2xl",
+        "fixed bottom-6 right-6 z-20 flex items-center rounded-sk-lg backdrop-blur-md border-2 border-line shadow-hard transition-all duration-150 p-1 select-none",
         isLight
-          ? "bg-neutral-900/90 text-white border-neutral-700/60 shadow-black/25"
-          : "bg-black/50 text-white border-white/15 shadow-black/40",
+          ? "bg-surface/95 text-ink"
+          : "bg-surface/95 text-ink",
       )}
     >
       {/* Utility icons */}
-      <div className="flex items-center p-1">
+      <div className="flex items-center gap-0.5">
         <button
           title="Wallpaper Presets & Templates"
           aria-label="Wallpaper Presets and Templates"
           onClick={onOpenPresets}
-          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/60 hover:text-white active:scale-95 transition-all cursor-pointer"
+          className="w-8 h-8 rounded-sk flex items-center justify-center hover:bg-paper text-ink/75 hover:text-ink active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
         >
-          <Sparkles className="w-3.5 h-3.5" />
+          <Sparkles className="w-4 h-4 text-brand-blue" />
         </button>
         <button
           title="Keyboard Shortcuts (?)"
           aria-label="Keyboard Shortcuts"
           onClick={onOpenShortcuts}
-          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/60 hover:text-white active:scale-95 transition-all cursor-pointer"
+          className="w-8 h-8 rounded-sk flex items-center justify-center hover:bg-paper text-ink/75 hover:text-ink active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
         >
-          <Keyboard className="w-3.5 h-3.5" />
+          <Keyboard className="w-4 h-4" />
         </button>
         <button
           title="Settings & Privacy"
           aria-label="Settings and Privacy"
           onClick={onOpenSettings}
-          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/60 hover:text-white active:scale-95 transition-all cursor-pointer"
+          className="w-8 h-8 rounded-sk flex items-center justify-center hover:bg-paper text-ink/75 hover:text-ink active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
         >
-          <Settings className="w-3.5 h-3.5" />
+          <Settings className="w-4 h-4" />
         </button>
         <button
           title="Widget Layout & Accessories (Drag anywhere on grid)"
           onClick={onOpenLayout}
-          className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-white/60 hover:text-white active:scale-95 transition-all cursor-pointer"
+          className="w-8 h-8 rounded-sk flex items-center justify-center hover:bg-paper text-ink/75 hover:text-ink active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
         >
-          <LayoutGrid className="w-3.5 h-3.5" />
+          <LayoutGrid className="w-4 h-4" />
         </button>
       </div>
 
       {/* Divider */}
-      <div className="w-px h-5 bg-white/15 shrink-0" />
+      <div className="w-px h-5 bg-line/20 shrink-0 mx-1.5" />
 
-      {/* Draw CTA — solid, high contrast */}
-      <div className="p-1 pl-1.5">
+      {/* Draw CTA — solid, high contrast green confirmation CTA */}
+      <div>
         <button
           title="Customize Wallpaper (Press E or click)"
           onClick={onEnterDrawMode}
-          className="h-8 px-4 rounded-full flex items-center gap-2 bg-white text-neutral-900 hover:bg-neutral-100 font-semibold text-xs active:scale-95 transition-all cursor-pointer shadow-sm"
+          className="h-8 px-3.5 rounded-sk flex items-center gap-1.5 bg-brand-green text-on-accent border-2 border-line font-hand font-bold text-xs shadow-hard-sm hover:brightness-105 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all cursor-pointer"
         >
-          <Pencil className="w-3.5 h-3.5" />
+          <Pencil className="w-3.5 h-3.5 shrink-0" />
           <span className="leading-none">Draw</span>
         </button>
       </div>

@@ -48,10 +48,8 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     >
       <div
         className={cn(
-          "absolute left-3.5 transition-colors z-10",
-          isLight
-            ? "text-neutral-500 group-focus-within:text-neutral-900"
-            : "text-white/50 group-focus-within:text-white",
+          "absolute left-3.5 transition-colors z-10 pointer-events-none",
+          isLight ? "text-[#52636A]" : "text-[#96AAB0]",
         )}
       >
         <Search className="w-4 h-4" />
@@ -70,10 +68,10 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                 : "Google"
         }...`}
         className={cn(
-          "w-full pl-10 pr-4 py-2.5 rounded-full backdrop-blur-xl text-sm outline-none transition-all shadow-lg focus:shadow-xl",
+          "w-full pl-10 pr-4 py-2.5 rounded-sk text-xs font-sans outline-none transition-all border-2",
           isLight
-            ? "bg-white/80 hover:bg-white/95 focus:bg-white border border-neutral-300 focus:border-neutral-900 text-neutral-900 placeholder-neutral-500 shadow-black/10"
-            : "bg-white/15 hover:bg-white/20 focus:bg-white/25 border border-white/20 focus:border-white/40 text-white placeholder-white/50",
+            ? "bg-white text-[#0E1A1F] border-[#0E1A1F] shadow-[3px_3px_0_#0E1A1F] placeholder:text-[#52636A] focus-visible:outline-brand-blue"
+            : "bg-[#15262D] text-[#EAF4F1] border-[#3D525A] shadow-[3px_3px_0_#000000] placeholder:text-[#96AAB0] focus-visible:outline-brand-blue",
         )}
       />
     </form>

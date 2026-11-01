@@ -40,19 +40,19 @@ export const SearchEngineDropdown: React.FC = () => {
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
-        className="flex items-center gap-1.5 px-3 py-1 bg-neutral-100 hover:bg-neutral-200/80 border border-neutral-200 text-neutral-700 hover:text-neutral-900 rounded-lg text-xs font-medium transition-all active:scale-95 cursor-pointer shadow-2xs"
+        className="flex items-center gap-1.5 px-2.5 py-1 bg-paper hover:bg-surface border-2 border-line text-ink rounded-sk text-xs font-hand font-bold shadow-hard-sm transition-all active:translate-x-[1px] active:translate-y-[1px] cursor-pointer"
       >
         <span>{activeLabel}</span>
         <ChevronDown
           className={cn(
-            "w-3.5 h-3.5 text-neutral-500 transition-transform duration-150",
+            "w-3.5 h-3.5 text-muted transition-transform duration-150",
             isOpen && "rotate-180",
           )}
         />
       </button>
 
       {isOpen && (
-        <div className="absolute left-0 top-full mt-1.5 w-36 bg-white rounded-xl shadow-xl border border-neutral-200 py-1 z-50 animate-in fade-in zoom-in-95 duration-100">
+        <div className="absolute left-0 top-full mt-1.5 w-40 bg-surface text-ink border-2 border-line rounded-sk-lg shadow-hard py-1 z-50 animate-in fade-in duration-100">
           {ENGINES.map((eng) => (
             <button
               key={eng.id}
@@ -62,14 +62,14 @@ export const SearchEngineDropdown: React.FC = () => {
                 setIsOpen(false);
               }}
               className={cn(
-                "w-full flex items-center justify-between px-3 py-1.5 text-xs text-left transition-colors cursor-pointer",
+                "w-full flex items-center justify-between px-3 py-1.5 text-xs font-hand text-left transition-colors cursor-pointer hover:bg-paper",
                 searchEngine === eng.id
-                  ? "bg-neutral-100 text-neutral-900 font-semibold"
-                  : "text-neutral-700 hover:bg-neutral-50",
+                  ? "font-bold text-blue-text bg-paper"
+                  : "text-ink/80",
               )}
             >
               <span>{eng.label}</span>
-              {searchEngine === eng.id && <Check className="w-3.5 h-3.5" />}
+              {searchEngine === eng.id && <Check className="w-3.5 h-3.5 text-blue-text" />}
             </button>
           ))}
         </div>
