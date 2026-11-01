@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Plus, Tag, Trash2, X } from "lucide-react";
+import { Plus, Tag, Trash2, X, Palette } from "lucide-react";
+import { PaletteExtractorModal } from "./PaletteExtractorModal";
 import { LibraryItem } from "../../lib/library/types";
 import { useAppStore } from "../../store/useAppStore";
 import { useSceneStore } from "../../store/useSceneStore";
@@ -25,6 +26,7 @@ export const LibrarySelectionBar: React.FC<LibrarySelectionBarProps> = ({
   const [showTagModal, setShowTagModal] = useState(false);
   const [tagInput, setTagInput] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showPaletteModal, setShowPaletteModal] = useState(false);
 
   if (selectedIds.size === 0) return null;
 
@@ -231,6 +233,17 @@ export const LibrarySelectionBar: React.FC<LibrarySelectionBarProps> = ({
           <span>Tag...</span>
         </button>
 
+        {/* Action: Extract Palette from Selection */}
+        {selectedItems.some((it) => it.type === "image") && (
+          <button
+            onClick={() => setShowPaletteModal(true)}
+            className="px-3 py-1 text-xs font-hand font-bold rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface active:translate-x-[1px] active:translate-y-[1px] cursor-pointer flex items-center gap-1.5"
+          >
+            <Palette className="w-3.5 h-3.5 text-brand-blue" />
+            <span>Palette...</span>
+          </button>
+        )}
+
         {/* Action: Delete */}
         <button
           onClick={() => setShowDeleteModal(true)}
@@ -347,6 +360,14 @@ export const LibrarySelectionBar: React.FC<LibrarySelectionBarProps> = ({
           </div>
         </div>
       )}
+      {/* Palette Modal */}
+      <PaletteExtractorModal
+        isOpen={showPaletteModal}
+        onClose={() => setShowPaletteModal(false)}
+        selectedItems={selectedItems}
+        onClearSelection={onClearSelection}
+        onCloseLibrary={onCloseLibrary}
+      />
     </>
   );
 };

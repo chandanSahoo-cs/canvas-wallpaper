@@ -271,3 +271,106 @@ export function extractPaletteFromImageData(
 
   return palette.slice(0, maxColors);
 }
+
+/**
+ * Merges palettes from multiple images into 5-8 dominant swatches.
+ * Clusters perceptually close colors in OKLab space, weighting them by source weights.
+ */
+export function mergePalettes(
+  palettes: PaletteColor[][],
+  targetCount: number = 6,
+): PaletteColor[] {
+  const allColors: { ok: OklabColor; hex: string; weight: number }[] = [];
+
+  for (const pal of palettes) {
+    if (!Array.isArray(pal)) continue;
+    for (const c of pal) {
+      if (!c || !c.hex) continue;
+      const rgb = hexToRgb(c.hex);
+      if (!rgb) continue;
+      const ok = rgbToOklab(rgb.r, rgb.g, rgb.b);
+      allColors.push({
+        ok,
+        hex: rgbToHex(rgb.r, rgb.g, rgb.b),
+        weight: c.weight || 1,
+      });
+    }
+  }
+
+  if (allColors.length === 0) {
+    return [
+      { hex: "#46BAEB", weight: 0.5 },
+      { hex: "#00BF63", weight: 0.5 },
+    ];
+  }
+
+  interface Cluster {
+    L: number;
+    a: number;
+    b: number;
+    weight: number;
+  }
+
+  let clusters: Cluster[] = allColors.map((c) => ({
+    L: c.ok.L,
+    a: c.ok.a,
+    b: c.ok.b,
+    weight: c.weight,
+  }));
+
+  const maxClust = Math.max(5, Math.min(8, targetCount));
+
+  while (clusters.length > maxClust) {
+    let closestDist = Infinity;
+    let idx1 = -1;
+    let idx2 = -1;
+
+    for (let i = 0; i < clusters.length; i++) {
+      for (let j = i + 1; j < clusters.length; j++) {
+        const dL = clusters[i].L - clusters[j].L;
+        const da = clusters[i].a - clusters[j].a;
+        const db = clusters[i].b - clusters[j].b;
+        const dist = Math.sqrt(dL * dL + da * da + db * db);
+        if (dist < closestDist) {
+          closestDist = dist;
+          idx1 = i;
+          idx2 = j;
+        }
+      }
+    }
+
+    if (idx1 === -1 || idx2 === -1) break;
+
+    const c1 = clusters[idx1];
+    const c2 = clusters[idx2];
+    const totalW = c1.weight + c2.weight;
+
+    const merged: Cluster = {
+      L: (c1.L * c1.weight + c2.L * c2.weight) / totalW,
+      a: (c1.a * c1.weight + c2.a * c2.weight) / totalW,
+      b: (c1.b * c1.weight + c2.b * c2.weight) / totalW,
+      weight: totalW,
+    };
+
+    clusters.splice(idx2, 1);
+    clusters.splice(idx1, 1, merged);
+  }
+
+  const sumWeights = clusters.reduce((acc, c) => acc + c.weight, 0) || 1;
+
+  const result: PaletteColor[] = clusters.map((c) => {
+    const rgb = oklabToRgb(c.L, c.a, c.b);
+    return {
+      hex: rgbToHex(rgb.r, rgb.g, rgb.b),
+      weight: Math.round((c.weight / sumWeights) * 1000) / 1000,
+    };
+  });
+
+  result.sort((a, b) => {
+    const diff = b.weight - a.weight;
+    if (Math.abs(diff) > 0.001) return diff;
+    return a.hex.localeCompare(b.hex);
+  });
+
+  return result.slice(0, maxClust);
+}

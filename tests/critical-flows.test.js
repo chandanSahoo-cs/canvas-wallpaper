@@ -56,6 +56,7 @@ const {
   oklabToRgb,
   hexDistanceOklab,
   extractPaletteFromImageData,
+  mergePalettes,
   computeDHashFromGrayscale,
   hammingDistance,
   backfillManager,
@@ -553,6 +554,73 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   await deleteTag('ideas');
   const storedTagsAfterDelete = JSON.parse(global.localStorage.getItem('papertab_tag_registry') || '{}');
   assert(!storedTagsAfterDelete['ideas'], 'deleteTag removes tag from registry');
+
+  
+  // --- SECTION 16: Color Filter & Palette Merging (Phase 4) ---
+  console.log('\n--- SECTION 16: Color Filter & Palette Merging (Phase 4) ---');
+
+  // 1. mergePalettes combines multiple palettes into 5-8 swatches
+  const p1 = [
+    { hex: '#46BAEB', weight: 0.6 },
+    { hex: '#14141A', weight: 0.4 },
+  ];
+  const p2 = [
+    { hex: '#48B8E8', weight: 0.5 }, // Perceptually almost identical to #46BAEB
+    { hex: '#00BF63', weight: 0.5 },
+  ];
+  const p3 = [
+    { hex: '#F59E0B', weight: 0.7 },
+    { hex: '#E03131', weight: 0.3 },
+  ];
+
+  const merged = mergePalettes([p1, p2, p3], 6);
+  assert(merged.length >= 4 && merged.length <= 6, 'mergePalettes produces between 4 and 6 swatches');
+  assert(merged.some(c => c.hex.startsWith('#')), 'All merged swatches are valid uppercase hex strings');
+  assert(merged[0].weight >= merged[merged.length - 1].weight, 'Merged swatches are sorted descending by weight');
+
+  // 2. Empty or invalid input fallback
+  const emptyMerged = mergePalettes([]);
+  assert(emptyMerged.length >= 2, 'Empty palette list produces brand default palette');
+
+  // 3. OKLab distance color filtering with tolerance
+  const colorItems = [
+    {
+      id: 'brand-blue-item',
+      type: 'image',
+      title: 'PaperTab Blue Icon',
+      tags: [],
+      palette: [{ hex: '#46BAEB', weight: 1.0 }],
+      placements: [],
+      createdAt: 1000,
+    },
+    {
+      id: 'cyan-item',
+      type: 'image',
+      title: 'Sky Cyan Photo',
+      tags: [],
+      palette: [{ hex: '#38A8D8', weight: 1.0 }], // close to brand blue, distance ~0.04
+      placements: [],
+      createdAt: 2000,
+    },
+    {
+      id: 'coral-item',
+      type: 'image',
+      title: 'Coral sunset',
+      tags: [],
+      palette: [{ hex: '#E03131', weight: 1.0 }],
+      placements: [],
+      createdAt: 3000,
+    },
+  ];
+
+  // Exact match tolerance (0.01)
+  const exactBlueFilter = filterLibraryItems(colorItems, { colorHex: '#46BAEB', colorTolerance: 0.01 });
+  assert(exactBlueFilter.length === 1 && exactBlueFilter[0].id === 'brand-blue-item', 'Strict tolerance (0.01) matches only exact brand blue');
+
+  // Normal tolerance (0.18) includes cyan-item (~0.04 distance) but rejects coral-item (~0.25+ distance)
+  const normalFilter = filterLibraryItems(colorItems, { colorHex: '#46BAEB', colorTolerance: 0.18 });
+  assert(normalFilter.some(it => it.id === 'brand-blue-item') && normalFilter.some(it => it.id === 'cyan-item'), 'Normal tolerance (0.18) matches perceptually close colors');
+  assert(!normalFilter.some(it => it.id === 'coral-item'), 'Normal tolerance strictly excludes perceptually distant coral color');
 
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 

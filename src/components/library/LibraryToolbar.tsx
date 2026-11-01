@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Calendar,
   Check,
@@ -16,6 +16,16 @@ import {
 import { LibraryFilters, LibrarySortBy } from "../../lib/library/types";
 import { Scene } from "../../store/useSceneStore";
 import { cn } from "../../lib/utils";
+
+const PRESET_COLOR_SWATCHES = [
+  { name: "Brand Blue", hex: "#46BAEB" },
+  { name: "Brand Green", hex: "#00BF63" },
+  { name: "Amber", hex: "#F59E0B" },
+  { name: "Coral", hex: "#E03131" },
+  { name: "Purple", hex: "#8B5CF6" },
+  { name: "Dark Ink", hex: "#14141A" },
+  { name: "Light Paper", hex: "#F5F5F7" },
+];
 
 interface LibraryToolbarProps {
   filters: LibraryFilters;
@@ -47,6 +57,14 @@ export const LibraryToolbar: React.FC<LibraryToolbarProps> = ({
   onSortChange,
   onOpenTagManager,
 }) => {
+  const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);
+  const [customHexInput, setCustomHexInput] = useState(filters.colorHex || "");
+
+  useEffect(() => {
+    if (filters.colorHex) {
+      setCustomHexInput(filters.colorHex);
+    }
+  }, [filters.colorHex]);
   const hasActiveFilters =
     Boolean(filters.query) ||
     Boolean(filters.tag) ||
@@ -144,6 +162,139 @@ export const LibraryToolbar: React.FC<LibraryToolbarProps> = ({
             </button>
           )}
 
+          {/* Color Filter Popover */}
+          <div className="relative">
+            <button
+              type="button"
+              title="Filter by OKLab color distance"
+              onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
+              className={cn(
+                "px-2 py-1.5 text-xs font-hand font-bold rounded-sk border-2 transition-all cursor-pointer flex items-center gap-1.5",
+                filters.colorHex
+                  ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                  : "bg-paper text-ink border-line/30 hover:border-line hover:bg-surface",
+              )}
+            >
+              <Palette className="w-3.5 h-3.5" />
+              <span>Color</span>
+              {filters.colorHex && (
+                <span
+                  className="w-2.5 h-2.5 rounded-full border border-white shrink-0"
+                  style={{ backgroundColor: filters.colorHex }}
+                />
+              )}
+            </button>
+
+            {isColorPickerOpen && (
+              <div className="absolute right-0 top-full mt-1.5 z-40 w-64 bg-surface text-ink border-2 border-line rounded-sk shadow-hard p-3 flex flex-col gap-2.5 animate-in fade-in zoom-in-95 duration-100">
+                <div className="flex items-center justify-between pb-1.5 border-b border-line/20">
+                  <span className="font-hand font-bold text-xs">Filter by OKLab Color</span>
+                  <button
+                    onClick={() => setIsColorPickerOpen(false)}
+                    className="text-muted hover:text-ink cursor-pointer"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Preset Swatches */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {PRESET_COLOR_SWATCHES.map((swatch) => (
+                    <button
+                      key={swatch.hex}
+                      type="button"
+                      title={swatch.name}
+                      onClick={() => {
+                        onFilterChange("colorHex", swatch.hex);
+                        setCustomHexInput(swatch.hex);
+                      }}
+                      className="w-6 h-6 rounded-sk-sm border border-line/40 transition-transform hover:scale-110 cursor-pointer shadow-xs"
+                      style={{
+                        backgroundColor: swatch.hex,
+                        outline:
+                          filters.colorHex?.toUpperCase() === swatch.hex.toUpperCase()
+                            ? "2px solid var(--ink)"
+                            : "none",
+                      }}
+                    />
+                  ))}
+                </div>
+
+                {/* Custom Hex Input */}
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="text"
+                    value={customHexInput}
+                    placeholder="#46BAEB"
+                    onChange={(e) => setCustomHexInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        const val = customHexInput.trim();
+                        if (/^#?[0-9a-fA-F]{3,6}$/.test(val)) {
+                          const formatted = val.startsWith("#") ? val : "#" + val;
+                          onFilterChange("colorHex", formatted);
+                        }
+                      }
+                    }}
+                    className="flex-1 px-2 py-1 text-xs font-mono rounded-sk-sm bg-paper text-ink border border-line/30 focus:border-brand-blue focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const val = customHexInput.trim();
+                      if (/^#?[0-9a-fA-F]{3,6}$/.test(val)) {
+                        const formatted = val.startsWith("#") ? val : "#" + val;
+                        onFilterChange("colorHex", formatted);
+                      }
+                    }}
+                    className="px-2 py-1 text-xs font-hand font-bold rounded-sk-sm bg-paper hover:bg-surface border border-line/40 cursor-pointer"
+                  >
+                    Apply
+                  </button>
+                </div>
+
+                {/* Tolerance Slider */}
+                <div className="flex flex-col gap-1 pt-1.5 border-t border-line/20">
+                  <div className="flex items-center justify-between text-[11px] font-sans text-muted">
+                    <span>Tolerance (OKLab distance)</span>
+                    <span className="font-mono font-bold text-ink">
+                      {(filters.colorTolerance ?? 0.18).toFixed(2)}
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.05"
+                    max="0.40"
+                    step="0.01"
+                    value={filters.colorTolerance ?? 0.18}
+                    onChange={(e) =>
+                      onFilterChange("colorTolerance", parseFloat(e.target.value))
+                    }
+                    className="w-full cursor-pointer accent-brand-blue"
+                  />
+                  <div className="flex justify-between text-[9px] text-muted font-sans">
+                    <span>Exact (0.05)</span>
+                    <span>Broad (0.40)</span>
+                  </div>
+                </div>
+
+                {/* Clear Color Filter */}
+                {filters.colorHex && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onClearFilter("colorHex");
+                      setIsColorPickerOpen(false);
+                    }}
+                    className="mt-1 py-1 text-xs font-hand font-bold text-danger hover:underline cursor-pointer text-center"
+                  >
+                    Clear Color Filter
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Sort By Dropdown */}
           <select
             value={sortBy}
@@ -239,6 +390,9 @@ export const LibraryToolbar: React.FC<LibraryToolbarProps> = ({
               style={{ backgroundColor: filters.colorHex }}
             />
             <span className="font-mono text-[10px]">{filters.colorHex}</span>
+            <span className="text-[9px] font-sans text-muted">
+              (±{(filters.colorTolerance ?? 0.18).toFixed(2)})
+            </span>
             <button
               onClick={() => onClearFilter("colorHex")}
               className="hover:text-danger cursor-pointer ml-0.5"
