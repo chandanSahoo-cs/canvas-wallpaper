@@ -11,7 +11,7 @@ import { useEffect } from "react";
  * - Wraps all storage calls in try/catch with fallback to localStorage.
  * - Standalone per-install: no sync, no device IDs, no per-device lists.
  */
-export function recordWallpaperViewport(): void {
+function recordWallpaperViewport(): void {
   try {
     const w = window.innerWidth;
     const h = window.innerHeight;

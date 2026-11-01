@@ -44,16 +44,6 @@ export function getConnectedGroupElementIds(
 }
 
 /**
- * Returns all elements belonging to a specific group ID.
- */
-export function getElementsInGroup(
-  elements: CanvasElement[],
-  groupId: string,
-): CanvasElement[] {
-  return elements.filter((el) => el.groupIds && el.groupIds.includes(groupId));
-}
-
-/**
  * Groups the selected elements by appending a new unique group ID.
  */
 export function groupElements(

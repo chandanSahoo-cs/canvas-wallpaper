@@ -19,7 +19,7 @@ export interface WidgetPositions {
   quickLinks: WidgetPosition;
 }
 
-export const DEFAULT_WIDGET_POSITIONS: WidgetPositions = {
+const DEFAULT_WIDGET_POSITIONS: WidgetPositions = {
   clock: { x: 50, y: 38 },
   search: { x: 50, y: 52 },
   quickLinks: { x: 50, y: 64 },

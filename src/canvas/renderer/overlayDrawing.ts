@@ -11,7 +11,7 @@ import {
 } from "../geometry";
 import { useAppStore } from "../../store/useAppStore";
 
-export function drawRoundedRect(
+function drawRoundedRect(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
@@ -33,7 +33,7 @@ export function drawRoundedRect(
   }
 }
 
-export function drawLockMarker(
+function drawLockMarker(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
@@ -84,7 +84,7 @@ export function drawLockMarker(
   ctx.restore();
 }
 
-export function drawGroupMarker(
+function drawGroupMarker(
   ctx: CanvasRenderingContext2D,
   x: number,
   y: number,
@@ -134,7 +134,7 @@ export function drawLockBadge(
   drawLockMarker(ctx, tr.x, tr.y);
 }
 
-export function drawRotationBadge(
+function drawRotationBadge(
   ctx: CanvasRenderingContext2D,
   pos: Point,
   deg: number,

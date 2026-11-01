@@ -27,7 +27,7 @@ import {
 } from "./storagePersistence";
 import { flipElements } from "../lib/flipElements";
 
-export const HISTORY_LIMIT = 50;
+const HISTORY_LIMIT = 50;
 
 export interface TextEditorState {
   elementId: string | null;

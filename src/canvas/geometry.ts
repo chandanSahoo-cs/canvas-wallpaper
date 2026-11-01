@@ -13,7 +13,7 @@ export const FONT_SIZE_MAP: Record<number, number> = {
   5.5: 28,
   8: 36,
 };
-export const EXCALIDRAW_FONT_FAMILY =
+const EXCALIDRAW_FONT_FAMILY =
   'Excalifont, Virgil, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
 
 export function getFontFamilyString(family?: FontFamily): string {
@@ -26,7 +26,7 @@ export function getFontFamilyString(family?: FontFamily): string {
   return EXCALIDRAW_FONT_FAMILY;
 }
 
-export const HANDLE_HIT_RADIUS = 16;
+const HANDLE_HIT_RADIUS = 16;
 export const ROTATE_HANDLE_OFFSET = 28;
 
 let sharedMeasureCtx: CanvasRenderingContext2D | null = null;

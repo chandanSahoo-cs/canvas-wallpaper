@@ -100,7 +100,3 @@ export function getRoughDrawable(el: CanvasElement): Drawable | null {
   return drawable;
 }
 
-export function invalidateCache(id?: string) {
-  if (id) cache.delete(id);
-  else cache.clear();
-}

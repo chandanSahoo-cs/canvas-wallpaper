@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export const TOUR_STORAGE_KEY = "papertab_tour_completed";
+const TOUR_STORAGE_KEY = "papertab_tour_completed";
 
 export interface TourStepConfig {
   id: string;

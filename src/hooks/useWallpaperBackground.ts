@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { BackgroundConfig } from "../elements/types";
 import { isColorLight } from "../lib/utils";
 
-export const PATTERN_OVERLAYS: Record<string, { image: string; size: string }> =
+const PATTERN_OVERLAYS: Record<string, { image: string; size: string }> =
   {
     dots: {
       image: "radial-gradient(rgba(255,255,255,0.15) 1.2px, transparent 1.2px)",
