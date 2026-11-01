@@ -63,7 +63,7 @@ export const ExportMenu: React.FC = () => {
         <div className="absolute top-11 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-neutral-200/90 p-1.5 flex flex-col gap-0.5 w-52 text-xs select-none z-50 animate-in fade-in zoom-in-95 duration-100">
           <button
             onClick={() => {
-              exportWallpaperAsPng();
+              exportWallpaperAsPng().catch((err) => console.error("Export error:", err));
               setIsOpen(false);
             }}
             className="w-full px-2.5 py-2 rounded-xl hover:bg-neutral-100 text-left flex items-center gap-2.5 text-neutral-700 hover:text-neutral-900 font-medium transition-colors cursor-pointer"

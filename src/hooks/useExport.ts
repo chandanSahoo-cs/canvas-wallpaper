@@ -212,15 +212,32 @@ export async function exportWallpaperAsPng(): Promise<void> {
       case "image": {
         const imgEl = el as ImageElement;
         const img = new Image();
+        if (imgEl.dataUrl.startsWith("http")) {
+          img.crossOrigin = "anonymous";
+        }
         img.src = imgEl.dataUrl;
-        if (img.complete) {
-          ctx.drawImage(img, imgEl.x, imgEl.y, imgEl.width, imgEl.height);
-        } else {
-          await new Promise((resolve) => {
-            img.onload = () => resolve(true);
-            img.onerror = () => resolve(false);
-          });
-          ctx.drawImage(img, imgEl.x, imgEl.y, imgEl.width, imgEl.height);
+        await new Promise((resolve) => {
+          let settled = false;
+          const done = () => {
+            if (!settled) {
+              settled = true;
+              resolve(true);
+            }
+          };
+          if (img.complete) {
+            done();
+          } else {
+            img.onload = done;
+            img.onerror = done;
+            setTimeout(done, 3000);
+          }
+        });
+        if (img.naturalWidth > 0) {
+          try {
+            ctx.drawImage(img, imgEl.x, imgEl.y, imgEl.width, imgEl.height);
+          } catch (e) {
+            console.warn("Could not draw image to export canvas:", e);
+          }
         }
         break;
       }
@@ -230,11 +247,16 @@ export async function exportWallpaperAsPng(): Promise<void> {
   }
 
   // 3. Export to PNG and download
-  const dataUrl = offscreen.toDataURL("image/png");
-  const a = document.createElement("a");
-  a.href = dataUrl;
-  a.download = `wallpaper-${Date.now()}.png`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  try {
+    const dataUrl = offscreen.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = dataUrl;
+    a.download = `wallpaper-${Date.now()}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  } catch (err) {
+    console.error("Export PNG failed:", err);
+    alert("Export failed: Canvas contains external cross-origin images or memory is restricted.");
+  }
 }

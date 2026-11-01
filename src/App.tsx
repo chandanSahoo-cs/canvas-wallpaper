@@ -66,6 +66,8 @@ export const App: React.FC = () => {
       {/* Interactive / Wallpaper Canvas */}
       <canvas
         ref={canvasRef}
+        role="region"
+        aria-label="PaperTab drawing canvas"
         className={cn(
           "absolute inset-0 w-full h-full touch-none",
           mode === "wallpaper" || isPreviewing
