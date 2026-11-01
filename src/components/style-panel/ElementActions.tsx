@@ -40,15 +40,15 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
   const canGroup = hasGroups || selectedMembers.length >= 2;
 
   return (
-    <div className="pt-2 border-t border-neutral-100 flex flex-col gap-2">
-      <div className="text-[10px] font-semibold tracking-wider text-neutral-400 uppercase">
+    <div className="pt-2.5 border-t border-line/20 flex flex-col gap-2">
+      <div className="text-[10px] font-hand font-bold tracking-wider text-muted uppercase">
         Actions
       </div>
       <div className="grid grid-cols-4 gap-1">
         <button
           title="Duplicate (Ctrl+D)"
           onClick={duplicateSelected}
-          className="p-1.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 flex items-center justify-center text-neutral-700 active:scale-95 transition-all"
+          className="p-1.5 rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface flex items-center justify-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
         >
           <Copy className="w-3.5 h-3.5" />
         </button>
@@ -56,10 +56,10 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
           title={isLocked ? "Unlock" : "Lock"}
           onClick={toggleLockSelected}
           className={cn(
-            "p-1.5 rounded-lg border flex items-center justify-center active:scale-95 transition-all",
+            "p-1.5 rounded-sk border-2 flex items-center justify-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]",
             isLocked
-              ? "bg-amber-50 border-amber-300 text-amber-700"
-              : "border-neutral-200 hover:bg-neutral-50 text-neutral-700",
+              ? "bg-warning text-white border-line font-bold"
+              : "bg-paper text-ink border-line/30 hover:border-line hover:bg-surface",
           )}
         >
           {isLocked ? (
@@ -71,7 +71,7 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
         <button
           title="Delete (Del / Backspace)"
           onClick={deleteSelected}
-          className="p-1.5 rounded-lg border border-neutral-200 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600 flex items-center justify-center text-neutral-700 active:scale-95 transition-all"
+          className="p-1.5 rounded-sk bg-paper text-ink border-2 border-line/30 hover:bg-danger/10 hover:border-danger hover:text-danger flex items-center justify-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>
@@ -79,7 +79,7 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
           title={hasGroups ? "Ungroup" : "Group"}
           onClick={hasGroups ? ungroupSelected : groupSelected}
           disabled={!canGroup}
-          className="p-1.5 rounded-lg border border-neutral-200 hover:bg-neutral-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center text-neutral-700 active:scale-95 transition-all"
+          className="p-1.5 rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
         >
           {hasGroups ? (
             <Ungroup className="w-3.5 h-3.5" />
@@ -90,38 +90,36 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
       </div>
 
       {/* Layer arrange */}
-      <div className="grid grid-cols-2 gap-1">
+      <div className="grid grid-cols-2 gap-1 font-hand">
         <button
           title="Send Backward"
           onClick={sendBackward}
-          className="py-1 px-2 rounded-lg border border-neutral-200 hover:bg-neutral-50 flex items-center justify-center gap-1 text-neutral-700 text-[11px]"
+          className="py-1 px-2 rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface flex items-center justify-center gap-1 text-[11px] font-bold cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
         >
           <ArrowDownToLine className="w-3.5 h-3.5" /> Back
         </button>
         <button
           title="Bring Forward"
           onClick={sendForward}
-          className="py-1 px-2 rounded-lg border border-neutral-200 hover:bg-neutral-50 flex items-center justify-center gap-1 text-neutral-700 text-[11px]"
+          className="py-1 px-2 rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface flex items-center justify-center gap-1 text-[11px] font-bold cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
         >
-          <ArrowUpToLine className="w-3.5 h-3.5" /> Front
+          <ArrowUpToLine className="w-3.5 h-3.5" /> Forward
         </button>
       </div>
 
       {/* Flip elements */}
-      <div className="grid grid-cols-2 gap-1">
+      <div className="grid grid-cols-2 gap-1 font-hand">
         <button
           title="Flip Horizontal (Shift+H)"
           onClick={flipSelectedHorizontal}
-          disabled={isLocked}
-          className="py-1 px-2 rounded-lg border border-neutral-200 hover:bg-neutral-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-1 text-neutral-700 text-[11px] active:scale-95 transition-all"
+          className="py-1 px-2 rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface flex items-center justify-center gap-1 text-[11px] font-bold cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
         >
           <FlipHorizontal className="w-3.5 h-3.5" /> Flip H
         </button>
         <button
           title="Flip Vertical (Shift+V)"
           onClick={flipSelectedVertical}
-          disabled={isLocked}
-          className="py-1 px-2 rounded-lg border border-neutral-200 hover:bg-neutral-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center gap-1 text-neutral-700 text-[11px] active:scale-95 transition-all"
+          className="py-1 px-2 rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface flex items-center justify-center gap-1 text-[11px] font-bold cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
         >
           <FlipVertical className="w-3.5 h-3.5" /> Flip V
         </button>

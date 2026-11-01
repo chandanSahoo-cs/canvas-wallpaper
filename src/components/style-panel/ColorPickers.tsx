@@ -11,6 +11,8 @@ interface ColorPickersProps {
 
 const FILL_PRESETS = [
   "transparent",
+  "#46BAEB",
+  "#00BF63",
   "#ffc9c9",
   "#b2f2bb",
   "#a5d8ff",
@@ -26,14 +28,30 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({
   onFillChange,
 }) => {
   const strokePresets = isLightBg
-    ? ["#1e1e1e", "#e03131", "#2f9e44", "#1971c2", "#f08c00", "#ffffff"]
-    : ["#ffffff", "#e03131", "#2f9e44", "#1971c2", "#f08c00", "#1e1e1e"];
+    ? [
+        "#46BAEB",
+        "#00BF63",
+        "#1e1e1e",
+        "#e03131",
+        "#1971c2",
+        "#f08c00",
+        "#ffffff",
+      ]
+    : [
+        "#46BAEB",
+        "#00BF63",
+        "#ffffff",
+        "#e03131",
+        "#1971c2",
+        "#f08c00",
+        "#1e1e1e",
+      ];
 
   return (
     <>
       {/* Stroke Color */}
       <div>
-        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+        <div className="text-xs font-hand font-bold text-muted mb-1.5">
           Stroke
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -42,15 +60,15 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({
               key={c}
               onClick={() => onStrokeChange(c)}
               className={cn(
-                "w-6 h-6 rounded-full border-2 transition-transform active:scale-90",
-                activeStrokeColor === c
-                  ? "border-neutral-900 scale-110 shadow-sm"
-                  : "border-black/10 hover:scale-105",
+                "w-6 h-6 rounded-sk-sm border-2 transition-transform cursor-pointer active:scale-90",
+                activeStrokeColor.toLowerCase() === c.toLowerCase()
+                  ? "border-line shadow-hard-sm scale-110 z-10"
+                  : "border-line/30 hover:border-line/70 hover:scale-105",
               )}
               style={{ backgroundColor: c }}
             />
           ))}
-          <label className="w-6 h-6 rounded-full overflow-hidden relative cursor-pointer border border-neutral-200 bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-500 active:scale-90 transition-transform">
+          <label className="w-6 h-6 rounded-sk-sm overflow-hidden relative cursor-pointer border-2 border-line/40 hover:border-line bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-500 active:scale-90 transition-transform">
             <input
               type="color"
               value={activeStrokeColor}
@@ -63,7 +81,7 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({
 
       {/* Fill Color */}
       <div>
-        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+        <div className="text-xs font-hand font-bold text-muted mb-1.5">
           Fill
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -72,17 +90,17 @@ export const ColorPickers: React.FC<ColorPickersProps> = ({
               key={c}
               onClick={() => onFillChange(c)}
               className={cn(
-                "w-6 h-6 rounded-full border-2 transition-transform active:scale-90",
-                activeFillColor === c
-                  ? "border-neutral-900 scale-110 shadow-sm"
-                  : "border-black/10 hover:scale-105",
+                "w-6 h-6 rounded-sk-sm border-2 transition-transform cursor-pointer active:scale-90",
+                activeFillColor.toLowerCase() === c.toLowerCase()
+                  ? "border-line shadow-hard-sm scale-110 z-10"
+                  : "border-line/30 hover:border-line/70 hover:scale-105",
                 c === "transparent" &&
-                  "bg-[radial-gradient(#e2e2e6_1px,transparent_1px)] [background-size:4px_4px] bg-white",
+                  "bg-[radial-gradient(var(--ink)_1px,transparent_1px)] [background-size:4px_4px] bg-paper",
               )}
               style={c !== "transparent" ? { backgroundColor: c } : {}}
             />
           ))}
-          <label className="w-6 h-6 rounded-full overflow-hidden relative cursor-pointer border border-neutral-200 bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-500 active:scale-90 transition-transform">
+          <label className="w-6 h-6 rounded-sk-sm overflow-hidden relative cursor-pointer border-2 border-line/40 hover:border-line bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-500 active:scale-90 transition-transform">
             <input
               type="color"
               value={

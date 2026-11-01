@@ -122,14 +122,15 @@ const STROKE_STYLES: {
     id: "solid",
     label: "Solid",
     svg: (
-      <svg className="w-7 h-2" viewBox="0 0 28 8">
+      <svg className="w-6 h-1.5" viewBox="0 0 24 6">
         <line
           x1="0"
-          y1="4"
-          x2="28"
-          y2="4"
+          y1="3"
+          x2="24"
+          y2="3"
           stroke="currentColor"
           strokeWidth="2.5"
+          strokeLinecap="round"
         />
       </svg>
     ),
@@ -138,15 +139,16 @@ const STROKE_STYLES: {
     id: "dashed",
     label: "Dashed",
     svg: (
-      <svg className="w-7 h-2" viewBox="0 0 28 8">
+      <svg className="w-6 h-1.5" viewBox="0 0 24 6">
         <line
           x1="0"
-          y1="4"
-          x2="28"
-          y2="4"
+          y1="3"
+          x2="24"
+          y2="3"
           stroke="currentColor"
           strokeWidth="2.5"
-          strokeDasharray="6 3"
+          strokeDasharray="4 3"
+          strokeLinecap="round"
         />
       </svg>
     ),
@@ -155,15 +157,15 @@ const STROKE_STYLES: {
     id: "dotted",
     label: "Dotted",
     svg: (
-      <svg className="w-7 h-2" viewBox="0 0 28 8">
+      <svg className="w-6 h-1.5" viewBox="0 0 24 6">
         <line
           x1="1"
-          y1="4"
-          x2="27"
-          y2="4"
+          y1="3"
+          x2="23"
+          y2="3"
           stroke="currentColor"
           strokeWidth="2.5"
-          strokeDasharray="1 4"
+          strokeDasharray="1 3.5"
           strokeLinecap="round"
         />
       </svg>
@@ -172,9 +174,9 @@ const STROKE_STYLES: {
 ];
 
 const ROUGHNESS_OPTIONS = [
-  { val: 0.2, label: "Clean" },
-  { val: 1.4, label: "Sketch" },
-  { val: 2.5, label: "Rough" },
+  { val: 0.2, label: "Architect" },
+  { val: 1.4, label: "Artist" },
+  { val: 2.8, label: "Cartoon" },
 ];
 
 const STROKE_WIDTH_OPTIONS = [
@@ -197,105 +199,117 @@ export const StrokeAndFillStyles: React.FC<StrokeAndFillStylesProps> = ({
     <>
       {/* Fill Style */}
       <div>
-        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+        <div className="text-xs font-hand font-bold text-muted mb-1.5">
           Fill style
         </div>
         <div className="grid grid-cols-3 gap-1">
-          {FILL_STYLES.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => onFillStyleChange(f.id)}
-              title={f.label}
-              className={cn(
-                "py-1.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer",
-                activeFillStyle === f.id
-                  ? "bg-neutral-900 border-neutral-900 text-white"
-                  : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
-              )}
-            >
-              {f.icon}
-              <span className="text-[10px] font-medium leading-none">
-                {f.label}
-              </span>
-            </button>
-          ))}
+          {FILL_STYLES.map((f) => {
+            const isSelected = activeFillStyle === f.id;
+            return (
+              <button
+                key={f.id}
+                onClick={() => onFillStyleChange(f.id)}
+                title={f.label}
+                className={cn(
+                  "py-1.5 rounded-sk border-2 flex flex-col items-center justify-center gap-1 transition-all cursor-pointer font-hand",
+                  isSelected
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm font-bold"
+                    : "bg-paper text-ink border-transparent hover:border-line/30",
+                )}
+              >
+                {f.icon}
+                <span className="text-[10px] leading-none">
+                  {f.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Stroke Style */}
       <div>
-        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+        <div className="text-xs font-hand font-bold text-muted mb-1.5">
           Stroke style
         </div>
         <div className="grid grid-cols-3 gap-1">
-          {STROKE_STYLES.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => onStrokeStyleChange(s.id)}
-              title={s.label}
-              className={cn(
-                "py-1.5 rounded-lg border flex flex-col items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer",
-                activeStrokeStyle === s.id
-                  ? "bg-neutral-900 border-neutral-900 text-white"
-                  : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
-              )}
-            >
-              {s.svg}
-              <span className="text-[10px] font-medium leading-none">
-                {s.label}
-              </span>
-            </button>
-          ))}
+          {STROKE_STYLES.map((s) => {
+            const isSelected = activeStrokeStyle === s.id;
+            return (
+              <button
+                key={s.id}
+                onClick={() => onStrokeStyleChange(s.id)}
+                title={s.label}
+                className={cn(
+                  "py-1.5 rounded-sk border-2 flex flex-col items-center justify-center gap-1 transition-all cursor-pointer font-hand",
+                  isSelected
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm font-bold"
+                    : "bg-paper text-ink border-transparent hover:border-line/30",
+                )}
+              >
+                {s.svg}
+                <span className="text-[10px] leading-none">
+                  {s.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Roughness */}
+      {/* Roughness / Aesthetic */}
       <div>
-        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+        <div className="text-xs font-hand font-bold text-muted mb-1.5">
           Aesthetic
         </div>
         <div className="grid grid-cols-3 gap-1">
-          {ROUGHNESS_OPTIONS.map((r) => (
-            <button
-              key={r.val}
-              onClick={() => onRoughnessChange(r.val)}
-              className={cn(
-                "py-1.5 rounded-lg border text-[11px] font-medium transition-all active:scale-95 cursor-pointer",
-                Math.abs(activeRoughness - r.val) < 0.3
-                  ? "bg-neutral-900 border-neutral-900 text-white"
-                  : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
-              )}
-            >
-              {r.label}
-            </button>
-          ))}
+          {ROUGHNESS_OPTIONS.map((r) => {
+            const isSelected = Math.abs(activeRoughness - r.val) < 0.4;
+            return (
+              <button
+                key={r.val}
+                onClick={() => onRoughnessChange(r.val)}
+                className={cn(
+                  "py-1.5 rounded-sk border-2 text-[10px] font-hand transition-all cursor-pointer",
+                  isSelected
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm font-bold"
+                    : "bg-paper text-ink border-transparent hover:border-line/30",
+                )}
+              >
+                {r.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Stroke Width */}
       <div>
-        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+        <div className="text-xs font-hand font-bold text-muted mb-1.5">
           Stroke width
         </div>
-        <div className="flex items-center gap-1">
-          {STROKE_WIDTH_OPTIONS.map((s) => (
-            <button
-              key={s.size}
-              onClick={() => onWidthChange(s.size)}
-              title={s.label}
-              className={cn(
-                "flex-1 py-1.5 rounded-lg flex items-center justify-center border transition-all active:scale-95 cursor-pointer",
-                activeStrokeWidth === s.size
-                  ? "bg-neutral-900 border-neutral-900 text-white"
-                  : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
-              )}
-            >
-              <span
-                className="rounded-full bg-current block"
-                style={{ width: `${s.dot}px`, height: `${s.dot}px` }}
-              />
-            </button>
-          ))}
+        <div className="grid grid-cols-3 gap-1">
+          {STROKE_WIDTH_OPTIONS.map((w) => {
+            const isSelected = Math.abs(activeStrokeWidth - w.size) < 0.5;
+            return (
+              <button
+                key={w.size}
+                onClick={() => onWidthChange(w.size)}
+                className={cn(
+                  "py-1.5 rounded-sk border-2 flex items-center justify-center gap-1.5 transition-all cursor-pointer font-hand text-[10px]",
+                  isSelected
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm font-bold"
+                    : "bg-paper text-ink border-transparent hover:border-line/30",
+                )}
+              >
+                <span
+                  className="rounded-full bg-current shrink-0"
+                  style={{ width: `${w.dot}px`, height: `${w.dot}px` }}
+                />
+                <span>{w.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
     </>

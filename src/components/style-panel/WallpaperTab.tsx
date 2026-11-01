@@ -69,35 +69,35 @@ export const WallpaperTab: React.FC = () => {
       {/* Preset Wallpapers & Templates */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <div className="text-[11px] font-medium text-neutral-500">
+          <div className="text-xs font-hand font-bold text-muted">
             Presets & Templates
           </div>
           <button
             onClick={() => setIsPresetsOpen(true)}
-            className="flex items-center gap-1 text-[11px] font-semibold text-sky-600 hover:text-sky-700 hover:underline cursor-pointer"
+            className="flex items-center gap-1 text-[11px] font-hand font-bold text-blue-text hover:underline cursor-pointer"
           >
-            <Sparkles className="w-3 h-3 text-sky-500" />
+            <Sparkles className="w-3 h-3 text-brand-blue" />
             <span>Browse All (5)</span>
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-1.5">
+        <div className="grid grid-cols-2 gap-2">
           {WALLPAPER_PRESETS.slice(0, 4).map((p) => (
             <button
               key={p.id}
               onClick={() => applyPresetToActiveScene(p)}
-              className="group flex flex-col p-2 rounded-xl border border-neutral-200/90 hover:border-neutral-900 bg-white hover:bg-neutral-50 transition-all text-left cursor-pointer active:scale-95 shadow-2xs"
+              className="group flex flex-col p-2 rounded-sk border-2 border-line/30 hover:border-line bg-paper hover:bg-surface transition-all text-left cursor-pointer active:translate-x-[1px] active:translate-y-[1px]"
             >
               <div
-                className="w-full h-8 rounded-lg mb-1.5 flex items-center justify-center text-[10px] font-bold text-white shadow-inner"
+                className="w-full h-8 rounded-sk-sm mb-1.5 flex items-center justify-center text-[10px] font-hand font-bold text-white border border-line/20 shadow-inner"
                 style={{ background: p.previewBg }}
               >
-                <span className="opacity-90">{p.badge}</span>
+                <span className="opacity-95">{p.badge}</span>
               </div>
-              <span className="text-xs font-semibold text-neutral-800 truncate group-hover:text-neutral-950">
+              <span className="text-xs font-hand font-bold text-ink truncate">
                 {p.title}
               </span>
-              <span className="text-[10px] text-neutral-400 truncate">
+              <span className="text-[10px] font-hand text-muted truncate">
                 {p.category}
               </span>
             </button>
@@ -106,8 +106,8 @@ export const WallpaperTab: React.FC = () => {
       </div>
 
       {/* Background Color */}
-      <div className="pt-2 border-t border-neutral-100">
-        <div className="text-[11px] font-medium text-neutral-500 mb-2">
+      <div className="pt-2 border-t border-line/20">
+        <div className="text-xs font-hand font-bold text-muted mb-2">
           Background
         </div>
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -116,11 +116,11 @@ export const WallpaperTab: React.FC = () => {
               key={c}
               onClick={() => setBackground({ type: "color", color: c })}
               className={cn(
-                "w-6 h-6 rounded-full border-2 transition-transform active:scale-90",
+                "w-6 h-6 rounded-sk-sm border-2 transition-transform cursor-pointer active:scale-90",
                 (background.color || "#14141a").toLowerCase() ===
                   c.toLowerCase()
-                  ? "border-neutral-900 scale-110 shadow-sm"
-                  : "border-black/10 hover:scale-105",
+                  ? "border-line shadow-hard-sm scale-110 z-10"
+                  : "border-line/30 hover:border-line/70 hover:scale-105",
               )}
               style={{ backgroundColor: c }}
             />
@@ -129,7 +129,7 @@ export const WallpaperTab: React.FC = () => {
           {/* Custom color picker */}
           <label
             title="Custom Background Color"
-            className="w-6 h-6 rounded-full overflow-hidden relative cursor-pointer border border-neutral-200 bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-500 active:scale-90 transition-transform"
+            className="w-6 h-6 rounded-sk-sm overflow-hidden relative cursor-pointer border-2 border-line/40 hover:border-line bg-gradient-to-tr from-rose-500 via-amber-400 to-sky-500 active:scale-90 transition-transform"
           >
             <input
               type="color"
@@ -146,9 +146,9 @@ export const WallpaperTab: React.FC = () => {
             title="Set wallpaper image"
             onClick={() => fileInputRef.current?.click()}
             className={cn(
-              "w-6 h-6 rounded-full border border-neutral-200 hover:bg-neutral-100 flex items-center justify-center text-neutral-600 transition-transform active:scale-90",
+              "w-6 h-6 rounded-sk-sm border-2 border-line/40 hover:border-line bg-paper hover:bg-surface flex items-center justify-center text-ink transition-transform cursor-pointer active:scale-90",
               background.type === "image" &&
-                "border-neutral-900 text-neutral-900 bg-neutral-100",
+                "border-line bg-brand-blue text-on-accent",
             )}
           >
             <ImageIcon className="w-3.5 h-3.5" />
@@ -165,63 +165,66 @@ export const WallpaperTab: React.FC = () => {
 
       {/* Pattern Overlays */}
       <div>
-        <div className="text-[11px] font-medium text-neutral-500 mb-2">
+        <div className="text-xs font-hand font-bold text-muted mb-2">
           Pattern
         </div>
         <div className="grid grid-cols-4 gap-1">
-          {PATTERN_OPTIONS.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setBackground({ pattern: p.id })}
-              className={cn(
-                "py-1.5 rounded-lg border text-[11px] font-medium transition-all active:scale-95 text-center",
-                (background.pattern ?? "none") === p.id
-                  ? "bg-neutral-900 border-neutral-900 text-white"
-                  : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
-              )}
-            >
-              {p.label}
-            </button>
-          ))}
+          {PATTERN_OPTIONS.map((p) => {
+            const isSelected = (background.pattern ?? "none") === p.id;
+            return (
+              <button
+                key={p.id}
+                onClick={() => setBackground({ pattern: p.id })}
+                className={cn(
+                  "py-1.5 rounded-sk border-2 text-[11px] font-hand font-bold transition-all text-center cursor-pointer",
+                  isSelected
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                    : "bg-paper text-ink border-transparent hover:border-line/30",
+                )}
+              >
+                {p.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="pt-1 border-t border-neutral-100 flex flex-col gap-1.5">
+      <div className="pt-2 border-t border-line/20 flex flex-col gap-1.5">
         <button
           onClick={toggleBoundaryMarker}
           className={cn(
-            "w-full py-2 px-3 rounded-xl border transition-all active:scale-95 flex items-center justify-between text-xs font-medium cursor-pointer",
+            "w-full py-2 px-3 rounded-sk border-2 transition-all flex items-center justify-between text-xs font-hand font-bold cursor-pointer active:translate-x-[1px] active:translate-y-[1px]",
             showBoundaryMarker
-              ? "border-sky-300 bg-sky-50/60 text-sky-800"
-              : "border-neutral-200 hover:bg-neutral-100 text-neutral-700",
+              ? "border-line bg-brand-blue/20 text-ink shadow-hard-sm"
+              : "border-line/30 hover:border-line bg-paper text-ink",
           )}
         >
           <span className="flex items-center gap-1.5">
-            <SquareDashed className="w-3.5 h-3.5 text-sky-500" />
+            <SquareDashed className="w-3.5 h-3.5 text-brand-blue" />
             <span>Wallpaper Boundary</span>
           </span>
-          <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-white/90 border border-neutral-200/60">
+          <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded-sk-sm bg-surface border border-line/30">
             {showBoundaryMarker ? "On" : "Off"}
           </span>
         </button>
         <button
           onClick={() => centerArtworkToScreen()}
-          className="w-full py-2 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-700 transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs font-medium cursor-pointer"
+          className="w-full py-2 px-3 rounded-sk border-2 border-line/30 hover:border-line bg-paper hover:bg-surface text-ink transition-all flex items-center justify-center gap-1.5 text-xs font-hand font-bold cursor-pointer active:translate-x-[1px] active:translate-y-[1px]"
         >
-          <Crosshair className="w-3.5 h-3.5 text-neutral-600" /> Center artwork on screen
+          <Crosshair className="w-3.5 h-3.5 text-muted" /> Center artwork on screen
         </button>
         <button
           onClick={() => centerToOrigin(true)}
-          className="w-full py-2 px-3 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-700 transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs font-medium cursor-pointer"
+          className="w-full py-2 px-3 rounded-sk border-2 border-line/30 hover:border-line bg-paper hover:bg-surface text-ink transition-all flex items-center justify-center gap-1.5 text-xs font-hand font-bold cursor-pointer active:translate-x-[1px] active:translate-y-[1px]"
         >
-          <Crosshair className="w-3.5 h-3.5" /> Center canvas to (0,0)
+          <Crosshair className="w-3.5 h-3.5 text-muted" /> Center canvas to (0,0)
         </button>
         <button
           onClick={() => {
             if (confirm("Clear the whole wallpaper?")) clearCanvas();
           }}
-          className="w-full py-2 px-3 rounded-xl border border-neutral-200 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-600 text-neutral-500 transition-all active:scale-95 flex items-center justify-center gap-1.5 text-xs font-medium cursor-pointer"
+          className="w-full py-2 px-3 rounded-sk border-2 border-line/30 hover:border-danger hover:bg-danger/10 hover:text-danger text-muted transition-all flex items-center justify-center gap-1.5 text-xs font-hand font-bold cursor-pointer active:translate-x-[1px] active:translate-y-[1px]"
         >
           <RotateCcw className="w-3.5 h-3.5" /> Clear wallpaper
         </button>

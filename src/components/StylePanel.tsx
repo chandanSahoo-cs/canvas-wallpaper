@@ -142,17 +142,17 @@ export const StylePanel: React.FC = () => {
   return (
     <div
       id="tour-style-panel"
-      className="fixed top-20 left-4 z-20 w-60 max-h-[calc(100vh-6rem)] bg-white/95 backdrop-blur-xl border border-neutral-200/80 shadow-xl rounded-2xl p-3.5 flex flex-col gap-3.5 text-xs select-none overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-neutral-200 hover:[&::-webkit-scrollbar-thumb]:bg-neutral-300 [&::-webkit-scrollbar-thumb]:rounded-full"
+      className="fixed top-20 left-4 z-20 w-64 max-h-[calc(100vh-6rem)] bg-surface text-ink border-2 border-line shadow-hard rounded-sk-lg p-3.5 flex flex-col gap-3.5 text-xs select-none overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-line/20 [&::-webkit-scrollbar-thumb]:rounded-sk"
     >
       {/* Top Tabs: Tool / Element Styles vs Wallpaper Canvas */}
-      <div className="flex items-center bg-neutral-100 p-0.5 rounded-xl shrink-0">
+      <div className="flex items-center bg-paper p-1 border-2 border-line rounded-sk gap-1 shrink-0">
         <button
           onClick={() => setActiveTab("styles")}
           className={cn(
-            "flex-1 py-1.5 rounded-lg font-medium text-[11px] transition-all flex items-center justify-center gap-1.5",
+            "flex-1 py-1 px-2 rounded-sk-sm font-hand font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer",
             activeTab === "styles"
-              ? "bg-white text-neutral-900 shadow-xs"
-              : "text-neutral-500 hover:text-neutral-800",
+              ? "bg-brand-blue text-on-accent border-2 border-line shadow-hard-sm"
+              : "text-ink/70 hover:text-ink hover:bg-surface/50 border-2 border-transparent",
           )}
         >
           <Paintbrush className="w-3.5 h-3.5" />
@@ -165,10 +165,10 @@ export const StylePanel: React.FC = () => {
         <button
           onClick={() => setActiveTab("wallpaper")}
           className={cn(
-            "flex-1 py-1.5 rounded-lg font-medium text-[11px] transition-all flex items-center justify-center gap-1.5",
+            "flex-1 py-1 px-2 rounded-sk-sm font-hand font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer",
             activeTab === "wallpaper"
-              ? "bg-white text-neutral-900 shadow-xs"
-              : "text-neutral-500 hover:text-neutral-800",
+              ? "bg-brand-blue text-on-accent border-2 border-line shadow-hard-sm"
+              : "text-ink/70 hover:text-ink hover:bg-surface/50 border-2 border-transparent",
           )}
         >
           <Palette className="w-3.5 h-3.5" />
