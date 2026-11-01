@@ -7,7 +7,7 @@ import {
   LayoutTemplate,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { optimizeImageDataUrl } from "../../lib/imageInsert";
+import { ingestImage } from "../../lib/assets";
 import { useAppStore } from "../../store/useAppStore";
 import { useSceneStore } from "../../store/useSceneStore";
 import { WALLPAPER_PRESETS } from "../../lib/wallpaperPresets";
@@ -42,25 +42,24 @@ export const WallpaperTab: React.FC = () => {
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleBackgroundImageUpload = (
+  const handleBackgroundImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      const img = new Image();
-      img.onload = () => {
-        const optimized = optimizeImageDataUrl(img, 1920);
-        setBackground({
-          type: "image",
-          imageUrl: optimized,
-        });
-      };
-      img.src = dataUrl;
-    };
-    reader.readAsDataURL(file);
+    try {
+      const asset = await ingestImage(file, {
+        title: file.name,
+        savedAt: Date.now(),
+      });
+      setBackground({
+        type: "image",
+        color: background.color || "#14141a",
+        imageAssetId: asset.id,
+      });
+    } catch (err: any) {
+      alert(err?.message || "Failed to set background image.");
+    }
     e.target.value = "";
   };
 

@@ -31,6 +31,16 @@ const {
   WALLPAPER_PRESETS,
 } = jiti('../src/lib/wallpaperPresets.ts');
 
+const {
+  ALLOWED_IMAGE_MIME_TYPES,
+  MAX_FILE_SIZE_BYTES,
+  MAX_ORIGINAL_SIZE_BYTES,
+  MAX_MEGAPIXELS,
+  computeBlobHash,
+  blobToBase64,
+  base64ToBlob,
+} = jiti('../src/lib/assets/index.ts');
+
 let passed = 0;
 let failed = 0;
 
@@ -133,8 +143,49 @@ const elD = { id: 'd', groupIds: ['g3'] };
 const connected = getConnectedGroupElementIds([elA, elB, elC, elD], new Set(['a']));
 assert(connected.has('a') && connected.has('b') && connected.has('c') && !connected.has('d'), 'getConnectedGroupElementIds performs full transitive closure');
 
-console.log(`\nResults: ${passed} passed, ${failed} failed.`);
+// 9. Asset Store & Ingestion Pipeline Tests
+assert(ALLOWED_IMAGE_MIME_TYPES.has('image/png'), 'Allowed MIME includes PNG');
+assert(ALLOWED_IMAGE_MIME_TYPES.has('image/jpeg'), 'Allowed MIME includes JPEG');
+assert(ALLOWED_IMAGE_MIME_TYPES.has('image/webp'), 'Allowed MIME includes WebP');
+assert(ALLOWED_IMAGE_MIME_TYPES.has('image/gif'), 'Allowed MIME includes GIF');
+assert(ALLOWED_IMAGE_MIME_TYPES.has('image/avif'), 'Allowed MIME includes AVIF');
+assert(!ALLOWED_IMAGE_MIME_TYPES.has('image/svg+xml'), 'Allowed MIME strictly rejects SVG');
+assert(!ALLOWED_IMAGE_MIME_TYPES.has('text/html'), 'Allowed MIME strictly rejects non-images');
 
-if (failed > 0) {
+assert(MAX_FILE_SIZE_BYTES === 50 * 1024 * 1024, 'MAX_FILE_SIZE_BYTES is 50 MB');
+assert(MAX_ORIGINAL_SIZE_BYTES === 25 * 1024 * 1024, 'MAX_ORIGINAL_SIZE_BYTES is 25 MB');
+assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
+
+(async () => {
+  // SHA-256 Hash Deduplication verification
+  const testBytes1 = new Uint8Array([1, 2, 3, 4, 5, 42, 99]);
+  const testBytes2 = new Uint8Array([1, 2, 3, 4, 5, 42, 99]);
+  const testBytesDiff = new Uint8Array([1, 2, 3, 4, 5, 42, 100]);
+  const blob1 = new Blob([testBytes1], { type: 'image/png' });
+  const blob2 = new Blob([testBytes2], { type: 'image/png' });
+  const blobDiff = new Blob([testBytesDiff], { type: 'image/png' });
+
+  const hash1 = await computeBlobHash(blob1);
+  const hash2 = await computeBlobHash(blob2);
+  const hashDiff = await computeBlobHash(blobDiff);
+
+  assert(hash1 === hash2, 'Identical byte blobs produce identical SHA-256 hashes (deduplication foundation)');
+  assert(hash1 !== hashDiff, 'Different byte blobs produce distinct SHA-256 hashes');
+  assert(typeof hash1 === 'string' && hash1.length === 64, 'SHA-256 hash is 64 hex characters');
+
+  // Base64 serialization roundtrip for .canvaswallpaper export/import
+  const originalBlob = new Blob(['paper-tab-test-binary-stream'], { type: 'image/webp' });
+  const b64 = await blobToBase64(originalBlob);
+  const restoredBlob = base64ToBlob(b64, 'image/webp');
+  const restoredHash = await computeBlobHash(restoredBlob);
+  assert(restoredHash === await computeBlobHash(originalBlob), 'base64ToBlob and blobToBase64 roundtrip preserves byte integrity');
+
+  console.log(`\nResults: ${passed} passed, ${failed} failed.`);
+
+  if (failed > 0) {
+    process.exit(1);
+  }
+})().catch(err => {
+  console.error("Async test failed:", err);
   process.exit(1);
-}
+});

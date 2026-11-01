@@ -8,10 +8,12 @@ import {
 import { roughOptions } from "../rough-cache";
 import { FONT_SIZE_MAP, getFontFamilyString } from "../geometry";
 import { useAppStore } from "../../store/useAppStore";
+import { getAssetObjectUrl } from "../../lib/assets";
 
 type RoughCanvas = ReturnType<typeof rough.canvas>;
 
 export const imageElementCache = new Map<string, HTMLImageElement>();
+const pendingAssetLoads = new Set<string>();
 
 export function drawArrow(
   rc: RoughCanvas,
@@ -101,19 +103,39 @@ export function drawImage(
   el: ImageElement,
   onNeedRender?: () => void,
 ): void {
-  let img = imageElementCache.get(el.dataUrl);
+  if (!el.assetId) return;
+
+  let img = imageElementCache.get(el.assetId);
   if (!img) {
-    if (imageElementCache.size >= 50) {
-      const oldestKey = imageElementCache.keys().next().value;
-      if (oldestKey) imageElementCache.delete(oldestKey);
+    if (!pendingAssetLoads.has(el.assetId)) {
+      pendingAssetLoads.add(el.assetId);
+      getAssetObjectUrl(el.assetId)
+        .then((url) => {
+          pendingAssetLoads.delete(el.assetId);
+          if (!url) return;
+          const newImg = new Image();
+          newImg.onload = () => {
+            onNeedRender?.();
+          };
+          newImg.src = url;
+          imageElementCache.set(el.assetId, newImg);
+          onNeedRender?.();
+        })
+        .catch(() => {
+          pendingAssetLoads.delete(el.assetId);
+        });
     }
-    img = new Image();
-    img.src = el.dataUrl;
-    img.onload = () => {
-      onNeedRender?.();
-    };
-    imageElementCache.set(el.dataUrl, img);
+
+    // Subtle sketchbook placeholder while loading
+    ctx.save();
+    ctx.strokeStyle = "rgba(14, 26, 31, 0.25)";
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.strokeRect(el.x, el.y, el.width, el.height);
+    ctx.restore();
+    return;
   }
+
   if (img.complete && img.naturalWidth > 0) {
     ctx.drawImage(img, el.x, el.y, el.width, el.height);
   }

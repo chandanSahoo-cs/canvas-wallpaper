@@ -1,6 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { BackgroundConfig } from "../elements/types";
 import { isColorLight } from "../lib/utils";
+import { getAssetObjectUrl } from "../lib/assets";
 
 const PATTERN_OVERLAYS: Record<string, { image: string; size: string }> =
   {
@@ -20,15 +21,28 @@ const PATTERN_OVERLAYS: Record<string, { image: string; size: string }> =
   };
 
 export function useWallpaperBackground(background: BackgroundConfig) {
+  const [bgImageUrl, setBgImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (background.type === "image" && background.imageAssetId) {
+      getAssetObjectUrl(background.imageAssetId).then((url) => {
+        if (!cancelled) setBgImageUrl(url);
+      });
+    } else {
+      setBgImageUrl(null);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [background.type, background.imageAssetId]);
+
   const pattern =
     background.pattern && background.pattern !== "none"
       ? PATTERN_OVERLAYS[background.pattern]
       : null;
 
-  const baseBg =
-    background.type === "image" && background.imageUrl
-      ? `url(${background.imageUrl})`
-      : undefined;
+  const baseBg = bgImageUrl ? `url(${bgImageUrl})` : undefined;
 
   const bgStyle: React.CSSProperties = useMemo(() => {
     return {
@@ -48,18 +62,16 @@ export function useWallpaperBackground(background: BackgroundConfig) {
   }, [
     background.color,
     background.pattern,
-    background.type,
-    background.imageUrl,
     pattern,
     baseBg,
   ]);
 
   const isLight = useMemo(() => {
-    if (background.type === "image" && background.imageUrl) {
+    if (background.type === "image" && (background.imageAssetId || bgImageUrl)) {
       return false;
     }
     return isColorLight(background.color || "#14141a");
-  }, [background.color, background.type, background.imageUrl]);
+  }, [background.color, background.type, background.imageAssetId, bgImageUrl]);
 
   return { bgStyle, isLight };
 }

@@ -1,3 +1,5 @@
+import { requestStoragePersistence, runAssetGarbageCollection } from "./lib/assets";
+import { ImageElement } from "./elements/types";
 import React, { useEffect, useRef, useState } from "react";
 import { useCanvas } from "./canvas/useCanvas";
 import { InlineTextEditor } from "./components/InlineTextEditor";
@@ -59,6 +61,24 @@ export const App: React.FC = () => {
   useEffect(() => {
     loadScenesFromStorage();
     useWidgetStore.getState().loadFromStorage();
+    requestStoragePersistence();
+
+    // Startup garbage collection: collect all referenced asset IDs across all scenes
+    setTimeout(async () => {
+      const allScenes = useSceneStore.getState().scenes;
+      const referenced = new Set<string>();
+      for (const s of allScenes) {
+        if (s.background?.type === "image" && s.background.imageAssetId) {
+          referenced.add(s.background.imageAssetId);
+        }
+        for (const el of s.elements) {
+          if (el.type === "image" && (el as ImageElement).assetId) {
+            referenced.add((el as ImageElement).assetId);
+          }
+        }
+      }
+      await runAssetGarbageCollection(referenced);
+    }, 2000);
   }, [loadScenesFromStorage]);
 
   return (

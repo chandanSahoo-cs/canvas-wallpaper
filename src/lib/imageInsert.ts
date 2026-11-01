@@ -1,96 +1,66 @@
 import { ImageElement } from "../elements/types";
 import { newId, randomSeed } from "./utils";
 import { useAppStore } from "../store/useAppStore";
+import { ingestImage } from "./assets";
 
-export function optimizeImageDataUrl(
-  img: HTMLImageElement,
-  maxDimension = 1600,
-  format: "image/webp" | "image/jpeg" | "image/png" = "image/webp",
-  quality = 0.85,
-): string {
-  const needsDownscale = img.width > maxDimension || img.height > maxDimension;
-  if (!needsDownscale && img.src.startsWith("data:image/webp")) {
-    return img.src;
-  }
-  const scale = Math.min(maxDimension / img.width, maxDimension / img.height, 1);
-  const targetW = Math.round(img.width * scale);
-  const targetH = Math.round(img.height * scale);
+/**
+ * Ingests an image File into the IndexedDB asset store and places an ImageElement
+ * onto the active canvas board.
+ */
+export async function insertImageFromFile(file: File): Promise<boolean> {
+  if (!file) return false;
 
-  const canvas = document.createElement("canvas");
-  canvas.width = targetW;
-  canvas.height = targetH;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return img.src;
-  ctx.drawImage(img, 0, 0, targetW, targetH);
   try {
-    const dataUrl = canvas.toDataURL(format, quality);
-    if (dataUrl.startsWith(`data:${format}`)) {
-      return dataUrl;
-    }
-  } catch {}
-  return canvas.toDataURL("image/png");
-}
+    const asset = await ingestImage(file, {
+      title: file.name,
+      savedAt: Date.now(),
+    });
 
-export function insertImageFromFile(file: File): Promise<boolean> {
-  return new Promise((resolve) => {
-    if (!file || !file.type.startsWith("image/")) {
-      resolve(false);
-      return;
-    }
+    const store = useAppStore.getState();
+    const maxW = Math.min(500, window.innerWidth * 0.7);
+    const maxH = Math.min(400, window.innerHeight * 0.7);
+    const scale = Math.min(maxW / asset.width, maxH / asset.height, 1);
+    const w = Math.max(20, Math.round(asset.width * scale));
+    const h = Math.max(20, Math.round(asset.height * scale));
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      const img = new Image();
-      img.onload = () => {
-        const store = useAppStore.getState();
-        const maxW = Math.min(500, window.innerWidth * 0.7);
-        const maxH = Math.min(400, window.innerHeight * 0.7);
-        const scale = Math.min(maxW / img.width, maxH / img.height, 1);
-        const w = Math.round(img.width * scale);
-        const h = Math.round(img.height * scale);
+    // Center within current zoomed/panned canvas viewport
+    const screenCenterX = window.innerWidth / 2;
+    const screenCenterY = window.innerHeight / 2;
+    const cx = Math.round(
+      screenCenterX / store.zoom + store.scrollOffset.x - w / 2,
+    );
+    const cy = Math.round(
+      screenCenterY / store.zoom + store.scrollOffset.y - h / 2,
+    );
 
-        // Center within current zoomed/panned canvas viewport
-        const screenCenterX = window.innerWidth / 2;
-        const screenCenterY = window.innerHeight / 2;
-        const cx = Math.round(
-          screenCenterX / store.zoom + store.scrollOffset.x - w / 2,
-        );
-        const cy = Math.round(
-          screenCenterY / store.zoom + store.scrollOffset.y - h / 2,
-        );
-
-        const finalDataUrl = optimizeImageDataUrl(img);
-
-        const imageEl: ImageElement = {
-          id: newId(),
-          type: "image",
-          angle: 0,
-          locked: false,
-          groupIds: [],
-          x: cx,
-          y: cy,
-          width: w,
-          height: h,
-          dataUrl: finalDataUrl,
-          strokeColor: "#1e1e1e",
-          fillColor: "transparent",
-          strokeWidth: 1.5,
-          opacity: 100,
-          seed: randomSeed(),
-        };
-
-        store.pushHistory();
-        store.setElements([...store.elements, imageEl]);
-        store.setSelectedIds(new Set([imageEl.id]));
-        store.setTool("selection");
-        store.saveToStorage();
-        resolve(true);
-      };
-      img.onerror = () => resolve(false);
-      img.src = dataUrl;
+    const imageEl: ImageElement = {
+      id: newId(),
+      type: "image",
+      angle: 0,
+      locked: false,
+      groupIds: [],
+      x: cx,
+      y: cy,
+      width: w,
+      height: h,
+      assetId: asset.id,
+      caption: file.name.replace(/\.[^/.]+$/, ""),
+      strokeColor: "#1e1e1e",
+      fillColor: "transparent",
+      strokeWidth: 1.5,
+      opacity: 100,
+      seed: randomSeed(),
     };
-    reader.onerror = () => resolve(false);
-    reader.readAsDataURL(file);
-  });
+
+    store.pushHistory();
+    store.setElements([...store.elements, imageEl]);
+    store.setSelectedIds(new Set([imageEl.id]));
+    store.setTool("selection");
+    store.saveToStorage();
+    return true;
+  } catch (err: any) {
+    console.warn("Failed to insert image:", err);
+    alert(err?.message || "Failed to import image.");
+    return false;
+  }
 }

@@ -20,7 +20,7 @@ export const ClockWidget: React.FC<ClockWidgetProps> = ({
   const isLight =
     propIsLight !== undefined
       ? propIsLight
-      : !(background?.type === "image" && background?.imageUrl) &&
+      : !(background?.type === "image" && background?.imageAssetId) &&
         isColorLight(background?.color || "#14141a");
 
   useEffect(() => {

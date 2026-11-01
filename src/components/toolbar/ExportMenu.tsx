@@ -28,11 +28,11 @@ export const ExportMenu: React.FC = () => {
     };
   }, [isOpen]);
 
-  const handleExportJson = () => {
+  const handleExportJson = async () => {
     const currentScene = useSceneStore
       .getState()
       .scenes.find((s) => s.id === useSceneStore.getState().activeSceneId);
-    exportWallpaperFile(currentScene?.name);
+    await exportWallpaperFile(currentScene?.name);
     setIsOpen(false);
   };
 

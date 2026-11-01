@@ -1,3 +1,4 @@
+import { getAssetObjectUrl } from "../lib/assets";
 import rough from "roughjs";
 import { useAppStore } from "../store/useAppStore";
 import { TextElement, ImageElement } from "../elements/types";
@@ -26,26 +27,29 @@ export async function exportWallpaperAsPng(): Promise<void> {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   // 1. Draw background
-  if (background.type === "image" && background.imageUrl) {
-    const bgImg = new Image();
-    bgImg.src = background.imageUrl;
-    await new Promise((resolve) => {
-      let settled = false;
-      const done = () => {
-        if (!settled) {
-          settled = true;
-          resolve(true);
+  if (background.type === "image" && background.imageAssetId) {
+    const bgUrl = await getAssetObjectUrl(background.imageAssetId);
+    if (bgUrl) {
+      const bgImg = new Image();
+      bgImg.src = bgUrl;
+      await new Promise((resolve) => {
+        let settled = false;
+        const done = () => {
+          if (!settled) {
+            settled = true;
+            resolve(true);
+          }
+        };
+        if (bgImg.complete) {
+          done();
+        } else {
+          bgImg.onload = done;
+          bgImg.onerror = done;
+          setTimeout(done, 3000);
         }
-      };
-      if (bgImg.complete) {
-        done();
-      } else {
-        bgImg.onload = done;
-        bgImg.onerror = done;
-        setTimeout(done, 3000);
-      }
-    });
-    ctx.drawImage(bgImg, 0, 0, width, height);
+      });
+      ctx.drawImage(bgImg, 0, 0, width, height);
+    }
   } else {
     ctx.fillStyle = background.color || "#14141a";
     ctx.fillRect(0, 0, width, height);
@@ -211,11 +215,10 @@ export async function exportWallpaperAsPng(): Promise<void> {
       }
       case "image": {
         const imgEl = el as ImageElement;
+        const imgUrl = await getAssetObjectUrl(imgEl.assetId);
+        if (!imgUrl) break;
         const img = new Image();
-        if (imgEl.dataUrl.startsWith("http")) {
-          img.crossOrigin = "anonymous";
-        }
-        img.src = imgEl.dataUrl;
+        img.src = imgUrl;
         await new Promise((resolve) => {
           let settled = false;
           const done = () => {

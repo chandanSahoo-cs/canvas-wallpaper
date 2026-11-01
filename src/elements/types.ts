@@ -75,7 +75,10 @@ export interface ImageElement extends BaseElement {
   y: number;
   width: number;
   height: number;
-  dataUrl: string;
+  assetId: string;
+  caption?: string;
+  showCaption?: boolean;
+  sourceUrl?: string;
 }
 
 export type CanvasElement =
@@ -116,6 +119,6 @@ export interface BackgroundConfig {
   type: BackgroundType;
   color: string; // solid color or fallback
   gradient?: string; // CSS gradient string
-  imageUrl?: string; // base64 data url
+  imageAssetId?: string; // Asset id in IndexedDB
   pattern?: PatternType;
 }

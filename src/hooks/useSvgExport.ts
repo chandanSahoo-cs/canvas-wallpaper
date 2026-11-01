@@ -8,8 +8,18 @@ import {
   getFontFamilyString,
 } from "../canvas/geometry";
 import { escapeXml, isColorLight } from "../lib/utils";
+import { getAsset } from "../lib/assets";
 
-export function exportWallpaperAsSvg(): void {
+async function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => resolve("");
+    reader.readAsDataURL(blob);
+  });
+}
+
+export async function exportWallpaperAsSvg(): Promise<void> {
   const { elements, background } = useAppStore.getState();
   const width = window.innerWidth;
   const height = window.innerHeight;
@@ -21,9 +31,21 @@ export function exportWallpaperAsSvg(): void {
 
   // Background
   const bgColor = escapeXml(
-    background.type === "color" ? background.color : "#14141a",
+    background.color || "#14141a",
   );
   svgParts.push(`<rect width="100%" height="100%" fill="${bgColor}" />`);
+
+  if (background.type === "image" && background.imageAssetId) {
+    const bgAsset = await getAsset(background.imageAssetId);
+    if (bgAsset && bgAsset.blob) {
+      const bgDataUrl = await blobToDataUrl(bgAsset.blob);
+      if (bgDataUrl) {
+        svgParts.push(
+          `<image width="100%" height="100%" href="${escapeXml(bgDataUrl)}" preserveAspectRatio="xMidYMid slice" />`,
+        );
+      }
+    }
+  }
 
   for (const el of elements) {
     const opacity = (el.opacity ?? 100) / 100;
@@ -53,18 +75,18 @@ export function exportWallpaperAsSvg(): void {
       }
       case "diamond": {
         const nb = normBox(el);
-        const pts = diamondPoints(nb.x, nb.y, nb.w, nb.h)
-          .map(([x, y]) => `${x},${y}`)
-          .join(" ");
-        svgParts.push(`<polygon points="${pts}" ${commonAttr} />`);
+        const pts = diamondPoints(nb.x, nb.y, nb.w, nb.h);
+        const ptStr = pts.map((p) => `${p[0]},${p[1]}`).join(" ");
+        svgParts.push(`<polygon points="${ptStr}" ${commonAttr} />`);
         break;
       }
       case "ellipse": {
-        const nb = normBox(el);
-        const cx = nb.x + nb.w / 2;
-        const cy = nb.y + nb.h / 2;
+        const rx = Math.abs(el.width) / 2;
+        const ry = Math.abs(el.height) / 2;
+        const cx = el.x + el.width / 2;
+        const cy = el.y + el.height / 2;
         svgParts.push(
-          `<ellipse cx="${cx}" cy="${cy}" rx="${nb.w / 2}" ry="${nb.h / 2}" ${commonAttr} />`,
+          `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" ${commonAttr} />`,
         );
         break;
       }
@@ -118,14 +140,9 @@ export function exportWallpaperAsSvg(): void {
       case "freedraw": {
         const pts = el.points;
         if (pts.length > 0) {
-          let d = `M ${pts[0].x} ${pts[0].y}`;
-          for (let i = 1; i < pts.length; i++) {
-            d += ` L ${pts[i].x} ${pts[i].y}`;
-          }
+          const ptStr = pts.map((p) => `${p.x},${p.y}`).join(" ");
           svgParts.push(
-            `<path d="${d}" fill="none" stroke="${strokeColor}" stroke-width="${
-              el.strokeWidth * 2
-            }" stroke-linecap="round" stroke-linejoin="round" opacity="${opacity}"${rotateAttr} />`,
+            `<polyline points="${ptStr}" fill="none" ${commonAttr} stroke-linecap="round" stroke-linejoin="round" />`,
           );
         }
         break;
@@ -134,9 +151,9 @@ export function exportWallpaperAsSvg(): void {
         const textEl = el as TextElement;
         const textStr = typeof textEl.text === "string" ? textEl.text : "";
         if (!textStr) break;
+        const lines = textStr.split("\n");
         const fontSize =
           textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
-        const lines = textStr.split("\n");
         const lineHeight = fontSize * 1.3;
 
         let textSpans = "";
@@ -158,10 +175,16 @@ export function exportWallpaperAsSvg(): void {
       }
       case "image": {
         const imgEl = el as ImageElement;
-        const safeDataUrl = escapeXml(imgEl.dataUrl);
-        svgParts.push(
-          `<image href="${safeDataUrl}" x="${imgEl.x}" y="${imgEl.y}" width="${imgEl.width}" height="${imgEl.height}" opacity="${opacity}"${rotateAttr} />`,
-        );
+        const asset = await getAsset(imgEl.assetId);
+        if (asset && asset.blob) {
+          const dataUrl = await blobToDataUrl(asset.blob);
+          if (dataUrl) {
+            const safeDataUrl = escapeXml(dataUrl);
+            svgParts.push(
+              `<image href="${safeDataUrl}" x="${imgEl.x}" y="${imgEl.y}" width="${imgEl.width}" height="${imgEl.height}" opacity="${opacity}"${rotateAttr} />`,
+            );
+          }
+        }
         break;
       }
     }
