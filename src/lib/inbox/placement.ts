@@ -1,8 +1,14 @@
 import { getAsset } from "../assets/db";
-import { CanvasElement, ImageElement, TextElement } from "../../elements/types";
+import {
+  CanvasElement,
+  ImageElement,
+  LinkElement,
+  TextElement,
+} from "../../elements/types";
 import { useAppStore } from "../../store/useAppStore";
 import { updateInboxItemState } from "./storage";
 import { InboxItem } from "./types";
+import { enrichLinkElementOnBoard } from "./ogResolver";
 
 /**
  * Returns current center of the user's viewport in canvas coordinates.
@@ -14,6 +20,44 @@ export function getViewportCenter(): { x: number; y: number } {
   return {
     x: Math.round(width / (2 * zoom) + scrollOffset.x),
     y: Math.round(height / (2 * zoom) + scrollOffset.y),
+  };
+}
+
+export function createLinkElement(
+  url: string,
+  title?: string,
+  posX: number = 0,
+  posY: number = 0,
+): LinkElement {
+  let domain = "";
+  try {
+    domain = new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    domain = url;
+  }
+
+  const width = 280;
+  const height = 80;
+  const seed = Math.floor(Math.random() * 2 ** 31);
+
+  return {
+    id: `link-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+    type: "link",
+    x: Math.round(posX - width / 2),
+    y: Math.round(posY - height / 2),
+    width,
+    height,
+    url,
+    title: title || domain || "Web Link",
+    domain,
+    strokeColor: "#0E1A1F",
+    fillColor: "#FFFFFF",
+    strokeWidth: 2,
+    strokeStyle: "solid",
+    roughness: 1.2,
+    opacity: 100,
+    locked: false,
+    seed,
   };
 }
 
@@ -94,28 +138,17 @@ export async function createBoardElementFromInboxItem(
   }
 
   if (item.kind === "link") {
-    // Phase 3 text representation; Phase 4 upgrades to LinkElement
-    const displayTitle = item.title || item.url || "Web Link";
-    const content = `🔗 ${displayTitle}\n${item.url || ""}`;
-
-    const textEl: TextElement = {
-      id: `text-link-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      type: "text",
-      x: Math.round(posX - 140),
-      y: Math.round(posY - 40),
-      text: content,
-      fontSize: 18,
-      fontFamily: "sans",
-      strokeColor: "#0E1A1F",
-      fillColor: "transparent",
-      strokeWidth: 2,
-      strokeStyle: "solid",
-      roughness: 1,
-      opacity: 100,
-      locked: false,
-      seed,
-    };
-    return textEl;
+    const linkEl = createLinkElement(
+      item.url || "https://papertab.app",
+      item.title,
+      posX,
+      posY,
+    );
+    // Best-effort OpenGraph enrichment in background
+    setTimeout(() => {
+      enrichLinkElementOnBoard(linkEl.id);
+    }, 100);
+    return linkEl;
   }
 
   return null;

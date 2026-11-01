@@ -81,6 +81,19 @@ export interface ImageElement extends BaseElement {
   sourceUrl?: string;
 }
 
+export interface LinkElement extends BaseElement {
+  type: "link";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  url: string;
+  title: string;
+  domain: string;
+  faviconAssetId?: string;
+  previewAssetId?: string;
+}
+
 export type CanvasElement =
   | RectangleElement
   | DiamondElement
@@ -89,7 +102,8 @@ export type CanvasElement =
   | ArrowElement
   | FreedrawElement
   | TextElement
-  | ImageElement;
+  | ImageElement
+  | LinkElement;
 
 export type ToolType =
   | "selection"

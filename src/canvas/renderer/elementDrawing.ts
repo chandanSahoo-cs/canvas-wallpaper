@@ -4,11 +4,13 @@ import {
   Point,
   TextElement,
   ImageElement,
+  LinkElement,
 } from "../../elements/types";
 import { roughOptions } from "../rough-cache";
 import { FONT_SIZE_MAP, getFontFamilyString } from "../geometry";
 import { useAppStore } from "../../store/useAppStore";
 import { getLodTier, getOrLoadAssetBitmap } from "../../lib/assets";
+import { getCanvasOverlayTheme } from "./canvasTheme";
 
 type RoughCanvas = ReturnType<typeof rough.canvas>;
 
@@ -91,7 +93,30 @@ export function drawText(ctx: CanvasRenderingContext2D, el: TextElement): void {
   const lines = textStr.split("\n");
   const lineHeight = fontSize * 1.25;
   for (let i = 0; i < lines.length; i++) {
-    ctx.fillText(lines[i], el.x ?? 0, (el.y ?? 0) + i * lineHeight);
+    const line = lines[i];
+    ctx.fillText(line, el.x ?? 0, (el.y ?? 0) + i * lineHeight);
+
+    // Text quotes requirement: source underlined as a link
+    const trimmed = line.trim();
+    if (
+      trimmed.startsWith("— http") ||
+      trimmed.startsWith("— www") ||
+      trimmed.includes("http://") ||
+      trimmed.includes("https://") ||
+      (trimmed.startsWith("— ") && i === lines.length - 1)
+    ) {
+      const metrics = ctx.measureText(line);
+      const startX = el.x ?? 0;
+      const underlineY = (el.y ?? 0) + i * lineHeight + fontSize + 2;
+      ctx.save();
+      ctx.strokeStyle = el.strokeColor || "#46BAEB";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(startX, underlineY);
+      ctx.lineTo(startX + metrics.width, underlineY);
+      ctx.stroke();
+      ctx.restore();
+    }
   }
 }
 
@@ -202,6 +227,128 @@ function drawUnavailablePlaceholder(
     ctx.textBaseline = "middle";
     ctx.fillText("Image unavailable", x + w / 2, y + h / 2);
   }
+
+  ctx.restore();
+}
+
+export function drawLinkCard(
+  ctx: CanvasRenderingContext2D,
+  rc: RoughCanvas,
+  el: LinkElement,
+  zoom: number = 1,
+  onNeedRender?: () => void,
+): void {
+  const theme = getCanvasOverlayTheme();
+  const bx = Math.min(el.x, el.x + el.width);
+  const by = Math.min(el.y, el.y + el.height);
+  const bw = Math.abs(el.width);
+  const bh = Math.abs(el.height);
+
+  ctx.save();
+
+  // 1. Hard offset drop shadow (3px 3px 0 <line>)
+  ctx.fillStyle = theme.line;
+  ctx.fillRect(bx + 3, by + 3, bw, bh);
+
+  // 2. Card background fill
+  const cardBg =
+    el.fillColor && el.fillColor !== "transparent"
+      ? el.fillColor
+      : theme.surface;
+  ctx.fillStyle = cardBg;
+  ctx.fillRect(bx, by, bw, bh);
+
+  // 3. Hand-drawn rough border around card
+  rc.rectangle(bx, by, bw, bh, {
+    roughness: el.roughness ?? 1.2,
+    stroke: el.strokeColor || theme.line,
+    strokeWidth: el.strokeWidth || 2,
+    seed: el.seed,
+  });
+
+  let contentTop = by + 12;
+
+  // 4. Optional preview image banner if previewAssetId exists
+  if (el.previewAssetId) {
+    const previewH = Math.min(bh - 54, 90);
+    const tier = getLodTier(bw - 8, previewH, zoom);
+    const result = getOrLoadAssetBitmap(el.previewAssetId, tier, onNeedRender);
+    if (result.status === "ready" && result.bitmap) {
+      try {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(bx + 4, by + 4, bw - 8, previewH);
+        ctx.clip();
+        ctx.drawImage(result.bitmap, bx + 4, by + 4, bw - 8, previewH);
+        ctx.restore();
+
+        // Divider line below preview image
+        rc.line(bx, by + previewH + 4, bx + bw, by + previewH + 4, {
+          roughness: 1.0,
+          stroke: theme.line,
+          strokeWidth: 1.5,
+          seed: el.seed + 1,
+        });
+        contentTop = by + previewH + 12;
+      } catch {}
+    }
+  }
+
+  // 5. Favicon or link icon
+  const iconSize = 16;
+  const iconX = bx + 12;
+  const iconY = contentTop + 2;
+
+  let hasCustomFavicon = false;
+  if (el.faviconAssetId) {
+    const favResult = getOrLoadAssetBitmap(el.faviconAssetId, "thumb", onNeedRender);
+    if (favResult.status === "ready" && favResult.bitmap) {
+      try {
+        ctx.drawImage(favResult.bitmap, iconX, iconY, iconSize, iconSize);
+        hasCustomFavicon = true;
+      } catch {}
+    }
+  }
+
+  if (!hasCustomFavicon) {
+    // Hand-drawn link glyph
+    ctx.font = "14px system-ui, sans-serif";
+    ctx.fillStyle = theme.blue;
+    ctx.textBaseline = "middle";
+    ctx.fillText("🔗", iconX, iconY + iconSize / 2);
+  }
+
+  // 6. External link arrow on top-right: ↗
+  ctx.font = "13px system-ui, sans-serif";
+  ctx.fillStyle = theme.muted;
+  ctx.textAlign = "right";
+  ctx.textBaseline = "top";
+  ctx.fillText("↗", bx + bw - 10, contentTop);
+
+  // 7. Title (Excalifont, truncated)
+  const textX = iconX + iconSize + 8;
+  const maxTitleW = bw - (iconSize + 36);
+
+  ctx.font = "bold 13px Excalifont, system-ui, sans-serif";
+  ctx.fillStyle = theme.ink;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "top";
+
+  let titleStr = el.title || el.domain || "Web Link";
+  if (ctx.measureText(titleStr).width > maxTitleW) {
+    while (titleStr.length > 3 && ctx.measureText(titleStr + "...").width > maxTitleW) {
+      titleStr = titleStr.slice(0, -1);
+    }
+    titleStr += "...";
+  }
+  ctx.fillText(titleStr, textX, contentTop);
+
+  // 8. Domain line (system font, muted)
+  ctx.font = "11px system-ui, -apple-system, sans-serif";
+  ctx.fillStyle = theme.blue;
+  ctx.textBaseline = "top";
+  const domainY = contentTop + 18;
+  ctx.fillText(el.domain || "link", textX, domainY);
 
   ctx.restore();
 }

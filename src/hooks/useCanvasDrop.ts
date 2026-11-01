@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import { ALLOWED_IMAGE_MIME_TYPES, ingestImage } from "../lib/assets";
 import { ImageElement } from "../elements/types";
 import { useAppStore } from "../store/useAppStore";
-import { placeInboxItemOnBoard } from "../lib/inbox/placement";
+import { createLinkElement, placeInboxItemOnBoard } from "../lib/inbox/placement";
+import { enrichLinkElementOnBoard } from "../lib/inbox/ogResolver";
+import { validateHttpUrl } from "../lib/inbox/validation";
 
 interface UseCanvasDropOptions {
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
@@ -144,8 +146,9 @@ export function useCanvasDrop({ canvasRef }: UseCanvasDropOptions) {
         return;
       }
 
-      // Path B: External dragged image from another tab (URL / HTML)
-      let externalUrl = dt.getData("text/uri-list")?.trim();
+      // Path B: Dragged URL or image from another tab
+      let externalUrl =
+        dt.getData("text/uri-list")?.trim() || dt.getData("text/plain")?.trim();
       if (!externalUrl) {
         const html = dt.getData("text/html");
         if (html) {
@@ -156,10 +159,24 @@ export function useCanvasDrop({ canvasRef }: UseCanvasDropOptions) {
         }
       }
 
-      if (
-        externalUrl &&
-        (externalUrl.startsWith("http://") || externalUrl.startsWith("https://"))
-      ) {
+      if (externalUrl && validateHttpUrl(externalUrl)) {
+        const isDirectImage = /\.(jpe?g|png|webp|gif|avif)($|\?)/i.test(externalUrl);
+
+        if (!isDirectImage) {
+          // Drop web page URL -> create LinkElement card
+          const linkEl = createLinkElement(externalUrl, undefined, dropX, dropY);
+          const state = useAppStore.getState();
+          state.pushHistory();
+          state.setElements([...state.elements, linkEl]);
+          state.setSelectedIds(new Set([linkEl.id]));
+          state.setTool("selection");
+          if (state.mode === "wallpaper") {
+            state.setMode("drawing");
+          }
+          setTimeout(() => enrichLinkElementOnBoard(linkEl.id), 100);
+          return;
+        }
+
         try {
           const res = await fetch(externalUrl);
           if (!res.ok) {
@@ -170,7 +187,8 @@ export function useCanvasDrop({ canvasRef }: UseCanvasDropOptions) {
             throw new Error(`Unsupported image type: ${blob.type}`);
           }
 
-          const filename = externalUrl.split("/").pop()?.split("?")[0] || "Web Image";
+          const filename =
+            externalUrl.split("/").pop()?.split("?")[0] || "Web Image";
           const asset = await ingestImage(blob, {
             url: externalUrl,
             title: filename,
@@ -219,10 +237,17 @@ export function useCanvasDrop({ canvasRef }: UseCanvasDropOptions) {
             state.setMode("drawing");
           }
         } catch (err) {
-          console.warn("Could not import external image:", err);
-          alert(
-            "Could not load image directly from external website (CORS / origin restriction). Please save the image file and drop it instead.",
-          );
+          // Graceful fallback to LinkElement card if direct image fetch fails (CORS)
+          const linkEl = createLinkElement(externalUrl, undefined, dropX, dropY);
+          const state = useAppStore.getState();
+          state.pushHistory();
+          state.setElements([...state.elements, linkEl]);
+          state.setSelectedIds(new Set([linkEl.id]));
+          state.setTool("selection");
+          if (state.mode === "wallpaper") {
+            state.setMode("drawing");
+          }
+          setTimeout(() => enrichLinkElementOnBoard(linkEl.id), 100);
         }
       }
     };

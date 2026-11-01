@@ -4,6 +4,9 @@ import { ImageElement, TextElement } from "../elements/types";
 import { newId, randomSeed } from "../lib/utils";
 import { ingestImage } from "../lib/assets";
 import { FONT_SIZE_MAP } from "../canvas/geometry";
+import { createLinkElement } from "../lib/inbox/placement";
+import { enrichLinkElementOnBoard } from "../lib/inbox/ogResolver";
+import { validateHttpUrl } from "../lib/inbox/validation";
 
 function isInputElement(target: EventTarget | null): boolean {
   const el = target as HTMLElement | null;
@@ -133,18 +136,30 @@ export function useCanvasPaste() {
         return;
       }
 
-      // 3. Check for plain text to paste as a new TextElement
+      // 3. Check for URLs to paste as a LinkElement card, or plain text as TextElement
       if (text && text.trim()) {
         e.preventDefault();
+        const trimmed = text.trim();
         const store = useAppStore.getState();
         const screenCenterX = window.innerWidth / 2;
         const screenCenterY = window.innerHeight / 2;
         const cx = Math.round(
-          screenCenterX / store.zoom + store.scrollOffset.x - 50,
+          screenCenterX / store.zoom + store.scrollOffset.x,
         );
         const cy = Math.round(
-          screenCenterY / store.zoom + store.scrollOffset.y - 15,
+          screenCenterY / store.zoom + store.scrollOffset.y,
         );
+
+        if (validateHttpUrl(trimmed)) {
+          const linkEl = createLinkElement(trimmed, undefined, cx, cy);
+          pushHistory();
+          setElements([...useAppStore.getState().elements, linkEl]);
+          setSelectedIds(new Set([linkEl.id]));
+          setTool("selection");
+          saveToStorage();
+          setTimeout(() => enrichLinkElementOnBoard(linkEl.id), 100);
+          return;
+        }
 
         const textEl: TextElement = {
           id: newId(),
@@ -152,8 +167,8 @@ export function useCanvasPaste() {
           angle: 0,
           locked: false,
           groupIds: [],
-          x: cx,
-          y: cy,
+          x: cx - 50,
+          y: cy - 15,
           text: text.slice(0, 10000),
           fontSize: FONT_SIZE_MAP[store.currentStrokeWidth] || 20,
           fontFamily: store.currentFontFamily || "handwritten",

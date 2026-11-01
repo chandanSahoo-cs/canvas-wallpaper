@@ -1,6 +1,6 @@
 import rough from "roughjs";
 import { useAppStore } from "../store/useAppStore";
-import { CanvasElement, Point } from "../elements/types";
+import { CanvasElement, LinkElement, Point } from "../elements/types";
 import { getCenter, getScreenBBox, RotationOverlay } from "./geometry";
 import { getRoughDrawable, roughOptions } from "./rough-cache";
 import {
@@ -8,6 +8,7 @@ import {
   drawFreedraw,
   drawText,
   drawImage,
+  drawLinkCard,
 } from "./renderer/elementDrawing";
 import {
   drawLockBadge,
@@ -178,6 +179,10 @@ export class CanvasRenderer {
       }
       case "image": {
         drawImage(this.ctx, el, zoom, this.onNeedRender);
+        break;
+      }
+      case "link": {
+        drawLinkCard(this.ctx, this.rc, el as LinkElement, zoom, this.onNeedRender);
         break;
       }
     }

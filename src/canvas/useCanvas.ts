@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Point, TextElement, ToolType } from "../elements/types";
+import { LinkElement, Point, TextElement, ToolType } from "../elements/types";
 import { useAppStore } from "../store/useAppStore";
 import { EraserTool } from "../tools/EraserTool";
 import { FreedrawTool } from "../tools/FreedrawTool";
@@ -116,6 +116,25 @@ export function useCanvas(
 
       const rawPos = { x: e.clientX, y: e.clientY };
       const pos = screenToCanvas(e.clientX, e.clientY);
+
+      // Ctrl/Cmd + Click on LinkElement opens URL in new tab (http/https only)
+      if ((e.ctrlKey || e.metaKey) && e.button === 0) {
+        const hitEl = [...state.elements].reverse().find((el) => {
+          if (el.type !== "link") return false;
+          const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
+          return elementContains(el, local);
+        }) as LinkElement | undefined;
+
+        if (
+          hitEl &&
+          hitEl.url &&
+          (hitEl.url.startsWith("http://") || hitEl.url.startsWith("https://"))
+        ) {
+          window.open(hitEl.url, "_blank", "noopener,noreferrer");
+          return;
+        }
+      }
+
       const tool = tools[state.currentTool];
       if (tool) {
         tool.onPointerDown({ pos, rawPos, e, canvas: canvas! });
