@@ -5,6 +5,7 @@ import { Scene, useSceneStore } from "../../store/useSceneStore";
 import { SCHEMA_VERSION } from "../scenes/storage";
 import { ZipWriter } from "./zipWriter";
 import { BackupManifest } from "./types";
+import { recordBackupCompleted } from "../storage/health";
 
 export interface ExportProgress {
   phase: "collecting" | "assets" | "compressing" | "saving";
@@ -183,6 +184,7 @@ export async function exportEverything(
       const writable = await handle.createWritable();
       await writable.write(blob);
       await writable.close();
+      recordBackupCompleted();
       return { success: true, filename: handle.name || suggestedFilename };
     } catch (err: any) {
       if (err.name === "AbortError") {
@@ -202,5 +204,6 @@ export async function exportEverything(
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 3000);
 
+  recordBackupCompleted();
   return { success: true, filename: suggestedFilename };
 }

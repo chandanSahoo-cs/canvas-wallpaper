@@ -1110,6 +1110,44 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   assert(inspectionResult.assetCount === 1, "inspectBackupZip detects 1 asset");
   assert(inspectionResult.fileCount === 4, "inspectBackupZip detects 4 total entries");
 
+  // --- SECTION 24: Storage Health, Diagnostics & Backup Nudge (Phase 4) ---
+  console.log("\n--- SECTION 24: Storage Health, Diagnostics & Backup Nudge (Phase 4) ---");
+  const {
+    LAST_BACKUP_KEY,
+    BACKUP_NUDGE_DISMISSED_KEY,
+    getLastBackupTimestamp,
+    recordBackupCompleted,
+    dismissBackupNudge,
+    shouldShowBackupNudge,
+  } = jiti('../src/lib/storage/health.ts');
+
+  // Test Backup Nudge state machine
+  localStorage.removeItem(LAST_BACKUP_KEY);
+  localStorage.removeItem(BACKUP_NUDGE_DISMISSED_KEY);
+
+  assert(getLastBackupTimestamp() === null, "Initial backup timestamp is null");
+  assert(shouldShowBackupNudge().show === false, "Does not show nudge when no backup recorded yet");
+
+  // Recent backup (today)
+  recordBackupCompleted();
+  assert(typeof getLastBackupTimestamp() === "number", "recordBackupCompleted saves timestamp");
+  assert(shouldShowBackupNudge().show === false, "Does not show nudge on recent backup");
+
+  // Backup 14 days ago
+  const fourteenDaysAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  localStorage.setItem(LAST_BACKUP_KEY, fourteenDaysAgo.toString());
+  const nudge14 = shouldShowBackupNudge();
+  assert(nudge14.show === true, "Shows backup nudge when last backup was 14 days ago");
+  assert(nudge14.daysSinceBackup === 14, "Nudge correctly calculates 14 days since backup");
+
+  // Dismissing the nudge suppresses it for 7 days
+  dismissBackupNudge();
+  assert(shouldShowBackupNudge().show === false, "Dismissing nudge suppresses reminder");
+
+  // Reset keys
+  localStorage.removeItem(LAST_BACKUP_KEY);
+  localStorage.removeItem(BACKUP_NUDGE_DISMISSED_KEY);
+
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 
   if (failed > 0) {

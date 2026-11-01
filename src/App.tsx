@@ -17,6 +17,8 @@ import { OnboardingTour } from "./components/OnboardingTour";
 import { PresetGalleryDialog } from "./components/PresetGalleryDialog";
 import { LibraryModal } from "./components/library/LibraryModal";
 import { LightboxModal } from "./components/lightbox/LightboxModal";
+import { BackupModal } from "./components/backup/BackupModal";
+import { BackupNudgeBanner } from "./components/backup/BackupNudgeBanner";
 import { InboxTray } from "./components/inbox/InboxTray";
 import { useAppStore } from "./store/useAppStore";
 import { useSceneStore } from "./store/useSceneStore";
@@ -38,6 +40,7 @@ export const App: React.FC = () => {
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isBackupOpen, setIsBackupOpen] = useState(false);
 
   // Store bindings
   const mode = useAppStore((s) => s.mode);
@@ -249,6 +252,15 @@ export const App: React.FC = () => {
       <LibraryModal />
       <LightboxModal />
       <OnboardingTour />
+
+      {/* Backup & Restore Modal */}
+      <BackupModal
+        isOpen={isBackupOpen}
+        onClose={() => setIsBackupOpen(false)}
+      />
+
+      {/* Non-Annoying Backup Reminder Banner */}
+      <BackupNudgeBanner onOpenBackup={() => setIsBackupOpen(true)} />
 
       {/* Idle Metadata Backfill Progress */} 
       <BackfillProgressIndicator />

@@ -19,9 +19,11 @@ import {
   Shuffle,
   Trash2,
   Archive,
+  HardDrive,
 } from "lucide-react";
 import { useResurfaceStore } from "../lib/resurface/store";
 import { BackupModal } from "../components/backup/BackupModal";
+import { StorageHealthModal } from "../components/storage/StorageHealthModal";
 import {
   requestHostPermission,
   removeHostPermission,
@@ -50,6 +52,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   const [indexRebuiltMessage, setIndexRebuiltMessage] = useState(false);
   const [hasCapturePermission, setHasCapturePermission] = useState(false);
   const [isBackupOpen, setIsBackupOpen] = useState(false);
+  const [isHealthOpen, setIsHealthOpen] = useState(false);
 
   useEffect(() => {
     return subscribeHostPermission(setHasCapturePermission);
@@ -610,6 +613,25 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
             </button>
           </div>
 
+          {/* Storage Health & Diagnostics */}
+          <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
+            <div className="flex items-center gap-2.5">
+              <HardDrive className="w-4 h-4 text-brand-blue" />
+              <div>
+                <div className="text-sm font-hand font-bold text-ink">Storage Health</div>
+                <div className="text-xs font-sans text-muted">
+                  Quota analytics, largest items, orphan cleanup & integrity
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => setIsHealthOpen(true)}
+              className="py-1.5 px-3 rounded-sk bg-paper hover:bg-surface text-ink font-hand font-bold text-xs border-2 border-line shadow-hard-sm active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
+            >
+              Inspect
+            </button>
+          </div>
+
           {/* Feature Walkthrough Tour */}
           <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
             <div className="flex items-center gap-2.5">
@@ -658,6 +680,15 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
       <BackupModal
         isOpen={isBackupOpen}
         onClose={() => setIsBackupOpen(false)}
+      />
+
+      <StorageHealthModal
+        isOpen={isHealthOpen}
+        onClose={() => setIsHealthOpen(false)}
+        onOpenBackup={() => {
+          setIsHealthOpen(false);
+          setIsBackupOpen(true);
+        }}
       />
     </div>
   );
