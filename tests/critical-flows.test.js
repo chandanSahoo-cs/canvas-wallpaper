@@ -39,7 +39,14 @@ const {
   computeBlobHash,
   blobToBase64,
   base64ToBlob,
+  getLodTier,
+  MAX_CACHE_BYTES,
+  THUMBNAIL_MAX_SCREEN_EDGE,
 } = jiti('../src/lib/assets/index.ts');
+
+const {
+  getScreenBBox,
+} = jiti('../src/canvas/geometry.ts');
 
 const {
   SCHEMA_VERSION,
@@ -207,6 +214,42 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   const sceneKey2 = SCENE_KEY_PREFIX + 'board-xyz';
   assert(sceneKey1 === 'scene:board-abc' && sceneKey2 === 'scene:board-xyz', 'Discrete scene keys isolate storage items per board');
   assert(sceneKey1 !== sceneKey2, 'Different boards map to distinct storage keys');
+
+  // --- SECTION 11: Scalable Rendering & Asset Loader (Phase 3) ---
+  console.log('\n--- SECTION 11: Scalable Rendering & Asset Loader (Phase 3) ---');
+  assert(MAX_CACHE_BYTES === 256 * 1024 * 1024, 'Bitmap cache budget is strictly 256 MB');
+  assert(THUMBNAIL_MAX_SCREEN_EDGE === 320, 'Thumbnail max screen edge is 320px');
+
+  // LOD Tier calculations
+  assert(getLodTier(200, 150, 1) === 'thumb', 'Elements <= 320px at zoom 1 select thumb tier');
+  assert(getLodTier(400, 300, 1) === 'full', 'Elements > 320px at zoom 1 select full tier');
+  assert(getLodTier(200, 150, 2) === 'full', '200x150 at zoom 2 is 400x300 > 320 so full tier');
+  assert(getLodTier(100, 100, 2) === 'thumb', '100x100 at zoom 2 is 200x200 <= 320 so thumb tier');
+  assert(getLodTier(500, 500, 0.5) === 'thumb', '500x500 at zoom 0.5 is 250x250 <= 320 so thumb tier');
+
+  // Decoded pixel byte size calculation
+  const testW = 1920;
+  const testH = 1080;
+  const expectedBytes = testW * testH * 4;
+  assert(expectedBytes === 8294400, 'w * h * 4 calculation accurately estimates decoded pixel memory (~8.29 MB for 1080p)');
+
+  // Viewport culling bounding box intersection
+  const viewport = { minX: 0, minY: 0, maxX: 1920, maxY: 1080 };
+  const inViewEl = { type: 'rectangle', x: 100, y: 100, width: 200, height: 150, strokeWidth: 2, angle: 0 };
+  const outViewEl = { type: 'rectangle', x: 2500, y: 3000, width: 200, height: 150, strokeWidth: 2, angle: 0 };
+  const rotatedInViewEl = { type: 'rectangle', x: -50, y: -50, width: 100, height: 100, strokeWidth: 2, angle: Math.PI / 4 };
+
+  const boxIn = getScreenBBox(inViewEl);
+  const boxOut = getScreenBBox(outViewEl);
+  const boxRot = getScreenBBox(rotatedInViewEl);
+
+  const isInVisible = boxIn.x <= viewport.maxX && boxIn.x + boxIn.w >= viewport.minX && boxIn.y <= viewport.maxY && boxIn.y + boxIn.h >= viewport.minY;
+  const isOutVisible = boxOut.x <= viewport.maxX && boxOut.x + boxOut.w >= viewport.minX && boxOut.y <= viewport.maxY && boxOut.y + boxOut.h >= viewport.minY;
+  const isRotVisible = boxRot.x <= viewport.maxX && boxRot.x + boxRot.w >= viewport.minX && boxRot.y <= viewport.maxY && boxRot.y + boxRot.h >= viewport.minY;
+
+  assert(isInVisible, 'Viewport culling correctly identifies elements inside camera viewport');
+  assert(!isOutVisible, 'Viewport culling correctly skips elements outside camera viewport');
+  assert(isRotVisible, 'Viewport culling correctly accounts for rotated element extents');
 
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 

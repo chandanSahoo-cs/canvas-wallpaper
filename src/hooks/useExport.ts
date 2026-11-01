@@ -1,4 +1,4 @@
-import { getAssetObjectUrl } from "../lib/assets";
+import { loadFullImageBitmap } from "../lib/assets";
 import rough from "roughjs";
 import { useAppStore } from "../store/useAppStore";
 import { TextElement, ImageElement } from "../elements/types";
@@ -28,27 +28,9 @@ export async function exportWallpaperAsPng(): Promise<void> {
 
   // 1. Draw background
   if (background.type === "image" && background.imageAssetId) {
-    const bgUrl = await getAssetObjectUrl(background.imageAssetId);
-    if (bgUrl) {
-      const bgImg = new Image();
-      bgImg.src = bgUrl;
-      await new Promise((resolve) => {
-        let settled = false;
-        const done = () => {
-          if (!settled) {
-            settled = true;
-            resolve(true);
-          }
-        };
-        if (bgImg.complete) {
-          done();
-        } else {
-          bgImg.onload = done;
-          bgImg.onerror = done;
-          setTimeout(done, 3000);
-        }
-      });
-      ctx.drawImage(bgImg, 0, 0, width, height);
+    const bgBitmap = await loadFullImageBitmap(background.imageAssetId);
+    if (bgBitmap) {
+      ctx.drawImage(bgBitmap, 0, 0, width, height);
     }
   } else {
     ctx.fillStyle = background.color || "#14141a";
@@ -100,7 +82,7 @@ export async function exportWallpaperAsPng(): Promise<void> {
     ctx.restore();
   }
 
-  // 2. Draw elements
+  // 2. Draw elements in order (full resolution images, bypassing LOD)
   const rc = rough.canvas(offscreen);
 
   for (const el of elements) {
@@ -215,32 +197,14 @@ export async function exportWallpaperAsPng(): Promise<void> {
       }
       case "image": {
         const imgEl = el as ImageElement;
-        const imgUrl = await getAssetObjectUrl(imgEl.assetId);
-        if (!imgUrl) break;
-        const img = new Image();
-        img.src = imgUrl;
-        await new Promise((resolve) => {
-          let settled = false;
-          const done = () => {
-            if (!settled) {
-              settled = true;
-              resolve(true);
-            }
-          };
-          if (img.complete) {
-            done();
-          } else {
-            img.onload = done;
-            img.onerror = done;
-            setTimeout(done, 3000);
+        if (!imgEl.assetId) break;
+        try {
+          const bitmap = await loadFullImageBitmap(imgEl.assetId);
+          if (bitmap) {
+            ctx.drawImage(bitmap, imgEl.x, imgEl.y, imgEl.width, imgEl.height);
           }
-        });
-        if (img.naturalWidth > 0) {
-          try {
-            ctx.drawImage(img, imgEl.x, imgEl.y, imgEl.width, imgEl.height);
-          } catch (e) {
-            console.warn("Could not draw image to export canvas:", e);
-          }
+        } catch (e) {
+          console.warn("Could not draw image to export canvas:", e);
         }
         break;
       }

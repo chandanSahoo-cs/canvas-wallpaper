@@ -23,6 +23,7 @@ import { ToolType } from "../elements/types";
 import { cn } from "../lib/utils";
 import { ExportMenu } from "./toolbar/ExportMenu";
 import { ZoomControls } from "./toolbar/ZoomControls";
+import { StressTestButton } from "./toolbar/StressTestButton";
 
 interface ToolbarProps {
   onOpenShortcuts?: () => void;
@@ -193,6 +194,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
       {/* Cluster 3: Utilities + Done */}
       <div className="flex items-center gap-0.5">
         <ExportMenu />
+        <StressTestButton />
 
         {/* Keyboard Shortcuts */}
         {onOpenShortcuts && (
