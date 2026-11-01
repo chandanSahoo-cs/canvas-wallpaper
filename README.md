@@ -18,6 +18,8 @@ PaperTab brings an Excalidraw-inspired sketching canvas directly to your New Tab
 - **Export & Import**: Export artwork as high-resolution PNG or vector SVG, or backup/restore entire scenes as `.canvaswallpaper` files.
 - **Local-First & Private**: No tracking, no user accounts, no telemetry. Your drawings, scenes, and preferences are stored strictly on your local device.
 
+For design guidelines and UI token specifications, see [DESIGN.md](DESIGN.md).
+
 ---
 
 ## Installation

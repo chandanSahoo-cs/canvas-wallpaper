@@ -91,10 +91,10 @@ assert(ORIGINAL_PRESET_CENTER.x === 733.27 && ORIGINAL_PRESET_CENTER.y === 387.2
 const shiftedPreset = getDefaultWallpaperElements(1920, 1080);
 assert(shiftedPreset.length === 251, 'getDefaultWallpaperElements retains element count');
 
-// 4. Multiple Wallpaper Presets Catalog
-assert(Array.isArray(WALLPAPER_PRESETS) && WALLPAPER_PRESETS.length === 5, 'WALLPAPER_PRESETS provides exactly 5 presets');
+// 4. Wallpaper Presets Catalog
+assert(Array.isArray(WALLPAPER_PRESETS) && WALLPAPER_PRESETS.length === 1, 'WALLPAPER_PRESETS provides signature preset');
 for (const p of WALLPAPER_PRESETS) {
-  assert(Boolean(p.id && p.title && p.description && p.category && p.background), `Preset ${p.id} has complete metadata`);
+  assert(Boolean(p.id && p.title && p.description && p.badge && p.background), `Preset ${p.id} has complete metadata`);
   const elements = p.getElements(1920, 1080);
   assert(Array.isArray(elements) && elements.length > 0, `Preset ${p.id} returns non-empty elements array (${elements.length} elements)`);
   const hasInvalidCoords = elements.some(el => {

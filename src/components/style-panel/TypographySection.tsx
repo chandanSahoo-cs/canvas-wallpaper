@@ -32,47 +32,53 @@ export const TypographySection: React.FC<TypographySectionProps> = ({
     <>
       {/* Font Family */}
       <div>
-        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+        <div className="text-xs font-hand font-bold text-muted mb-1.5">
           Font
         </div>
         <div className="grid grid-cols-3 gap-1">
-          {FONT_FAMILIES.map((f) => (
-            <button
-              key={f.id}
-              onClick={() => onFontFamilyChange(f.id)}
-              className={cn(
-                "py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95 cursor-pointer",
-                activeFontFamily === f.id
-                  ? "bg-neutral-900 border-neutral-900 text-white"
-                  : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
-              )}
-            >
-              {f.label}
-            </button>
-          ))}
+          {FONT_FAMILIES.map((f) => {
+            const isSelected = activeFontFamily === f.id;
+            return (
+              <button
+                key={f.id}
+                onClick={() => onFontFamilyChange(f.id)}
+                className={cn(
+                  "py-1 rounded-sk border-2 text-[11px] font-hand transition-all cursor-pointer",
+                  isSelected
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm font-bold"
+                    : "bg-paper text-ink border-transparent hover:border-line/30",
+                )}
+              >
+                {f.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
       {/* Font Size */}
       <div>
-        <div className="text-[11px] font-medium text-neutral-500 mb-1.5">
+        <div className="text-xs font-hand font-bold text-muted mb-1.5">
           Size
         </div>
         <div className="grid grid-cols-4 gap-1">
-          {FONT_SIZES.map((s) => (
-            <button
-              key={s.size}
-              onClick={() => onFontSizeChange(s.size)}
-              className={cn(
-                "py-1 rounded-lg border text-[11px] font-medium transition-all active:scale-95 cursor-pointer",
-                activeFontSize === s.size
-                  ? "bg-neutral-900 border-neutral-900 text-white"
-                  : "border-neutral-200 hover:bg-neutral-50 text-neutral-600",
-              )}
-            >
-              {s.label}
-            </button>
-          ))}
+          {FONT_SIZES.map((s) => {
+            const isSelected = activeFontSize === s.size;
+            return (
+              <button
+                key={s.size}
+                onClick={() => onFontSizeChange(s.size)}
+                className={cn(
+                  "py-1 rounded-sk border-2 text-[11px] font-hand transition-all cursor-pointer",
+                  isSelected
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm font-bold"
+                    : "bg-paper text-ink border-transparent hover:border-line/30",
+                )}
+              >
+                {s.label}
+              </button>
+            );
+          })}
         </div>
       </div>
     </>

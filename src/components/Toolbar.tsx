@@ -107,31 +107,34 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
   return (
     <div
       id="tour-toolbar"
-      className="fixed top-4 left-1/2 -translate-x-1/2 z-30 bg-white/95 backdrop-blur-xl border border-neutral-200/80 shadow-xl rounded-2xl p-1.5 flex items-center gap-1 select-none"
+      className="fixed top-4 left-1/2 -translate-x-1/2 z-30 bg-surface border-2 border-line shadow-hard rounded-sk-lg p-1.5 flex items-center gap-1 select-none"
     >
       {/* Cluster 1: Primary Tools */}
       <div className="flex items-center gap-0.5">
-        {TOOLS.map((t) => (
-          <button
-            key={t.id}
-            title={`${t.label} (${t.shortcut})`}
-            onClick={() => setTool(t.id)}
-            className={cn(
-              "w-8.5 h-8.5 rounded-xl flex items-center justify-center transition-all duration-150 cursor-pointer",
-              currentTool === t.id
-                ? "bg-neutral-900 text-white shadow-sm"
-                : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 active:scale-95",
-            )}
-          >
-            {t.icon}
-          </button>
-        ))}
+        {TOOLS.map((t) => {
+          const isSelected = currentTool === t.id;
+          return (
+            <button
+              key={t.id}
+              title={`${t.label} (${t.shortcut})`}
+              onClick={() => setTool(t.id)}
+              className={cn(
+                "w-8 h-8 rounded-sk flex items-center justify-center transition-all duration-150 cursor-pointer",
+                isSelected
+                  ? "bg-brand-blue text-on-accent border-2 border-line shadow-hard-sm active-tilt z-10"
+                  : "text-ink hover:bg-paper hover:border-line/40 border-2 border-transparent active:translate-x-[1px] active:translate-y-[1px]",
+              )}
+            >
+              {t.icon}
+            </button>
+          );
+        })}
 
         {/* Insert Image Button */}
         <button
           title="Insert Image (or paste with Ctrl+V)"
           onClick={() => imageInputRef.current?.click()}
-          className="w-8.5 h-8.5 rounded-xl flex items-center justify-center text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 active:scale-95 transition-all duration-150 cursor-pointer"
+          className="w-8 h-8 rounded-sk flex items-center justify-center text-ink hover:bg-paper hover:border-line/40 border-2 border-transparent active:translate-x-[1px] active:translate-y-[1px] transition-all duration-150 cursor-pointer"
         >
           <ImageIcon className="w-4 h-4" />
         </button>
@@ -151,7 +154,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
         />
       </div>
 
-      <div className="w-px h-5 bg-neutral-200 mx-1 shrink-0" />
+      <div className="w-px h-5 bg-line/20 mx-1 shrink-0" />
 
       {/* Cluster 2: History (Undo/Redo) & Zoom */}
       <div className="flex items-center gap-0.5">
@@ -160,10 +163,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
           disabled={history.length === 0}
           onClick={undo}
           className={cn(
-            "w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150",
+            "w-8 h-8 rounded-sk flex items-center justify-center transition-all duration-150 border-2 border-transparent",
             history.length === 0
-              ? "opacity-25 cursor-not-allowed text-neutral-400"
-              : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 active:scale-95 cursor-pointer",
+              ? "opacity-30 cursor-not-allowed text-muted"
+              : "text-ink hover:bg-paper hover:border-line/30 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer",
           )}
         >
           <Undo2 className="w-4 h-4" />
@@ -173,10 +176,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
           disabled={future.length === 0}
           onClick={redo}
           className={cn(
-            "w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150",
+            "w-8 h-8 rounded-sk flex items-center justify-center transition-all duration-150 border-2 border-transparent",
             future.length === 0
-              ? "opacity-25 cursor-not-allowed text-neutral-400"
-              : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-900 active:scale-95 cursor-pointer",
+              ? "opacity-30 cursor-not-allowed text-muted"
+              : "text-ink hover:bg-paper hover:border-line/30 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer",
           )}
         >
           <Redo2 className="w-4 h-4" />
@@ -185,18 +188,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
         <ZoomControls />
       </div>
 
-      <div className="w-px h-5 bg-neutral-200 mx-1 shrink-0" />
+      <div className="w-px h-5 bg-line/20 mx-1 shrink-0" />
 
       {/* Cluster 3: Utilities + Done */}
       <div className="flex items-center gap-0.5">
         <ExportMenu />
 
-        {/* Keyboard Shortcuts — utility, visually secondary */}
+        {/* Keyboard Shortcuts */}
         {onOpenShortcuts && (
           <button
             title="Keyboard Shortcuts (?)"
             onClick={onOpenShortcuts}
-            className="w-8 h-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-all duration-150 active:scale-95 cursor-pointer"
+            className="w-8 h-8 rounded-sk flex items-center justify-center text-ink/70 hover:text-ink hover:bg-paper hover:border-line/30 border-2 border-transparent transition-all duration-150 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer"
           >
             <Keyboard className="w-3.5 h-3.5" />
           </button>
@@ -208,29 +211,29 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
           aria-label="Toggle wallpaper boundary marker"
           onClick={toggleBoundaryMarker}
           className={cn(
-            "w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150 active:scale-95 cursor-pointer",
+            "w-8 h-8 rounded-sk flex items-center justify-center transition-all duration-150 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer border-2",
             showBoundaryMarker
-              ? "text-sky-600 bg-sky-50 hover:bg-sky-100"
-              : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100",
+              ? "text-blue-text bg-brand-blue/20 border-line"
+              : "text-ink/70 hover:text-ink hover:bg-paper border-transparent",
           )}
         >
           <SquareDashed className="w-3.5 h-3.5" />
         </button>
 
-        {/* Preview Wallpaper — utility, visually secondary */}
+        {/* Preview Wallpaper */}
         <button
           title="Preview Wallpaper (H)"
           onClick={togglePreview}
-          className="w-8 h-8 rounded-xl flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-all duration-150 active:scale-95 cursor-pointer"
+          className="w-8 h-8 rounded-sk flex items-center justify-center text-ink/70 hover:text-ink hover:bg-paper hover:border-line/30 border-2 border-transparent transition-all duration-150 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer"
         >
           <Eye className="w-3.5 h-3.5" />
         </button>
 
-        {/* Done / Exit Drawing Mode — primary CTA */}
+        {/* Done / Exit Drawing Mode — primary confirmation CTA */}
         <button
           title="Exit Drawing Mode"
           onClick={() => setMode("wallpaper")}
-          className="ml-1.5 h-8 px-3 rounded-xl flex items-center gap-1.5 bg-neutral-900 text-white hover:bg-neutral-700 transition-all duration-150 shadow-sm active:scale-95 cursor-pointer text-xs font-semibold tracking-tight"
+          className="ml-1.5 h-8 px-3 rounded-sk flex items-center gap-1.5 bg-brand-green text-on-accent border-2 border-line shadow-hard hover:brightness-105 transition-all duration-150 active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-pressed cursor-pointer text-xs font-hand font-bold tracking-wide"
         >
           <Check className="w-3.5 h-3.5 shrink-0" />
           Done

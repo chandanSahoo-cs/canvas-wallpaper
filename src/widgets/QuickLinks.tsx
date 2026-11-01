@@ -74,18 +74,18 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({
               href={link.url}
               title={link.title}
               className={cn(
-                "flex flex-col items-center gap-1.5 w-18 p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md",
+                "flex flex-col items-center gap-1.5 w-18 p-2 rounded-sk border-2 transition-all duration-150 active:translate-x-[1px] active:translate-y-[1px]",
                 isLight
-                  ? "bg-white/80 hover:bg-white/95 border border-neutral-200/90 text-neutral-900 shadow-sm hover:shadow-md"
-                  : "bg-white/10 hover:bg-white/20 border border-white/15 text-white",
+                  ? "bg-white text-[#0E1A1F] border-[#0E1A1F] shadow-[2px_2px_0_#0E1A1F] hover:bg-[#F6FAF8]"
+                  : "bg-[#15262D] text-[#EAF4F1] border-[#3D525A] shadow-[2px_2px_0_#000000] hover:bg-[#0E1A1F]",
               )}
             >
               <div
                 className={cn(
-                  "w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden",
+                  "w-10 h-10 rounded-sk-sm flex items-center justify-center overflow-hidden border",
                   isLight
-                    ? "bg-neutral-100 border border-neutral-200/60"
-                    : "bg-white/20",
+                    ? "bg-[#F6FAF8] border-[#0E1A1F]/20"
+                    : "bg-[#0E1A1F] border-[#3D525A]/60",
                 )}
               >
                 <img
@@ -97,12 +97,7 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({
                   }}
                 />
               </div>
-              <span
-                className={cn(
-                  "text-[11px] font-semibold truncate max-w-full drop-shadow-xs",
-                  isLight ? "text-neutral-800" : "text-white/90",
-                )}
-              >
+              <span className="text-[11px] font-hand font-bold truncate max-w-full">
                 {link.title}
               </span>
             </a>
@@ -115,7 +110,7 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({
                 removeQuickLink(link.id);
               }}
               title="Remove shortcut"
-              className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-neutral-900/90 hover:bg-neutral-900 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow-md"
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-sk-sm bg-danger text-white border border-line flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow-hard-sm cursor-pointer"
             >
               <X className="w-3 h-3" />
             </button>
@@ -129,28 +124,23 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({
           onClick={() => setIsAdding(true)}
           title="Add Shortcut"
           className={cn(
-            "flex flex-col items-center justify-center w-18 h-[76px] p-2 rounded-2xl backdrop-blur-md transition-all duration-150 hover:scale-105 active:scale-95 shadow-md cursor-pointer",
+            "flex flex-col items-center justify-center w-18 h-[76px] p-2 rounded-sk border-2 transition-all duration-150 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer",
             isLight
-              ? "bg-white/80 hover:bg-white/95 border border-neutral-200/90 text-neutral-700 hover:text-neutral-900 shadow-sm hover:shadow-md"
-              : "bg-white/10 hover:bg-white/20 border border-white/15 text-white/80 hover:text-white",
+              ? "bg-white text-[#0E1A1F] border-[#0E1A1F] shadow-[2px_2px_0_#0E1A1F] hover:bg-[#F6FAF8]"
+              : "bg-[#15262D] text-[#EAF4F1] border-[#3D525A] shadow-[2px_2px_0_#000000] hover:bg-[#0E1A1F]",
           )}
         >
           <div
             className={cn(
-              "w-10 h-10 rounded-xl flex items-center justify-center",
+              "w-10 h-10 rounded-sk-sm flex items-center justify-center border",
               isLight
-                ? "bg-neutral-100 border border-neutral-200/60"
-                : "bg-white/15",
+                ? "bg-[#F6FAF8] border-[#0E1A1F]/20"
+                : "bg-[#0E1A1F] border-[#3D525A]/60",
             )}
           >
             <Plus className="w-5 h-5" />
           </div>
-          <span
-            className={cn(
-              "text-[11px] font-semibold mt-1",
-              isLight ? "text-neutral-700" : "text-white/80",
-            )}
-          >
+          <span className="text-[11px] font-hand font-bold mt-1">
             Add
           </span>
         </button>
@@ -160,18 +150,18 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({
       {isAdding && (
         <div
           onClick={() => setIsAdding(false)}
-          className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-ink/60 flex items-center justify-center p-4 animate-in fade-in duration-150"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-2xl p-5 w-full max-w-sm shadow-2xl border border-neutral-200 animate-in fade-in zoom-in-95 duration-150"
+            className="bg-surface text-ink border-2 border-line rounded-sk-lg p-5 w-full max-w-sm shadow-hard"
           >
-            <h3 className="text-sm font-semibold text-neutral-800 mb-3">
+            <h3 className="font-hand text-base font-bold text-ink mb-3">
               Add Shortcut
             </h3>
             <form onSubmit={handleAdd} className="flex flex-col gap-3">
               <div>
-                <label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider block mb-1">
+                <label className="text-xs font-hand font-bold text-muted block mb-1">
                   Name
                 </label>
                 <input
@@ -179,11 +169,11 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   placeholder="e.g. GitHub"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+                  className="w-full px-3 py-2 text-xs font-sans rounded-sk border-2 border-line/40 bg-paper text-ink outline-none focus-visible:outline-brand-blue"
                 />
               </div>
               <div>
-                <label className="text-[11px] font-medium text-neutral-500 uppercase tracking-wider block mb-1">
+                <label className="text-xs font-hand font-bold text-muted block mb-1">
                   URL
                 </label>
                 <input
@@ -192,20 +182,20 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({
                   onChange={(e) => setNewUrl(e.target.value)}
                   placeholder="https://..."
                   required
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-neutral-200 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900"
+                  className="w-full px-3 py-2 text-xs font-sans rounded-sk border-2 border-line/40 bg-paper text-ink outline-none focus-visible:outline-brand-blue"
                 />
               </div>
               <div className="flex justify-end gap-2 mt-2">
                 <button
                   type="button"
                   onClick={() => setIsAdding(false)}
-                  className="px-3 py-1.5 text-xs text-neutral-600 hover:bg-neutral-100 rounded-xl"
+                  className="px-3 py-1.5 text-xs font-hand font-bold rounded-sk border-2 border-line/30 bg-paper hover:bg-surface text-ink"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 text-xs bg-neutral-900 text-white font-medium rounded-xl hover:bg-neutral-800 shadow-sm transition-colors cursor-pointer"
+                  className="px-4 py-1.5 text-xs font-hand font-bold bg-brand-green text-on-accent rounded-sk border-2 border-line shadow-hard-sm hover:brightness-105 active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
                 >
                   Add Shortcut
                 </button>

@@ -5,17 +5,21 @@ import {
   Calendar,
   Search,
   Link2,
-  LayoutGrid,
   Move,
   RotateCcw,
   Eye,
   EyeOff,
   Compass,
+  Sun,
+  Moon,
+  Monitor,
 } from "lucide-react";
 import { useWidgetStore } from "../store/useWidgetStore";
 import { useOnboardingStore } from "../store/useOnboardingStore";
+import { useAppStore } from "../store/useAppStore";
 import { PrivacyPolicyDialog } from "../components/PrivacyPolicyDialog";
 import { SearchEngineDropdown } from "./settings/SearchEngineDropdown";
+import { cn } from "../lib/utils";
 
 interface SettingsDialogProps {
   isOpen: boolean;
@@ -27,6 +31,8 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   onClose,
 }) => {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const themeMode = useAppStore((s) => s.themeMode);
+  const setThemeMode = useAppStore((s) => s.setThemeMode);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -55,7 +61,6 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
 
   const turnOffAllWidgets = useWidgetStore((s) => s.turnOffAllWidgets);
   const turnOnAllWidgets = useWidgetStore((s) => s.turnOnAllWidgets);
-  const toggleAllWidgets = useWidgetStore((s) => s.toggleAllWidgets);
 
   const setIsLayoutMode = useWidgetStore((s) => s.setIsLayoutMode);
   const resetWidgetPositions = useWidgetStore((s) => s.resetWidgetPositions);
@@ -65,14 +70,14 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 bg-ink/60 flex items-center justify-center p-4 select-none animate-in fade-in duration-150">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-dialog-title"
-        className="bg-white rounded-3xl p-6 w-full max-w-md shadow-2xl border border-neutral-200 text-neutral-800 animate-in fade-in zoom-in-95 duration-150"
+        className="bg-surface text-ink border-2 border-line rounded-sk-lg p-6 w-full max-w-md shadow-hard max-h-[85vh] flex flex-col"
       >
-        <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
+        <div className="flex items-center justify-between pb-3.5 border-b-2 border-line shrink-0">
           <div className="flex items-center gap-2.5">
             <img
               src="/icon/48.png"
@@ -80,234 +85,254 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
               aria-hidden="true"
               className="w-5 h-5 object-contain"
             />
-            <h2 id="settings-dialog-title" className="text-base font-semibold">
-              New Tab Widgets
+            <h2 id="settings-dialog-title" className="font-hand text-lg font-bold text-ink leading-tight">
+              Settings & Widgets
             </h2>
           </div>
           <button
             onClick={onClose}
             aria-label="Close settings"
-            className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+            className="p-1 rounded-sk-sm text-ink/70 hover:text-ink hover:bg-paper border border-transparent hover:border-line/30 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="flex flex-col gap-5 py-4">
+        <div className="flex flex-col gap-4 py-4 overflow-y-auto pr-1">
           {/* Master Control: Turn off / on every widget */}
-          <div className="flex items-center justify-between pb-4 border-b border-neutral-100">
+          <div className="flex items-center justify-between pb-3.5 border-b border-line/20">
             <div className="flex items-center gap-2.5">
               {allWidgetsOff ? (
-                <EyeOff className="w-4 h-4 text-neutral-400 mt-0.5" />
+                <EyeOff className="w-4 h-4 text-muted" />
               ) : (
-                <Eye className="w-4 h-4 text-neutral-500 mt-0.5" />
+                <Eye className="w-4 h-4 text-brand-green" />
               )}
               <div>
-                <div className="text-sm font-semibold text-neutral-900">
-                  All Widgets
-                </div>
-                <div className="text-xs text-neutral-500">
-                  {allWidgetsOff
-                    ? "All widgets are turned off (clean wallpaper)"
-                    : "Turn off every widget with one click"}
+                <div className="text-sm font-hand font-bold text-ink">All Widgets</div>
+                <div className="text-xs font-sans text-muted">
+                  Toggle all screen accessories
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-2">
+            <button
+              onClick={allWidgetsOff ? turnOnAllWidgets : turnOffAllWidgets}
+              className={cn(
+                "py-1.5 px-3 rounded-sk font-hand font-bold text-xs border-2 transition-all cursor-pointer active:translate-x-[1px] active:translate-y-[1px]",
+                allWidgetsOff
+                  ? "bg-brand-green text-on-accent border-line shadow-hard-sm"
+                  : "bg-paper text-ink border-line/30 hover:border-line",
+              )}
+            >
+              {allWidgetsOff ? "Show All" : "Hide All"}
+            </button>
+          </div>
+
+          {/* Individual Widget Toggles */}
+          <div className="flex flex-col gap-3">
+            {/* Clock */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Clock className="w-4 h-4 text-muted" />
+                <span className="text-xs font-sans font-medium text-ink">Digital Clock</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {showClock && (
+                  <div className="flex items-center bg-paper border border-line/40 p-0.5 rounded-sk-sm text-[10px] font-mono">
+                    <button
+                      onClick={() => setClockFormat("12h")}
+                      className={cn(
+                        "px-1.5 py-0.5 rounded-sk-sm font-medium transition-all cursor-pointer",
+                        clockFormat === "12h"
+                          ? "bg-brand-blue text-on-accent font-bold"
+                          : "text-ink/70 hover:text-ink",
+                      )}
+                    >
+                      12h
+                    </button>
+                    <button
+                      onClick={() => setClockFormat("24h")}
+                      className={cn(
+                        "px-1.5 py-0.5 rounded-sk-sm font-medium transition-all cursor-pointer",
+                        clockFormat === "24h"
+                          ? "bg-brand-blue text-on-accent font-bold"
+                          : "text-ink/70 hover:text-ink",
+                      )}
+                    >
+                      24h
+                    </button>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setShowClock(!showClock)}
+                  className={cn(
+                    "py-1 px-2.5 rounded-sk font-hand font-bold text-xs border-2 transition-all cursor-pointer",
+                    showClock
+                      ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                      : "bg-paper text-ink/70 border-line/30 hover:border-line",
+                  )}
+                >
+                  {showClock ? "On" : "Off"}
+                </button>
+              </div>
+            </div>
+
+            {/* Date */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Calendar className="w-4 h-4 text-muted" />
+                <span className="text-xs font-sans font-medium text-ink">Date & Day</span>
+              </div>
               <button
                 type="button"
-                onClick={() =>
-                  allWidgetsOff ? turnOnAllWidgets() : turnOffAllWidgets()
-                }
-                className={`text-xs px-2.5 py-1 rounded-xl font-medium transition-all active:scale-95 cursor-pointer ${
-                  allWidgetsOff
-                    ? "bg-neutral-900 text-white hover:bg-neutral-800 shadow-xs"
-                    : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
-                }`}
+                onClick={() => setShowDate(!showDate)}
+                className={cn(
+                  "py-1 px-2.5 rounded-sk font-hand font-bold text-xs border-2 transition-all cursor-pointer",
+                  showDate
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                    : "bg-paper text-ink/70 border-line/30 hover:border-line",
+                )}
               >
-                {allWidgetsOff ? "Turn on all" : "Turn off all"}
+                {showDate ? "On" : "Off"}
               </button>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={!allWidgetsOff}
-                  onChange={(e) => toggleAllWidgets(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
-              </label>
             </div>
-          </div>
 
-          {/* Clock Settings */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2.5">
-              <Clock className="w-4 h-4 text-neutral-500 mt-0.5" />
-              <div>
-                <div className="text-sm font-medium">Digital Clock</div>
-                <div className="text-xs text-neutral-500">
-                  Show time on wallpaper
-                </div>
+            {/* Search */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Search className="w-4 h-4 text-muted" />
+                <span className="text-xs font-sans font-medium text-ink">Search Bar</span>
               </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showClock}
-                onChange={(e) => setShowClock(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
-            </label>
-          </div>
-
-          {showClock && (
-            <div className="ml-7 flex items-center gap-3">
-              <span className="text-xs text-neutral-500 font-medium">
-                Format:
-              </span>
-              <div className="flex items-center gap-1 bg-neutral-100 p-0.5 rounded-lg text-xs">
+              <div className="flex items-center gap-2">
+                {showSearch && <SearchEngineDropdown />}
                 <button
-                  onClick={() => setClockFormat("12h")}
-                  className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
-                    clockFormat === "12h"
-                      ? "bg-white shadow-sm text-neutral-900"
-                      : "text-neutral-600 hover:text-neutral-900"
-                  }`}
+                  type="button"
+                  onClick={() => setShowSearch(!showSearch)}
+                  className={cn(
+                    "py-1 px-2.5 rounded-sk font-hand font-bold text-xs border-2 transition-all cursor-pointer",
+                    showSearch
+                      ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                      : "bg-paper text-ink/70 border-line/30 hover:border-line",
+                  )}
                 >
-                  12-Hour
-                </button>
-                <button
-                  onClick={() => setClockFormat("24h")}
-                  className={`px-2.5 py-1 rounded-md font-medium transition-all cursor-pointer ${
-                    clockFormat === "24h"
-                      ? "bg-white shadow-sm text-neutral-900"
-                      : "text-neutral-600 hover:text-neutral-900"
-                  }`}
-                >
-                  24-Hour
+                  {showSearch ? "On" : "Off"}
                 </button>
               </div>
             </div>
-          )}
 
-          {/* Date & Day Settings */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2.5">
-              <Calendar className="w-4 h-4 text-neutral-500 mt-0.5" />
-              <div>
-                <div className="text-sm font-medium">Date & Day</div>
-                <div className="text-xs text-neutral-500">
-                  Show day and date below clock
-                </div>
+            {/* Quick Links */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Link2 className="w-4 h-4 text-muted" />
+                <span className="text-xs font-sans font-medium text-ink">Quick Links</span>
               </div>
+              <button
+                type="button"
+                onClick={() => setShowQuickLinks(!showQuickLinks)}
+                className={cn(
+                  "py-1 px-2.5 rounded-sk font-hand font-bold text-xs border-2 transition-all cursor-pointer",
+                  showQuickLinks
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                    : "bg-paper text-ink/70 border-line/30 hover:border-line",
+                )}
+              >
+                {showQuickLinks ? "On" : "Off"}
+              </button>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showDate}
-                onChange={(e) => setShowDate(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
-            </label>
-          </div>
-
-          {/* Search Settings */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2.5">
-              <Search className="w-4 h-4 text-neutral-500 mt-0.5" />
-              <div>
-                <div className="text-sm font-medium">Search Bar</div>
-                <div className="text-xs text-neutral-500">
-                  Quick search overlay
-                </div>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showSearch}
-                onChange={(e) => setShowSearch(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
-            </label>
-          </div>
-
-          {showSearch && (
-            <div className="ml-7 flex items-center gap-3">
-              <span className="text-xs text-neutral-500 font-medium">
-                Engine:
-              </span>
-              <SearchEngineDropdown />
-            </div>
-          )}
-
-          {/* Quick Links Settings */}
-          <div className="flex items-start justify-between">
-            <div className="flex items-center gap-2.5">
-              <Link2 className="w-4 h-4 text-neutral-500 mt-0.5" />
-              <div>
-                <div className="text-sm font-medium">Quick Links</div>
-                <div className="text-xs text-neutral-500">
-                  Shortcut bookmark tiles
-                </div>
-              </div>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={showQuickLinks}
-                onChange={(e) => setShowQuickLinks(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-neutral-900"></div>
-            </label>
           </div>
 
           {/* Widget Layout & Alignment */}
-          <div className="pt-3 border-t border-neutral-100 flex flex-col gap-2">
+          <div className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <LayoutGrid className="w-4 h-4 text-neutral-700" />
-                <div>
-                  <div className="text-sm font-medium">Widget Layout</div>
-                  <div className="text-xs text-neutral-500">
-                    Align accessories anywhere on full screen
-                  </div>
-                </div>
+              <div className="text-sm font-hand font-bold text-ink">
+                Layout & Placement
               </div>
             </div>
-            <div className="flex items-center gap-2 mt-1">
+            <div className="flex items-center gap-2 mt-0.5">
               <button
                 onClick={() => {
                   onClose();
                   setIsLayoutMode(true);
                 }}
-                className="flex-1 py-2 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-medium text-xs flex items-center justify-center gap-2 border border-neutral-200 active:scale-95 transition-all cursor-pointer"
+                className="flex-1 py-1.5 px-3 rounded-sk bg-paper hover:bg-surface text-ink font-hand font-bold text-xs flex items-center justify-center gap-2 border-2 border-line shadow-hard-sm active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
               >
-                <Move className="w-3.5 h-3.5" /> Customize Layout (Drag
-                Anywhere)
+                <Move className="w-3.5 h-3.5" />
+                <span>Drag & Position Widgets</span>
               </button>
               <button
                 onClick={resetWidgetPositions}
-                title="Reset widgets to default center stack"
-                className="p-2 rounded-xl border border-neutral-200 hover:bg-neutral-100 text-neutral-600 active:scale-95 transition-all cursor-pointer"
+                title="Reset widgets to default layout"
+                className="p-1.5 rounded-sk border-2 border-line bg-paper hover:bg-surface text-ink shadow-hard-sm active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
+          {/* Interface Theme (System / Light / Dark) */}
+          <div className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Sun className="w-4 h-4 text-brand-blue" />
+                <div>
+                  <div className="text-sm font-hand font-bold text-ink">Appearance Theme</div>
+                  <div className="text-xs font-sans text-muted">
+                    Chrome theme mode (independent from wallpaper)
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 p-1 bg-paper border-2 border-line rounded-sk">
+              <button
+                type="button"
+                onClick={() => setThemeMode("system")}
+                className={cn(
+                  "py-1.5 px-2.5 rounded-sk-sm text-xs font-hand font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer border-2",
+                  themeMode === "system"
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                    : "border-transparent text-ink/70 hover:text-ink hover:bg-surface/50",
+                )}
+              >
+                <Monitor className="w-3.5 h-3.5" />
+                <span>System</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setThemeMode("light")}
+                className={cn(
+                  "py-1.5 px-2.5 rounded-sk-sm text-xs font-hand font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer border-2",
+                  themeMode === "light"
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                    : "border-transparent text-ink/70 hover:text-ink hover:bg-surface/50",
+                )}
+              >
+                <Sun className="w-3.5 h-3.5" />
+                <span>Light</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setThemeMode("dark")}
+                className={cn(
+                  "py-1.5 px-2.5 rounded-sk-sm text-xs font-hand font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer border-2",
+                  themeMode === "dark"
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                    : "border-transparent text-ink/70 hover:text-ink hover:bg-surface/50",
+                )}
+              >
+                <Moon className="w-3.5 h-3.5" />
+                <span>Dark</span>
+              </button>
+            </div>
+          </div>
+
           {/* Feature Walkthrough Tour */}
-          <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
+          <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
             <div className="flex items-center gap-2.5">
-              <Compass className="w-4 h-4 text-neutral-700" />
+              <Compass className="w-4 h-4 text-muted" />
               <div>
-                <div className="text-sm font-medium">Feature Walkthrough</div>
-                <div className="text-xs text-neutral-500">
-                  Take the interactive guided tour again
+                <div className="text-sm font-hand font-bold text-ink">Feature Walkthrough</div>
+                <div className="text-xs font-sans text-muted">
+                  Interactive guided tour
                 </div>
               </div>
             </div>
@@ -316,24 +341,24 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                 onClose();
                 useOnboardingStore.getState().resetTour();
               }}
-              className="py-1.5 px-3 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-800 font-medium text-xs border border-neutral-200 active:scale-95 transition-all cursor-pointer"
+              className="py-1.5 px-3 rounded-sk bg-paper hover:bg-surface text-ink font-hand font-bold text-xs border-2 border-line shadow-hard-sm active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
             >
               Start Tour
             </button>
           </div>
         </div>
 
-        <div className="pt-4 border-t border-neutral-100 flex items-center justify-between">
+        <div className="pt-3.5 border-t-2 border-line flex items-center justify-between shrink-0">
           <button
             type="button"
             onClick={() => setIsPrivacyOpen(true)}
-            className="text-xs text-neutral-400 hover:text-neutral-900 transition-colors cursor-pointer"
+            className="text-xs font-hand font-bold text-muted hover:text-ink transition-colors cursor-pointer"
           >
             Privacy Policy
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-medium active:scale-95 transition-all shadow-sm cursor-pointer"
+            className="px-4 py-1.5 rounded-sk bg-brand-green text-on-accent border-2 border-line shadow-hard font-hand font-bold text-xs hover:brightness-105 active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-pressed cursor-pointer"
           >
             Done
           </button>

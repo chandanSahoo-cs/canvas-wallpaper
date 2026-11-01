@@ -50,20 +50,15 @@ export const ClockWidget: React.FC<ClockWidgetProps> = ({
   });
 
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center justify-center select-none transition-colors duration-300",
-        isLight
-          ? "drop-shadow-[0_2px_10px_rgba(0,0,0,0.15)]"
-          : "drop-shadow-[0_4px_16px_rgba(0,0,0,0.5)]",
-      )}
-    >
+    <div className="flex flex-col items-center justify-center select-none transition-colors duration-150">
       {showClock && (
         <div className="flex items-baseline gap-2">
           <span
             className={cn(
-              "text-6xl md:text-7xl font-bold tracking-tight font-mono transition-colors",
-              isLight ? "text-neutral-900" : "text-white",
+              "text-6xl md:text-7xl font-hand font-bold tracking-tight transition-colors",
+              isLight
+                ? "text-[#0E1A1F] [text-shadow:2px_2px_0_rgba(255,255,255,0.7)]"
+                : "text-[#EAF4F1] [text-shadow:2px_2px_0_#000000]",
             )}
           >
             {formattedHours}:{minutes}
@@ -71,8 +66,10 @@ export const ClockWidget: React.FC<ClockWidgetProps> = ({
           {clockFormat === "12h" && (
             <span
               className={cn(
-                "text-xl font-semibold uppercase transition-colors",
-                isLight ? "text-neutral-700" : "text-white/80",
+                "text-xl font-hand font-bold uppercase transition-colors",
+                isLight
+                  ? "text-[#52636A] [text-shadow:1px_1px_0_rgba(255,255,255,0.7)]"
+                  : "text-[#96AAB0] [text-shadow:1px_1px_0_#000000]",
               )}
             >
               {period}
@@ -83,8 +80,10 @@ export const ClockWidget: React.FC<ClockWidgetProps> = ({
       {showDate && (
         <div
           className={cn(
-            "text-base font-semibold tracking-wide mt-1 transition-colors",
-            isLight ? "text-neutral-800" : "text-white/90",
+            "text-base md:text-lg font-hand font-bold tracking-wide mt-1 transition-colors",
+            isLight
+              ? "text-[#0E1A1F] [text-shadow:1px_1px_0_rgba(255,255,255,0.7)]"
+              : "text-[#EAF4F1] [text-shadow:1px_1px_0_#000000]",
           )}
         >
           {formattedDate}

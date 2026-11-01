@@ -22,6 +22,7 @@ import {
 import { isColorLight } from "../lib/utils";
 import { duplicateElements, preparePastedElements } from "./clipboardHelpers";
 import { flipElements } from "../lib/flipElements";
+import { ThemeMode, getStoredTheme, setTheme } from "../lib/theme";
 
 const HISTORY_LIMIT = 50;
 
@@ -46,6 +47,10 @@ export interface AppState {
   isPreviewing: boolean;
   isPresetsOpen: boolean;
   setIsPresetsOpen: (open: boolean) => void;
+
+  // Theme mode
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
 
   // Camera / Zoom (detail magnification)
   zoom: number;
@@ -341,6 +346,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   // Boundary marker state and actions
+  themeMode: getStoredTheme(),
+  setThemeMode: (mode: ThemeMode) => {
+    setTheme(mode);
+    set({ themeMode: mode });
+  },
+
   showBoundaryMarker: true,
   viewportBoundary: null,
   setShowBoundaryMarker: (show: boolean) => {
