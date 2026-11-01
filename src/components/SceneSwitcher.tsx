@@ -22,7 +22,6 @@ export const SceneSwitcher: React.FC = () => {
 
   const activeScene = scenes.find((s) => s.id === activeSceneId) || scenes[0];
 
-  // Close popover when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (
@@ -83,26 +82,26 @@ export const SceneSwitcher: React.FC = () => {
       {/* Trigger Button */}
       <div
         id="tour-scene-switcher"
-        className="flex items-center gap-1 bg-white/95 backdrop-blur-md border border-neutral-200/80 shadow-md hover:shadow-lg rounded-2xl p-1 transition-all duration-200"
+        className="flex items-center gap-1 bg-surface border-2 border-line shadow-hard rounded-sk p-1"
       >
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className="flex items-center gap-2 px-2.5 py-1.5 rounded-xl hover:bg-neutral-100/80 text-neutral-800 transition-colors cursor-pointer"
+          className="flex items-center gap-2 px-2.5 py-1.5 rounded-sk-sm hover:bg-paper text-ink transition-colors cursor-pointer"
           title="Switch Wallpaper Scene"
         >
           {/* Active scene background color indicator */}
           <span
-            className="w-3.5 h-3.5 rounded-full border border-black/15 shadow-inner shrink-0"
+            className="w-3.5 h-3.5 rounded-full border border-line/30 shadow-inner shrink-0"
             style={{
-              backgroundColor: activeScene?.background?.color || "#14141a",
+              backgroundColor: activeScene?.background?.color || "var(--paper)",
             }}
           />
-          <span className="text-xs font-semibold max-w-[130px] truncate">
+          <span className="font-hand font-bold text-xs max-w-[130px] truncate text-ink">
             {activeScene?.name || "Wallpaper"}
           </span>
           <ChevronDown
             className={cn(
-              "w-3.5 h-3.5 text-neutral-400 transition-transform duration-200",
+              "w-3.5 h-3.5 text-ink/60 transition-transform duration-200",
               isOpen && "rotate-180",
             )}
           />
@@ -112,7 +111,7 @@ export const SceneSwitcher: React.FC = () => {
         <button
           onClick={() => useAppStore.getState().setIsPresetsOpen(true)}
           title="Wallpaper Presets & Templates"
-          className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-neutral-100 text-neutral-500 hover:text-amber-500 transition-colors cursor-pointer"
+          className="w-8 h-8 rounded-sk-sm flex items-center justify-center hover:bg-paper text-ink/70 hover:text-ink transition-colors cursor-pointer"
         >
           <Sparkles className="w-3.5 h-3.5" />
         </button>
@@ -120,22 +119,22 @@ export const SceneSwitcher: React.FC = () => {
 
       {/* Popover Menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 w-64 bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-xl rounded-2xl p-2 z-40 animate-in fade-in zoom-in-95 duration-150">
-          <div className="flex items-center justify-between px-2.5 py-1.5 mb-1 text-[11px] font-semibold text-neutral-400 uppercase tracking-wider">
+        <div className="absolute top-full left-0 mt-2 w-64 bg-surface text-ink border-2 border-line shadow-hard rounded-sk-lg p-2.5 z-40 animate-in fade-in duration-100">
+          <div className="flex items-center justify-between px-2 py-1 mb-1.5 text-[11px] font-hand font-bold text-muted uppercase tracking-wider">
             <span>Wallpapers</span>
             <span
               className={cn(
-                "px-1.5 py-0.5 rounded-full font-mono text-[9px] transition-colors",
+                "px-1.5 py-0.5 rounded-sk-sm font-mono text-[10px] border border-line/30",
                 isAtLimit
-                  ? "bg-amber-100 text-amber-800 font-semibold"
-                  : "bg-neutral-100 text-neutral-500",
+                  ? "bg-warning text-white"
+                  : "bg-paper text-ink",
               )}
             >
               {scenes.length}/{MAX_SCENES}
             </span>
           </div>
 
-          <div className="max-h-60 overflow-y-auto space-y-1 pr-0.5 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:bg-neutral-200 [&::-webkit-scrollbar-thumb]:rounded-full">
+          <div className="max-h-60 overflow-y-auto space-y-1 pr-0.5">
             {scenes.map((s) => {
               const isActive = s.id === activeSceneId;
               const isRenaming = editingId === s.id;
@@ -144,7 +143,7 @@ export const SceneSwitcher: React.FC = () => {
                 return (
                   <div
                     key={s.id}
-                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl bg-neutral-50 border border-neutral-200"
+                    className="flex items-center gap-1.5 px-2 py-1.5 rounded-sk bg-paper border-2 border-line"
                   >
                     <input
                       ref={inputRef}
@@ -155,11 +154,11 @@ export const SceneSwitcher: React.FC = () => {
                         if (e.key === "Enter") handleSaveRename(s.id);
                         if (e.key === "Escape") setEditingId(null);
                       }}
-                      className="flex-1 bg-white text-xs font-medium text-neutral-800 px-2 py-1 rounded-lg border border-neutral-300 outline-none focus:border-neutral-500"
+                      className="flex-1 bg-surface text-xs font-sans text-ink px-2 py-1 rounded-sk-sm border border-line outline-none focus-visible:outline-brand-blue"
                     />
                     <button
                       onClick={() => handleSaveRename(s.id)}
-                      className="p-1 rounded-lg bg-neutral-900 text-white hover:bg-neutral-700 cursor-pointer"
+                      className="p-1 rounded-sk-sm bg-brand-green text-on-accent border border-line hover:brightness-105 cursor-pointer"
                     >
                       <Check className="w-3.5 h-3.5" />
                     </button>
@@ -175,17 +174,17 @@ export const SceneSwitcher: React.FC = () => {
                     setIsOpen(false);
                   }}
                   className={cn(
-                    "group flex items-center justify-between px-2.5 py-2 rounded-xl transition-all cursor-pointer text-xs",
+                    "group flex items-center justify-between px-2.5 py-2 rounded-sk transition-all cursor-pointer text-xs font-hand",
                     isActive
-                      ? "bg-neutral-100 text-neutral-900 font-semibold"
-                      : "hover:bg-neutral-50 text-neutral-700",
+                      ? "bg-paper text-ink font-bold border-2 border-line shadow-hard-sm"
+                      : "hover:bg-paper text-ink/80 border-2 border-transparent",
                   )}
                 >
                   <div className="flex items-center gap-2 min-w-0">
                     <span
-                      className="w-3 h-3 rounded-full border border-black/15 shadow-inner shrink-0"
+                      className="w-3 h-3 rounded-full border border-line/30 shadow-inner shrink-0"
                       style={{
-                        backgroundColor: s.background?.color || "#14141a",
+                        backgroundColor: s.background?.color || "var(--paper)",
                       }}
                     />
                     <span className="truncate">{s.name}</span>
@@ -196,7 +195,7 @@ export const SceneSwitcher: React.FC = () => {
                     <button
                       onClick={(e) => handleStartRename(e, s.id, s.name)}
                       title="Rename"
-                      className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-neutral-200 text-neutral-500 hover:text-neutral-800 transition-opacity cursor-pointer"
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded-sk-sm hover:bg-paper text-ink/60 hover:text-ink transition-opacity cursor-pointer"
                     >
                       <Edit2 className="w-3 h-3" />
                     </button>
@@ -206,14 +205,14 @@ export const SceneSwitcher: React.FC = () => {
                       <button
                         onClick={(e) => handleDelete(e, s.id)}
                         title="Delete Scene"
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-rose-100 text-neutral-400 hover:text-rose-600 transition-opacity cursor-pointer"
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded-sk-sm hover:bg-danger/10 text-muted hover:text-danger transition-opacity cursor-pointer"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
                     )}
 
                     {isActive && (
-                      <Check className="w-3.5 h-3.5 text-neutral-900 ml-0.5 shrink-0" />
+                      <Check className="w-3.5 h-3.5 text-brand-green ml-0.5 shrink-0" />
                     )}
                   </div>
                 </div>
@@ -221,16 +220,16 @@ export const SceneSwitcher: React.FC = () => {
             })}
           </div>
 
-          <div className="pt-2 mt-1 border-t border-neutral-100">
+          <div className="pt-2 mt-1.5 border-t border-line/20">
             {isAtLimit ? (
-              <div className="w-full py-2 px-3 rounded-xl bg-neutral-100 text-neutral-400 text-center font-medium text-[11px] select-none">
+              <div className="w-full py-1.5 px-2 rounded-sk bg-paper text-muted text-center font-hand text-[11px] select-none border border-line/20">
                 Maximum {MAX_SCENES} wallpapers reached
               </div>
             ) : (
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <button
                   onClick={handleCreate}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs transition-all shadow-sm active:scale-95 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-sk bg-brand-green text-on-accent font-hand font-bold text-xs border-2 border-line shadow-hard-sm hover:brightness-105 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" /> Blank
                 </button>
@@ -239,9 +238,9 @@ export const SceneSwitcher: React.FC = () => {
                     setIsOpen(false);
                     useAppStore.getState().setIsPresetsOpen(true);
                   }}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl border border-neutral-300 hover:bg-neutral-100 text-neutral-800 font-medium text-xs transition-all active:scale-95 cursor-pointer"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-sk bg-surface text-ink border-2 border-line font-hand font-bold text-xs shadow-hard-sm hover:bg-paper active:translate-x-[1px] active:translate-y-[1px] cursor-pointer"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Presets
+                  <Sparkles className="w-3.5 h-3.5 text-brand-blue" /> Presets
                 </button>
               </div>
             )}
