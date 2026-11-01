@@ -57,9 +57,9 @@ PaperTab brings an Excalidraw-inspired sketching canvas directly to your New Tab
 
 ---
 
-## Privacy
+## Privacy & Terms
 
-PaperTab does not track, collect, or transmit any user data. All sketches and settings are stored locally in your browser. Read our full [Privacy Policy](PRIVACY.md).
+PaperTab does not track, collect, or transmit any user data. All sketches and settings are stored locally in your browser. Read our full [Privacy Policy](PRIVACY.md) and [Terms of Service](TERMS.md).
 
 ---
 
