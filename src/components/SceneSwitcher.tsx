@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown, Plus, Trash2, Check, Edit2, Sparkles } from "lucide-react";
+import { ChevronDown, Plus, Trash2, Check, Edit2, LayoutTemplate } from "lucide-react";
 import { useSceneStore, MAX_SCENES } from "../store/useSceneStore";
 import { useAppStore } from "../store/useAppStore";
 import { cn } from "../lib/utils";
@@ -113,7 +113,7 @@ export const SceneSwitcher: React.FC = () => {
           title="Wallpaper Presets & Templates"
           className="w-8 h-8 rounded-sk-sm flex items-center justify-center hover:bg-paper text-ink/70 hover:text-ink transition-colors cursor-pointer"
         >
-          <Sparkles className="w-3.5 h-3.5" />
+          <LayoutTemplate className="w-3.5 h-3.5" />
         </button>
       </div>
 
@@ -240,7 +240,7 @@ export const SceneSwitcher: React.FC = () => {
                   }}
                   className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-sk bg-surface text-ink border-2 border-line font-hand font-bold text-xs shadow-hard-sm hover:bg-paper active:translate-x-[1px] active:translate-y-[1px] cursor-pointer"
                 >
-                  <Sparkles className="w-3.5 h-3.5 text-brand-blue" /> Presets
+                  <LayoutTemplate className="w-3.5 h-3.5 text-brand-blue" /> Presets
                 </button>
               </div>
             )}

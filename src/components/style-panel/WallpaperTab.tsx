@@ -4,7 +4,7 @@ import {
   RotateCcw,
   Crosshair,
   SquareDashed,
-  Sparkles,
+  LayoutTemplate,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { optimizeImageDataUrl } from "../../lib/imageInsert";
@@ -76,29 +76,32 @@ export const WallpaperTab: React.FC = () => {
             onClick={() => setIsPresetsOpen(true)}
             className="flex items-center gap-1 text-[11px] font-hand font-bold text-blue-text hover:underline cursor-pointer"
           >
-            <Sparkles className="w-3 h-3 text-brand-blue" />
-            <span>Browse All (5)</span>
+            <LayoutTemplate className="w-3 h-3 text-brand-blue" />
+            <span>Browse Gallery</span>
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          {WALLPAPER_PRESETS.slice(0, 4).map((p) => (
+        <div className="flex flex-col gap-2">
+          {WALLPAPER_PRESETS.map((p) => (
             <button
               key={p.id}
               onClick={() => applyPresetToActiveScene(p)}
-              className="group flex flex-col p-2 rounded-sk border-2 border-line/30 hover:border-line bg-paper hover:bg-surface transition-all text-left cursor-pointer active:translate-x-[1px] active:translate-y-[1px]"
+              className="group flex flex-col p-2.5 rounded-sk border-2 border-line bg-paper hover:bg-surface shadow-hard-sm transition-all text-left cursor-pointer active:translate-x-[1px] active:translate-y-[1px]"
             >
               <div
-                className="w-full h-8 rounded-sk-sm mb-1.5 flex items-center justify-center text-[10px] font-hand font-bold text-white border border-line/20 shadow-inner"
+                className="w-full h-9 rounded-sk-sm mb-2 flex items-center justify-between px-2.5 text-[10px] font-hand font-bold border border-line/20 shadow-inner"
                 style={{ background: p.previewBg }}
               >
-                <span className="opacity-95">{p.badge}</span>
+                <span className="text-white opacity-95">{p.badge}</span>
+                <span className="text-[10px] font-hand font-bold bg-brand-green text-on-accent px-1.5 py-0.5 rounded-sk-sm border border-line">
+                  Apply
+                </span>
               </div>
               <span className="text-xs font-hand font-bold text-ink truncate">
                 {p.title}
               </span>
-              <span className="text-[10px] font-hand text-muted truncate">
-                {p.category}
+              <span className="text-[10px] font-sans text-muted line-clamp-1">
+                {p.description}
               </span>
             </button>
           ))}

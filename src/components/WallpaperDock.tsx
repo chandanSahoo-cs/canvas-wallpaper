@@ -1,5 +1,5 @@
 import React from "react";
-import { Keyboard, Settings, LayoutGrid, Pencil, Sparkles } from "lucide-react";
+import { Keyboard, Settings, LayoutGrid, Pencil, LayoutTemplate } from "lucide-react";
 import { cn } from "../lib/utils";
 
 interface WallpaperDockProps {
@@ -37,7 +37,7 @@ export const WallpaperDock: React.FC<WallpaperDockProps> = ({
           onClick={onOpenPresets}
           className="w-8 h-8 rounded-sk flex items-center justify-center hover:bg-paper text-ink/75 hover:text-ink active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
         >
-          <Sparkles className="w-4 h-4 text-brand-blue" />
+          <LayoutTemplate className="w-4 h-4 text-brand-blue" />
         </button>
         <button
           title="Keyboard Shortcuts (?)"
