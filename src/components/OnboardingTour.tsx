@@ -22,6 +22,26 @@ import { useAppStore } from "../store/useAppStore";
 import { calculatePopoverPosition, Rect } from "../lib/tour/positioning";
 import { cn } from "../lib/utils";
 
+
+function renderFormattedDescription(text: string) {
+  const parts = text.split(/(Ctrl \+ [0-9A-Za-z]+|Ctrl \+ Scroll|Space|Esc|\b[EMIBH]\b|\?)/g);
+  return parts.map((part, i) => {
+    if (
+      /^(Ctrl \+ [0-9A-Za-z]+|Ctrl \+ Scroll|Space|Esc|[EMIBH]|\?)$/.test(part)
+    ) {
+      return (
+        <kbd
+          key={i}
+          className="px-1.5 py-0.5 mx-0.5 rounded-sk-sm bg-brand-blue/15 text-brand-blue border border-brand-blue/30 font-mono text-[11px] font-bold shadow-hard-sm inline-block"
+        >
+          {part}
+        </kbd>
+      );
+    }
+    return part;
+  });
+}
+
 export const OnboardingTour: React.FC = () => {
   const isWelcomeOpen = useOnboardingStore((s) => s.isWelcomeOpen);
   const isTourActive = useOnboardingStore((s) => s.isTourActive);
@@ -427,7 +447,12 @@ export const OnboardingTour: React.FC = () => {
         {/* Header row: Badge, Chapter name, Step counter, Close button */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-sk-sm bg-brand-blue text-on-accent font-hand font-bold text-[10px] uppercase tracking-wider border border-line shadow-hard-sm">
+            <span className={cn(
+              "px-2 py-0.5 rounded-sk-sm font-hand font-bold text-[10px] uppercase tracking-wider border border-line shadow-hard-sm",
+              useOnboardingStore.getState().isChapterCompleted(step.chapterId)
+                ? "bg-brand-green text-on-accent"
+                : "bg-brand-blue text-on-accent",
+            )}>
               {step.badge}
             </span>
             <span className="text-[11px] font-mono text-muted">
@@ -457,7 +482,7 @@ export const OnboardingTour: React.FC = () => {
             id="tour-step-description"
             className="text-xs font-sans text-muted leading-relaxed mt-1.5 whitespace-pre-line"
           >
-            {step.description}
+            {renderFormattedDescription(step.description)}
           </p>
         </div>
 

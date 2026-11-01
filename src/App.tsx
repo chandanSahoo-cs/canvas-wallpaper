@@ -14,6 +14,7 @@ import { PreviewPill } from "./components/PreviewPill";
 import { SettingsDialog } from "./widgets/SettingsDialog";
 import { WidgetLayoutOverlay } from "./widgets/WidgetLayoutOverlay";
 import { OnboardingTour } from "./components/OnboardingTour";
+import { TourHintPill } from "./components/TourHintPill";
 import { PresetGalleryDialog } from "./components/PresetGalleryDialog";
 import { LibraryModal } from "./components/library/LibraryModal";
 import { LightboxModal } from "./components/lightbox/LightboxModal";
@@ -259,6 +260,7 @@ export const App: React.FC = () => {
       <LibraryModal />
       <LightboxModal />
       <OnboardingTour />
+      <TourHintPill />
 
       {/* Backup & Restore Modal */}
       <BackupModal
