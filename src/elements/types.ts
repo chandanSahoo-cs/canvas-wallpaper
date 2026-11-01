@@ -135,4 +135,5 @@ export interface BackgroundConfig {
   gradient?: string; // CSS gradient string
   imageAssetId?: string; // Asset id in IndexedDB
   pattern?: PatternType;
+  fit?: "cover" | "contain";
 }

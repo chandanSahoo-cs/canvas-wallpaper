@@ -996,6 +996,52 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   const pickDaily2 = selectResurfacePick({ mode: "daily", fit: "cover", showCaption: true, exclusions: [] }, index, "board-1");
   assert(pickDaily1.item.id === pickDaily2.item.id, "Daily pick is strictly deterministic for current day");
 
+  // --- SECTION 22: Lightbox Store & Inspection (Phase 2) ---
+  console.log("\n--- SECTION 22: Lightbox Store & Inspection (Phase 2) ---");
+  const { useLightboxStore } = jiti('../src/lib/lightbox/store.ts');
+
+  assert(useLightboxStore.getState().isOpen === false, "Lightbox starts closed");
+  assert(useLightboxStore.getState().zoom === 1, "Lightbox starts with zoom 1");
+
+  const testLightboxItems = [
+    { id: "img-1", assetId: "asset-1", caption: "Photo 1" },
+    { id: "img-2", assetId: "asset-2", caption: "Photo 2" },
+    { id: "img-3", assetId: "asset-3", caption: "Photo 3" },
+  ];
+
+  useLightboxStore.getState().open(testLightboxItems, 1);
+  assert(useLightboxStore.getState().isOpen === true, "open() opens lightbox");
+  assert(useLightboxStore.getState().currentIndex === 1, "open() sets startIndex correctly");
+  assert(useLightboxStore.getState().items.length === 3, "open() loads all candidate items");
+
+  // Cyclical next
+  useLightboxStore.getState().next();
+  assert(useLightboxStore.getState().currentIndex === 2, "next() advances to index 2");
+  useLightboxStore.getState().next();
+  assert(useLightboxStore.getState().currentIndex === 0, "next() wraps around to index 0");
+
+  // Cyclical prev
+  useLightboxStore.getState().prev();
+  assert(useLightboxStore.getState().currentIndex === 2, "prev() wraps around to index 2");
+
+  // Zoom bounds clamping
+  useLightboxStore.getState().setZoom(10);
+  assert(useLightboxStore.getState().zoom === 8, "setZoom clamps to max 8x");
+  useLightboxStore.getState().setZoom(0.01);
+  assert(useLightboxStore.getState().zoom === 0.25, "setZoom clamps to min 0.25x");
+
+  // Pan and reset
+  useLightboxStore.getState().setPan({ x: 120, y: -45 });
+  assert(useLightboxStore.getState().pan.x === 120 && useLightboxStore.getState().pan.y === -45, "setPan sets coordinates");
+  useLightboxStore.getState().resetTransform();
+  assert(useLightboxStore.getState().zoom === 1, "resetTransform resets zoom to 1");
+  assert(useLightboxStore.getState().pan.x === 0 && useLightboxStore.getState().pan.y === 0, "resetTransform resets pan to 0,0");
+
+  // Close
+  useLightboxStore.getState().close();
+  assert(useLightboxStore.getState().isOpen === false, "close() closes lightbox");
+  assert(useLightboxStore.getState().items.length === 0, "close() clears items list");
+
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 
   if (failed > 0) {

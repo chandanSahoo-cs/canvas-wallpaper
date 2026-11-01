@@ -1,8 +1,9 @@
 import { useEffect, useRef } from "react";
-import { LinkElement, Point, TextElement, ToolType } from "../elements/types";
+import { ImageElement, LinkElement, Point, TextElement, ToolType } from "../elements/types";
 import { useAppStore } from "../store/useAppStore";
 import { useSceneStore } from "../store/useSceneStore";
 import { useResurfaceStore } from "../lib/resurface/store";
+import { useLightboxStore } from "../lib/lightbox/store";
 import { EraserTool } from "../tools/EraserTool";
 import { FreedrawTool } from "../tools/FreedrawTool";
 import { LineTool } from "../tools/LineTool";
@@ -231,7 +232,7 @@ export function useCanvas(
       }
     };
 
-    // Double-click to edit existing text, add text into shapes, or start typing anywhere like Excalidraw
+    // Double-click to inspect images in lightbox, edit text, add text into shapes, or start typing
     const onDoubleClick = (e: MouseEvent) => {
       const state = useAppStore.getState();
       if (state.mode !== "drawing" || state.isPreviewing) return;
@@ -244,6 +245,39 @@ export function useCanvas(
           ? rotatePoint(pos, getCenter(el), -el.angle)
           : pos;
         if (elementContains(el, local)) {
+          // Double-click an image in selection/drawing mode opens full-resolution lightbox
+          if (el.type === "image") {
+            const imgEl = el as ImageElement;
+            if (imgEl.assetId) {
+              const selectedImages = state.elements.filter(
+                (item) => item.type === "image" && state.selectedIds.has(item.id),
+              ) as ImageElement[];
+
+              const candidates =
+                selectedImages.length > 1
+                  ? selectedImages
+                  : (state.elements.filter(
+                      (item) => item.type === "image",
+                    ) as ImageElement[]);
+
+              const lightboxItems = candidates.map((item) => ({
+                id: item.id,
+                assetId: item.assetId,
+                elementId: item.id,
+                caption: item.caption,
+                sourceUrl: item.sourceUrl,
+                width: item.width,
+                height: item.height,
+              }));
+
+              const startIndex = lightboxItems.findIndex((it) => it.id === imgEl.id);
+              useLightboxStore.getState().open(
+                lightboxItems,
+                startIndex >= 0 ? startIndex : 0,
+              );
+              return;
+            }
+          }
           if (el.type === "text") {
             openTextEditor({ x: el.x, y: el.y }, el as TextElement);
             return;

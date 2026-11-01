@@ -82,6 +82,8 @@ export function useWallpaperBackground(background: BackgroundConfig) {
 
   const baseBg = bgImageUrl ? `url(${bgImageUrl})` : undefined;
 
+  const imageFit = background.fit || "cover";
+
   const bgStyle: React.CSSProperties = useMemo(() => {
     return {
       backgroundColor: effectiveBgColor,
@@ -92,15 +94,17 @@ export function useWallpaperBackground(background: BackgroundConfig) {
         : baseBg,
       backgroundSize: pattern
         ? baseBg
-          ? `${pattern.size}, cover`
+          ? `${pattern.size}, ${imageFit}`
           : pattern.size
-        : "cover",
+        : imageFit,
       backgroundPosition: "center",
+      backgroundRepeat: "no-repeat",
     };
   }, [
     effectiveBgColor,
     pattern,
     baseBg,
+    imageFit,
   ]);
 
   return { bgStyle, isLight };
