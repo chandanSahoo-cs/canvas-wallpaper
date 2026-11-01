@@ -9,6 +9,17 @@ import {
   shiftElements,
   ORIGINAL_PRESET_CENTER,
 } from "../lib/defaultWallpaperPreset";
+import {
+  createDefaultScene,
+  getStorageItems,
+  removeStorageItems,
+  SCHEMA_VERSION,
+  SCENE_INDEX_KEY,
+  SCENE_KEY_PREFIX,
+  ScenesIndex,
+  setStorageItems,
+  writeInstantPreviewCache,
+} from "../lib/scenes/storage";
 
 export interface Scene {
   id: string;
@@ -30,24 +41,19 @@ export interface SceneState {
   switchScene: (id: string) => void;
   deleteScene: (id: string) => void;
   renameScene: (id: string, name: string) => void;
-  saveScenesToStorage: () => void;
-  loadScenesFromStorage: () => void;
+  saveScenesToStorage: () => Promise<void>;
+  loadScenesFromStorage: () => Promise<void>;
+  resetAllScenes: () => Promise<void>;
 }
 
-export const MAX_SCENES = 5;
+export const MAX_SCENES = 100;
 
 let lastLocalSaveTime = 0;
+let isHydrating = false;
+let syncTimeout: any = null;
 
 export const useSceneStore = create<SceneState>((set, get) => ({
-  scenes: [
-    {
-      id: "default",
-      name: "Wallpaper 1",
-      elements: getDefaultWallpaperElements(),
-      background: { type: "color", color: "#14141a" },
-      createdAt: Date.now(),
-    },
-  ],
+  scenes: [createDefaultScene()],
   activeSceneId: "default",
 
   createScene: (name, initialElements, initialBackground) => {
@@ -57,7 +63,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     const { scenes, activeSceneId } = get();
     const appStore = useAppStore.getState();
 
-    // Preserve current scene state before switching to new scene
+    // Preserve current active scene state before switching
     const updatedScenes = scenes.map((s) => {
       if (s.id === activeSceneId) {
         return {
@@ -90,10 +96,12 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       background,
       createdAt: Date.now(),
     };
+
     set({
       scenes: [...updatedScenes, newScene],
       activeSceneId: id,
     });
+
     appStore.resetHistory();
     appStore.setElements(elements);
     appStore.setBackground(background);
@@ -131,7 +139,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     const { scenes, activeSceneId } = get();
     const appStore = useAppStore.getState();
 
-    // Save current scene state before switching
+    // Save current active scene state before switching
     const updatedScenes = scenes.map((s) => {
       if (s.id === activeSceneId) {
         return {
@@ -155,7 +163,8 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 
   deleteScene: (id) => {
     const { scenes, activeSceneId } = get();
-    if (scenes.length <= 1) return; // Keep at least one scene
+    if (scenes.length <= 1) return; // Retain at least one scene
+
     const remaining = scenes.filter((s) => s.id !== id);
     const nextActiveId = activeSceneId === id ? remaining[0].id : activeSceneId;
     set({ scenes: remaining, activeSceneId: nextActiveId });
@@ -167,6 +176,9 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       appStore.setElements(nextScene.elements);
       appStore.setBackground(nextScene.background);
     }
+
+    // Remove the deleted scene's key directly from storage
+    removeStorageItems([SCENE_KEY_PREFIX + id]).catch(() => {});
     get().saveScenesToStorage();
   },
 
@@ -177,213 +189,184 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     get().saveScenesToStorage();
   },
 
-  saveScenesToStorage: () => {
+  /**
+   * Scalable Per-Scene Storage Save:
+   * Writes the scenes index and only the active scene's data.
+   * Other scenes are untouched.
+   */
+  saveScenesToStorage: async () => {
     const { scenes, activeSceneId } = get();
     lastLocalSaveTime = Date.now();
+
     try {
       const activeScene = scenes.find((s) => s.id === activeSceneId) || scenes[0];
-      if (activeScene?.background?.color) {
-        try {
-          localStorage.setItem("papertab_bg_color", activeScene.background.color);
-        } catch (e) {}
-      }
-      if (
-        typeof chrome !== "undefined" &&
-        chrome.storage &&
-        chrome.storage.local
-      ) {
-        chrome.storage.local.set({
-          wallpaperScenes: JSON.stringify(scenes),
-          wallpaperActiveSceneId: activeSceneId,
-        });
-      } else {
-        localStorage.setItem("wallpaperScenes", JSON.stringify(scenes));
-        localStorage.setItem("wallpaperActiveSceneId", activeSceneId);
-      }
-    } catch (e) {
-      console.error("Scenes save error", e);
+
+      // Instant-paint synchronous cache
+      writeInstantPreviewCache(activeScene);
+
+      // Construct compact scene index
+      const index: ScenesIndex = {
+        schemaVersion: SCHEMA_VERSION,
+        activeId: activeSceneId,
+        order: scenes.map((s) => s.id),
+        items: Object.fromEntries(
+          scenes.map((s) => [
+            s.id,
+            {
+              id: s.id,
+              name: s.name,
+              createdAt: s.createdAt,
+              updatedAt: Date.now(),
+            },
+          ]),
+        ),
+      };
+
+      // Atomic write of index + active scene only
+      await setStorageItems({
+        [SCENE_INDEX_KEY]: index,
+        [SCENE_KEY_PREFIX + activeScene.id]: activeScene,
+      });
+    } catch (err) {
+      console.error("Scenes save error:", err);
     }
   },
 
-  loadScenesFromStorage: () => {
+  /**
+   * Loads scenes from per-scene storage keys with schema validation and one-time reset.
+   */
+  loadScenesFromStorage: async () => {
     try {
       const sanitize = (raw: any): CanvasElement[] => {
         if (!Array.isArray(raw)) return [];
-        return raw
-          .filter(
-            (el) => el && typeof el === "object" && typeof el.type === "string",
-          )
-          .map((el) => {
-            if (el.type === "text") {
-              return {
-                ...el,
-                text: typeof el.text === "string" ? el.text : "",
-              };
-            }
-            return el;
-          });
+        return raw.filter(
+          (el) => el && typeof el === "object" && typeof el.type === "string",
+        );
       };
 
-      const applyScenes = (
-        rawScenes: string | null,
-        rawActiveId: string | null,
-        rawFallbackElements: string | null,
-        rawFallbackBg: string | null,
-      ) => {
-        let scenes: Scene[] = [];
-        if (rawScenes) {
-          try {
-            const parsedScenes = JSON.parse(rawScenes);
-            if (Array.isArray(parsedScenes)) {
-              scenes = parsedScenes.map((s: any) => ({
-                ...s,
-                elements: sanitize(s.elements),
-              }));
-            }
-          } catch (e) {}
-        }
+      const storage = await getStorageItems<any>([
+        SCENE_INDEX_KEY,
+        "wallpaperScenes",
+      ]);
 
-        let fallbackElements: CanvasElement[] = [];
-        if (rawFallbackElements) {
-          try {
-            fallbackElements = sanitize(JSON.parse(rawFallbackElements));
-          } catch (e) {}
-        }
+      const index = storage[SCENE_INDEX_KEY] as ScenesIndex | undefined;
 
-        let fallbackBg: BackgroundConfig = { type: "color", color: "#14141a" };
-        if (rawFallbackBg) {
-          try {
-            const parsed = JSON.parse(rawFallbackBg);
-            fallbackBg =
-              typeof parsed === "string"
-                ? { type: "color", color: parsed }
-                : parsed;
-          } catch (e) {
-            fallbackBg = { type: "color", color: rawFallbackBg };
-          }
-        }
-
-        const isFirstRun = !Array.isArray(scenes) || scenes.length === 0;
-        if (isFirstRun) {
-          scenes = [
-            {
-              id: "default",
-              name: "Wallpaper 1",
-              elements:
-                fallbackElements.length > 0
-                  ? fallbackElements
-                  : getDefaultWallpaperElements(),
-              background: fallbackBg,
-              createdAt: Date.now(),
-            },
-          ];
-        }
-
-        const prevActiveId = get().activeSceneId;
-        const activeId =
-          rawActiveId && scenes.some((s) => s.id === rawActiveId)
-            ? rawActiveId
-            : scenes[0].id;
-
-        // If another tab switched the active scene, reset undo/redo history to prevent cross-scene bleed
-        if (activeId !== prevActiveId) {
-          useAppStore.getState().resetHistory();
-        }
-
-        set({ scenes, activeSceneId: activeId });
-
-        const currentScene = scenes.find((s) => s.id === activeId) || scenes[0];
-        let elementsToLoad = currentScene.elements;
-        if (
-          (!elementsToLoad || elementsToLoad.length === 0) &&
-          fallbackElements.length > 0 &&
-          isFirstRun
-        ) {
-          elementsToLoad = fallbackElements;
-          currentScene.elements = fallbackElements;
-        } else if (!elementsToLoad) {
-          elementsToLoad = [];
-          currentScene.elements = elementsToLoad;
-        }
-
-        // Auto-center default preset on new or different machines if still at original author coordinates
-        if (isDefaultPresetAtOriginalPosition(elementsToLoad)) {
-          const targetW =
-            typeof window !== "undefined" && window.innerWidth > 0
-              ? window.innerWidth
-              : 1466;
-          const targetH =
-            typeof window !== "undefined" && window.innerHeight > 0
-              ? window.innerHeight
-              : 748;
-          const dx = targetW / 2 - ORIGINAL_PRESET_CENTER.x;
-          const dy = targetH / 2 - ORIGINAL_PRESET_CENTER.y;
-          if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
-            elementsToLoad = shiftElements(elementsToLoad, dx, dy);
-            currentScene.elements = elementsToLoad;
-            scenes = scenes.map((s) =>
-              s.id === currentScene.id ? { ...s, elements: elementsToLoad } : s,
-            );
-            set({ scenes });
-            setTimeout(() => {
-              get().saveScenesToStorage();
-            }, 50);
-          }
-        }
-
-        isHydrating = true;
-        const appStore = useAppStore.getState();
-        const validSelected = new Set(
-          [...appStore.selectedIds].filter((id) =>
-            (elementsToLoad || []).some((el) => el.id === id),
-          ),
-        );
-        appStore.setSelectedIds(validSelected);
-        appStore.setElements(elementsToLoad || []);
-        const effectiveBg = currentScene.background || fallbackBg;
-        if (effectiveBg?.color) {
-          try {
-            localStorage.setItem("papertab_bg_color", effectiveBg.color);
-          } catch (e) {}
-        }
-        appStore.setBackground(effectiveBg);
-        setTimeout(() => {
-          isHydrating = false;
-        }, 50);
-      };
-
-      if (
-        typeof chrome !== "undefined" &&
-        chrome.storage &&
-        chrome.storage.local
-      ) {
-        chrome.storage.local.get(
-          [
-            "wallpaperScenes",
-            "wallpaperActiveSceneId",
-            "wallpaperElements",
-            "wallpaperBackground",
-          ],
-          (res: Record<string, any>) => {
-            applyScenes(
-              (res.wallpaperScenes as string) || null,
-              (res.wallpaperActiveSceneId as string) || null,
-              (res.wallpaperElements as string) || null,
-              (res.wallpaperBackground as string) || null,
-            );
-          },
-        );
-      } else {
-        applyScenes(
-          localStorage.getItem("wallpaperScenes"),
-          localStorage.getItem("wallpaperActiveSceneId"),
-          localStorage.getItem("wallpaperElements"),
-          localStorage.getItem("wallpaperBackground"),
-        );
+      // Schema mismatch or first run: perform one-time local reset
+      if (!index || index.schemaVersion !== SCHEMA_VERSION || !Array.isArray(index.order)) {
+        console.info("Initializing scene storage with schema v" + SCHEMA_VERSION);
+        const defaultScene = createDefaultScene();
+        set({ scenes: [defaultScene], activeSceneId: defaultScene.id });
+        useAppStore.getState().setElements(defaultScene.elements);
+        useAppStore.getState().setBackground(defaultScene.background);
+        await get().saveScenesToStorage();
+        return;
       }
-    } catch (e) {
-      console.error("Scenes load error", e);
+
+      // Fetch all scenes by their discrete keys
+      const sceneKeys = index.order.map((id) => SCENE_KEY_PREFIX + id);
+      const sceneRecords = await getStorageItems<any>(sceneKeys);
+
+      const loadedScenes: Scene[] = [];
+      for (const id of index.order) {
+        const raw = sceneRecords[SCENE_KEY_PREFIX + id];
+        const indexMeta = index.items[id];
+        if (raw && typeof raw === "object") {
+          loadedScenes.push({
+            id: raw.id || id,
+            name: raw.name || indexMeta?.name || `Wallpaper`,
+            elements: sanitize(raw.elements),
+            background: raw.background || { type: "color", color: "#14141a" },
+            createdAt: raw.createdAt || indexMeta?.createdAt || Date.now(),
+          });
+        } else if (indexMeta) {
+          loadedScenes.push({
+            id,
+            name: indexMeta.name || "Wallpaper",
+            elements: [],
+            background: { type: "color", color: "#14141a" },
+            createdAt: indexMeta.createdAt || Date.now(),
+          });
+        }
+      }
+
+      const scenes = loadedScenes.length > 0 ? loadedScenes : [createDefaultScene()];
+      const activeId = scenes.some((s) => s.id === index.activeId)
+        ? index.activeId
+        : scenes[0].id;
+
+      const prevActiveId = get().activeSceneId;
+      if (activeId !== prevActiveId) {
+        useAppStore.getState().resetHistory();
+      }
+
+      set({ scenes, activeSceneId: activeId });
+
+      const currentScene = scenes.find((s) => s.id === activeId) || scenes[0];
+      let elementsToLoad = currentScene.elements;
+
+      // Auto-center default preset on new/different machines if at original author coordinates
+      if (isDefaultPresetAtOriginalPosition(elementsToLoad)) {
+        const targetW =
+          typeof window !== "undefined" && window.innerWidth > 0
+            ? window.innerWidth
+            : 1466;
+        const targetH =
+          typeof window !== "undefined" && window.innerHeight > 0
+            ? window.innerHeight
+            : 748;
+        const dx = targetW / 2 - ORIGINAL_PRESET_CENTER.x;
+        const dy = targetH / 2 - ORIGINAL_PRESET_CENTER.y;
+        if (Math.abs(dx) > 1 || Math.abs(dy) > 1) {
+          elementsToLoad = shiftElements(elementsToLoad, dx, dy);
+          currentScene.elements = elementsToLoad;
+          set({
+            scenes: scenes.map((s) =>
+              s.id === currentScene.id ? { ...s, elements: elementsToLoad } : s,
+            ),
+          });
+          get().saveScenesToStorage();
+        }
+      }
+
+      isHydrating = true;
+      const appStore = useAppStore.getState();
+      const validSelected = new Set(
+        [...appStore.selectedIds].filter((id) =>
+          elementsToLoad.some((el) => el.id === id),
+        ),
+      );
+      appStore.setSelectedIds(validSelected);
+      appStore.setElements(elementsToLoad);
+      appStore.setBackground(currentScene.background);
+
+      writeInstantPreviewCache(currentScene);
+
+      setTimeout(() => {
+        isHydrating = false;
+      }, 50);
+    } catch (err) {
+      console.error("Scenes load error:", err);
     }
+  },
+
+  /**
+   * Resets all scenes to initial default (scenes only; does not delete assets).
+   */
+  resetAllScenes: async () => {
+    const { scenes } = get();
+    const keysToRemove = [
+      SCENE_INDEX_KEY,
+      "wallpaperScenes",
+      "wallpaperActiveSceneId",
+      ...scenes.map((s) => SCENE_KEY_PREFIX + s.id),
+    ];
+    await removeStorageItems(keysToRemove);
+    const defaultScene = createDefaultScene();
+    set({ scenes: [defaultScene], activeSceneId: defaultScene.id });
+    useAppStore.getState().resetHistory();
+    useAppStore.getState().setElements(defaultScene.elements);
+    useAppStore.getState().setBackground(defaultScene.background);
+    await get().saveScenesToStorage();
   },
 }));
 
@@ -392,17 +375,16 @@ if (typeof chrome !== "undefined" && chrome.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== "local") return;
     // Ignore storage change notifications originated by this tab's own recent save
-    if (Date.now() - lastLocalSaveTime < 350) return;
-    if (changes.wallpaperScenes || changes.wallpaperActiveSceneId) {
+    if (Date.now() - lastLocalSaveTime < 450) return;
+
+    const activeId = useSceneStore.getState().activeSceneId;
+    if (changes[SCENE_INDEX_KEY] || changes[SCENE_KEY_PREFIX + activeId]) {
       useSceneStore.getState().loadScenesFromStorage();
     }
   });
 }
 
-// Automatically sync any canvas element and background changes to the active scene & storage
-let syncTimeout: any = null;
-let isHydrating = false;
-
+// Automatically sync active canvas element and background changes to the active scene & storage
 useAppStore.subscribe((state, prevState) => {
   if (isHydrating) return;
   if (
@@ -417,16 +399,16 @@ useAppStore.subscribe((state, prevState) => {
     );
     useSceneStore.setState({ scenes: updatedScenes });
 
-    // Debounce disk save slightly so high-speed drawing doesn't thrash storage
+    // Debounce disk saves (~400ms) to avoid thrashing storage during drawing/dragging
     clearTimeout(syncTimeout);
     syncTimeout = setTimeout(() => {
       sceneState.saveScenesToStorage();
       syncTimeout = null;
-    }, 150);
+    }, 400);
   }
 });
 
-// Flush any pending debounced writes before tab close or navigation
+// Flush any pending debounced writes on beforeunload, pagehide, and visibilitychange
 if (typeof window !== "undefined") {
   const flushSync = () => {
     if (syncTimeout) {
@@ -435,6 +417,12 @@ if (typeof window !== "undefined") {
       useSceneStore.getState().saveScenesToStorage();
     }
   };
+
   window.addEventListener("beforeunload", flushSync);
   window.addEventListener("pagehide", flushSync);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      flushSync();
+    }
+  });
 }

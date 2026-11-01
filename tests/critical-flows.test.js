@@ -41,6 +41,19 @@ const {
   base64ToBlob,
 } = jiti('../src/lib/assets/index.ts');
 
+const {
+  SCHEMA_VERSION,
+  SCENE_INDEX_KEY,
+  SCENE_KEY_PREFIX,
+  INSTANT_PREVIEW_KEY,
+  BG_COLOR_KEY,
+  createDefaultScene,
+} = jiti('../src/lib/scenes/storage.ts');
+
+const {
+  MAX_SCENES,
+} = jiti('../src/store/useSceneStore.ts');
+
 let passed = 0;
 let failed = 0;
 
@@ -179,6 +192,21 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   const restoredBlob = base64ToBlob(b64, 'image/webp');
   const restoredHash = await computeBlobHash(restoredBlob);
   assert(restoredHash === await computeBlobHash(originalBlob), 'base64ToBlob and blobToBase64 roundtrip preserves byte integrity');
+
+  // --- SECTION 10: Scalable Scene Persistence & Discrete Keys ---
+  console.log('\n--- SECTION 10: Scalable Scene Persistence (Phase 2) ---');
+  assert(SCHEMA_VERSION === 2, 'Schema version is bumped to 2 for discrete scene storage');
+  assert(SCENE_INDEX_KEY === 'scenes_index', 'Scene index key is scenes_index');
+  assert(SCENE_KEY_PREFIX === 'scene:', 'Scene discrete key prefix is scene:');
+  assert(MAX_SCENES === 100, 'MAX_SCENES is raised to 100');
+
+  const defScene = createDefaultScene();
+  assert(defScene.id === 'default' && Array.isArray(defScene.elements) && defScene.background, 'createDefaultScene produces standard default scene');
+
+  const sceneKey1 = SCENE_KEY_PREFIX + 'board-abc';
+  const sceneKey2 = SCENE_KEY_PREFIX + 'board-xyz';
+  assert(sceneKey1 === 'scene:board-abc' && sceneKey2 === 'scene:board-xyz', 'Discrete scene keys isolate storage items per board');
+  assert(sceneKey1 !== sceneKey2, 'Different boards map to distinct storage keys');
 
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 
