@@ -21,7 +21,7 @@ export const ClockWidget: React.FC<ClockWidgetProps> = ({
     propIsLight !== undefined
       ? propIsLight
       : !(background?.type === "image" && background?.imageAssetId) &&
-        isColorLight(background?.color || "#14141a");
+        isColorLight(background?.color || "#f6faf8");
 
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 1000);

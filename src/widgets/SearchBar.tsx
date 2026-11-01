@@ -20,7 +20,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     propIsLight !== undefined
       ? propIsLight
       : !(background?.type === "image" && background?.imageAssetId) &&
-        isColorLight(background?.color || "#14141a");
+        isColorLight(background?.color || "#f6faf8");
 
   if (!showSearch) return null;
 

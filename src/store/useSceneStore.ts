@@ -42,11 +42,16 @@ export interface SceneState {
   deleteScene: (id: string) => void;
   renameScene: (id: string, name: string) => void;
   saveScenesToStorage: () => Promise<void>;
-  loadScenesFromStorage: () => Promise<void>;
+  loadScenesFromStorage: (options?: { isCrossTabSync?: boolean }) => Promise<void>;
   resetAllScenes: () => Promise<void>;
 }
 
 export const MAX_SCENES = 100;
+
+const tabSessionId =
+  typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+    ? crypto.randomUUID()
+    : Math.random().toString(36).slice(2) + Date.now().toString(36);
 
 let lastLocalSaveTime = 0;
 let isHydrating = false;
@@ -87,7 +92,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       : [];
     const background: BackgroundConfig = initialBackground
       ? { ...initialBackground }
-      : { type: "color", color: "#14141a" };
+      : createDefaultScene().background;
 
     const newScene: Scene = {
       id,
@@ -220,6 +225,8 @@ export const useSceneStore = create<SceneState>((set, get) => ({
             },
           ]),
         ),
+        _sourceTab: tabSessionId,
+        _updatedAt: Date.now(),
       };
 
       // Atomic write of index + active scene only
@@ -235,7 +242,8 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   /**
    * Loads scenes from per-scene storage keys with schema validation and one-time reset.
    */
-  loadScenesFromStorage: async () => {
+  loadScenesFromStorage: async (options?: { isCrossTabSync?: boolean }) => {
+    isHydrating = true;
     try {
       const sanitize = (raw: any): CanvasElement[] => {
         if (!Array.isArray(raw)) return [];
@@ -275,7 +283,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
             id: raw.id || id,
             name: raw.name || indexMeta?.name || `Wallpaper`,
             elements: sanitize(raw.elements),
-            background: raw.background || { type: "color", color: "#14141a" },
+            background: raw.background || createDefaultScene().background,
             createdAt: raw.createdAt || indexMeta?.createdAt || Date.now(),
           });
         } else if (indexMeta) {
@@ -283,7 +291,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
             id,
             name: indexMeta.name || "Wallpaper",
             elements: [],
-            background: { type: "color", color: "#14141a" },
+            background: createDefaultScene().background,
             createdAt: indexMeta.createdAt || Date.now(),
           });
         }
@@ -305,7 +313,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       let elementsToLoad = currentScene.elements;
 
       // Auto-center default preset on new/different machines if at original author coordinates
-      if (isDefaultPresetAtOriginalPosition(elementsToLoad)) {
+      if (!options?.isCrossTabSync && isDefaultPresetAtOriginalPosition(elementsToLoad)) {
         const targetW =
           typeof window !== "undefined" && window.innerWidth > 0
             ? window.innerWidth
@@ -346,6 +354,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       }, 50);
     } catch (err) {
       console.error("Scenes load error:", err);
+      isHydrating = false;
     }
   },
 
@@ -374,12 +383,19 @@ export const useSceneStore = create<SceneState>((set, get) => ({
 if (typeof chrome !== "undefined" && chrome.storage?.onChanged) {
   chrome.storage.onChanged.addListener((changes, areaName) => {
     if (areaName !== "local") return;
-    // Ignore storage change notifications originated by this tab's own recent save
-    if (Date.now() - lastLocalSaveTime < 450) return;
+
+    // Ignore storage writes initiated by this specific tab
+    const indexChange = changes[SCENE_INDEX_KEY];
+    const newIndex = indexChange?.newValue as ScenesIndex | undefined;
+    if (newIndex?._sourceTab === tabSessionId) {
+      return;
+    }
+
+    if (Date.now() - lastLocalSaveTime < 250) return;
 
     const activeId = useSceneStore.getState().activeSceneId;
     if (changes[SCENE_INDEX_KEY] || changes[SCENE_KEY_PREFIX + activeId]) {
-      useSceneStore.getState().loadScenesFromStorage();
+      useSceneStore.getState().loadScenesFromStorage({ isCrossTabSync: true });
     }
   });
 }
@@ -387,10 +403,10 @@ if (typeof chrome !== "undefined" && chrome.storage?.onChanged) {
 // Automatically sync active canvas element and background changes to the active scene & storage
 useAppStore.subscribe((state, prevState) => {
   if (isHydrating) return;
-  if (
-    state.elements !== prevState.elements ||
-    state.background !== prevState.background
-  ) {
+  const elementsChanged = state.elements !== prevState.elements;
+  const bgChanged = state.background !== prevState.background;
+
+  if (elementsChanged || bgChanged) {
     const sceneState = useSceneStore.getState();
     const updatedScenes = sceneState.scenes.map((s) =>
       s.id === sceneState.activeSceneId
@@ -399,12 +415,13 @@ useAppStore.subscribe((state, prevState) => {
     );
     useSceneStore.setState({ scenes: updatedScenes });
 
-    // Debounce disk saves (~400ms) to avoid thrashing storage during drawing/dragging
+    // Background changes save quickly (50ms) to ensure persistence; element edits debounce (400ms)
     clearTimeout(syncTimeout);
+    const delay = bgChanged && !elementsChanged ? 50 : 400;
     syncTimeout = setTimeout(() => {
-      sceneState.saveScenesToStorage();
+      useSceneStore.getState().saveScenesToStorage();
       syncTimeout = null;
-    }, 400);
+    }, delay);
   }
 });
 

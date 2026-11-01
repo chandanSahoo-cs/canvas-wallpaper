@@ -51,7 +51,7 @@ export const StylePanel: React.FC = () => {
     }
   }, [currentTool, setActiveTab]);
 
-  const isLightBg = isColorLight(background.color || "#14141a");
+  const isLightBg = isColorLight(background.color || "#f6faf8");
 
   const handleStrokeChange = (color: string) => {
     setCurrentStyles({ strokeColor: color });

@@ -26,11 +26,11 @@ export const WALLPAPER_PRESETS: WallpaperPreset[] = [
     title: "Playful Doodles",
     description: "Hand-drawn friendly dinosaurs, avocado, amoeba, and cosmic doodles.",
     badge: "Signature",
-    previewBg: "linear-gradient(135deg, #14141a 0%, #1e1e24 100%)",
+    previewBg: "linear-gradient(135deg, #0e1a1f 0%, #15262d 100%)",
     accentColor: "#46BAEB",
     background: {
       type: "color",
-      color: "#14141a",
+      color: "#0e1a1f",
       pattern: "dots",
     },
     getElements: getPlayfulDoodlesElements,

@@ -33,7 +33,7 @@ export async function exportWallpaperAsPng(): Promise<void> {
       ctx.drawImage(bgBitmap, 0, 0, width, height);
     }
   } else {
-    ctx.fillStyle = background.color || "#14141a";
+    ctx.fillStyle = background.color || "#f6faf8";
     ctx.fillRect(0, 0, width, height);
   }
 
@@ -181,7 +181,7 @@ export async function exportWallpaperAsPng(): Promise<void> {
         const fontSize =
           textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
         ctx.font = `${fontSize}px ${getFontFamilyString(textEl.fontFamily)}`;
-        const isLightBg = isColorLight(background.color || "#14141a");
+        const isLightBg = isColorLight(background.color || "#f6faf8");
         ctx.fillStyle = textEl.strokeColor || (isLightBg ? "#1e1e1e" : "#ffffff");
         ctx.textBaseline = "top";
         const lines = textStr.split("\n");

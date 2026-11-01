@@ -109,6 +109,10 @@ const {
   useSceneStore,
 } = jiti('../src/store/useSceneStore.ts');
 
+const {
+  useAppStore,
+} = jiti('../src/store/useAppStore.ts');
+
 let passed = 0;
 let failed = 0;
 
@@ -774,6 +778,36 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   // Verify non-image element is untouched
   const elText = board1.elements.find(e => e.id === 'el-text');
   assert(elText.text === 'Unaffected Note', 'Non-image elements remain untouched');
+
+    // --- SECTION 18: Wallpaper Background Persistence & Sketchbook Paper Sync ---
+  console.log("\n--- SECTION 18: Wallpaper Background Persistence & Sketchbook Paper Sync ---");
+  const defaultPaperScene = createDefaultScene();
+  assert(defaultPaperScene.background.color !== "#14141a", "createDefaultScene background does not use legacy black #14141a");
+  assert(defaultPaperScene.background.color === "#f6faf8" || defaultPaperScene.background.color === "#0e1a1f", "createDefaultScene background uses sketchbook paper token");
+
+  // Verify setBackground persists immediately to localStorage cache
+  useAppStore.getState().setBackground({ type: "color", color: "#00BF63" });
+  assert(useAppStore.getState().background.color === "#00bf63", "setBackground normalizes color to lowercase hex");
+  assert(global.localStorage.getItem(BG_COLOR_KEY) === "#00bf63", "setBackground immediately updates localStorage preview cache");
+
+  // Verify scene store reflects background update
+  const firstScene = useSceneStore.getState().scenes[0];
+  useSceneStore.setState({ activeSceneId: firstScene.id });
+  useAppStore.getState().setBackground({ type: "color", color: "#00BF63" });
+  const currentScene = useSceneStore.getState().scenes.find(s => s.id === useSceneStore.getState().activeSceneId);
+  assert(currentScene.background.color === "#00bf63", "Active scene background syncs with app store background");
+
+  // Verify theme mode adaptively adjusts neutral backgrounds
+  useAppStore.getState().setBackground({ type: "color", color: "#f6faf8" });
+  useAppStore.getState().setThemeMode("dark");
+  assert(useAppStore.getState().background.color === "#0e1a1f", "Switching to dark theme updates neutral paper to #0e1a1f");
+  useAppStore.getState().setThemeMode("light");
+  assert(useAppStore.getState().background.color === "#f6faf8", "Switching to light theme updates neutral paper to #f6faf8");
+
+  // Custom accent background is preserved when switching themes
+  useAppStore.getState().setBackground({ type: "color", color: "#46baeb" });
+  useAppStore.getState().setThemeMode("dark");
+  assert(useAppStore.getState().background.color === "#46baeb", "Custom accent background color is preserved across theme mode changes");
 
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 

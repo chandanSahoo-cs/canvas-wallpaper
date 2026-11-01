@@ -152,7 +152,7 @@ function sanitizeElement(el: any): CanvasElement | null {
 }
 
 function sanitizeBackground(bg: any): BackgroundConfig {
-  if (!bg || typeof bg !== "object") return { type: "color", color: "#14141a" };
+  if (!bg || typeof bg !== "object") return { type: "color", color: "#f6faf8" };
   const pattern = ["none", "dots", "grid", "lines"].includes(bg.pattern)
     ? bg.pattern
     : undefined;
@@ -161,13 +161,13 @@ function sanitizeBackground(bg: any): BackgroundConfig {
     return {
       type: "image",
       imageAssetId: typeof bg.imageAssetId === "string" ? bg.imageAssetId : undefined,
-      color: typeof bg.color === "string" ? bg.color.slice(0, 50) : "#14141a",
+      color: typeof bg.color === "string" ? bg.color.slice(0, 50) : "#f6faf8",
       pattern,
     };
   }
   return {
     type: "color",
-    color: typeof bg.color === "string" ? bg.color.slice(0, 50) : "#14141a",
+    color: typeof bg.color === "string" ? bg.color.slice(0, 50) : "#f6faf8",
     pattern,
   };
 }

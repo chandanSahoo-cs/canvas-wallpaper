@@ -20,6 +20,8 @@ export interface ScenesIndex {
   activeId: string;
   order: string[];
   items: Record<string, SceneIndexItem>;
+  _sourceTab?: string;
+  _updatedAt?: number;
 }
 
 export interface StoredSceneRecord {
@@ -77,7 +79,11 @@ export async function removeStorageItems(keys: string[]): Promise<void> {
 
 export function writeInstantPreviewCache(activeScene: Scene): void {
   try {
-    const color = activeScene.background?.color || "#14141a";
+    const isDark =
+      typeof document !== "undefined" &&
+      document.documentElement.getAttribute("data-theme") === "dark";
+    const defaultColor = isDark ? "#0e1a1f" : "#f6faf8";
+    const color = (activeScene.background?.color || defaultColor).toLowerCase();
     localStorage.setItem(BG_COLOR_KEY, color);
     localStorage.setItem(
       INSTANT_PREVIEW_KEY,
@@ -92,11 +98,16 @@ export function writeInstantPreviewCache(activeScene: Scene): void {
 }
 
 export function createDefaultScene(): Scene {
+  const isDark =
+    typeof document !== "undefined" &&
+    document.documentElement.getAttribute("data-theme") === "dark";
+  const defaultBgColor = isDark ? "#0e1a1f" : "#f6faf8";
+
   return {
     id: "default",
     name: "Wallpaper 1",
     elements: getDefaultWallpaperElements(),
-    background: { type: "color", color: "#14141a" },
+    background: { type: "color", color: defaultBgColor },
     createdAt: Date.now(),
   };
 }

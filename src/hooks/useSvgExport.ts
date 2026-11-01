@@ -31,7 +31,7 @@ export async function exportWallpaperAsSvg(): Promise<void> {
 
   // Background
   const bgColor = escapeXml(
-    background.color || "#14141a",
+    background.color || "#f6faf8",
   );
   svgParts.push(`<rect width="100%" height="100%" fill="${bgColor}" />`);
 
@@ -164,7 +164,7 @@ export async function exportWallpaperAsSvg(): Promise<void> {
         const fontFamily = escapeXml(
           getFontFamilyString(textEl.fontFamily).replace(/"/g, "'"),
         );
-        const isLightBg = isColorLight(background.color || "#14141a");
+        const isLightBg = isColorLight(background.color || "#f6faf8");
         const textColor = escapeXml(textEl.strokeColor || (isLightBg ? "#1e1e1e" : "#ffffff"));
         svgParts.push(
           `<text x="${textEl.x ?? 0}" y="${

@@ -68,7 +68,7 @@ export function isColorLight(colorStr?: string): boolean {
 }
 
 export function getDefaultStrokeColor(bgColor?: string): string {
-  return isColorLight(bgColor || "#14141a") ? "#1e1e1e" : "#ffffff";
+  return isColorLight(bgColor || "#f6faf8") ? "#1e1e1e" : "#ffffff";
 }
 
 export function sanitizeWebUrl(raw?: string): string {
