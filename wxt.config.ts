@@ -14,7 +14,8 @@ export default defineConfig({
     name: "PaperTab",
     description:
       "A drawable wallpaper for your New Tab page. Toggle drawing mode on to sketch, toggle it off to keep it as your background.",
-    permissions: ["storage", "unlimitedStorage"],
+    permissions: ["storage", "unlimitedStorage", "contextMenus"],
+    optional_host_permissions: ["https://*/*"],
     icons: {
       16: "/icon/16.png",
       32: "/icon/32.png",

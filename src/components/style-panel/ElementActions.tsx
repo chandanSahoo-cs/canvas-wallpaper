@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   ArrowDownToLine,
   ArrowUpToLine,
@@ -10,10 +10,15 @@ import {
   Trash2,
   Ungroup,
   Unlock,
+  LayoutGrid,
+  Columns3,
+  Rows2,
+  Columns2,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { CanvasElement } from "../../elements/types";
 import { useAppStore } from "../../store/useAppStore";
+import { ArrangeLayout } from "../../lib/arrange";
 
 interface ElementActionsProps {
   selectedMembers: CanvasElement[];
@@ -24,6 +29,8 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
   selectedMembers,
   isLocked,
 }) => {
+  const [spacing, setSpacing] = useState<number>(20);
+
   const duplicateSelected = useAppStore((s) => s.duplicateSelected);
   const deleteSelected = useAppStore((s) => s.deleteSelected);
   const toggleLockSelected = useAppStore((s) => s.toggleLockSelected);
@@ -33,11 +40,16 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
   const sendForward = useAppStore((s) => s.sendForward);
   const flipSelectedHorizontal = useAppStore((s) => s.flipSelectedHorizontal);
   const flipSelectedVertical = useAppStore((s) => s.flipSelectedVertical);
+  const arrangeSelected = useAppStore((s) => s.arrangeSelected);
 
   const hasGroups = selectedMembers.some(
     (el) => (el.groupIds?.length ?? 0) > 0,
   );
   const canGroup = hasGroups || selectedMembers.length >= 2;
+
+  const handleArrange = (layout: ArrangeLayout) => {
+    arrangeSelected(layout, spacing);
+  };
 
   return (
     <div className="pt-2.5 border-t border-line/20 flex flex-col gap-2">
@@ -88,6 +100,65 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
           )}
         </button>
       </div>
+
+      {/* Auto-Arrange Layout (Grid, Masonry, Row, Column) */}
+      {selectedMembers.length >= 2 && (
+        <div className="pt-2 border-t border-line/20 flex flex-col gap-1.5">
+          <div className="flex items-center justify-between text-[10px] font-hand font-bold tracking-wider text-muted uppercase">
+            <span>Arrange Layout</span>
+            <span className="font-mono text-[9px] text-muted">{spacing}px</span>
+          </div>
+
+          <div className="grid grid-cols-4 gap-1">
+            <button
+              title="Arrange in Grid"
+              onClick={() => handleArrange("grid")}
+              className="p-1.5 rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span className="text-[9px] font-hand">Grid</span>
+            </button>
+            <button
+              title="Arrange in Masonry"
+              onClick={() => handleArrange("masonry")}
+              className="p-1.5 rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
+            >
+              <Columns3 className="w-3.5 h-3.5" />
+              <span className="text-[9px] font-hand">Masonry</span>
+            </button>
+            <button
+              title="Arrange in Row"
+              onClick={() => handleArrange("row")}
+              className="p-1.5 rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
+            >
+              <Rows2 className="w-3.5 h-3.5" />
+              <span className="text-[9px] font-hand">Row</span>
+            </button>
+            <button
+              title="Arrange in Column"
+              onClick={() => handleArrange("column")}
+              className="p-1.5 rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface flex flex-col items-center justify-center gap-0.5 cursor-pointer transition-all active:translate-x-[1px] active:translate-y-[1px]"
+            >
+              <Columns2 className="w-3.5 h-3.5" />
+              <span className="text-[9px] font-hand">Col</span>
+            </button>
+          </div>
+
+          {/* Spacing control slider */}
+          <div className="flex items-center gap-2 pt-0.5">
+            <span className="text-[10px] font-hand text-muted shrink-0">Gap:</span>
+            <input
+              type="range"
+              min="4"
+              max="80"
+              step="4"
+              value={spacing}
+              onChange={(e) => setSpacing(Number(e.target.value))}
+              className="w-full accent-brand-blue cursor-pointer h-1.5 bg-paper rounded-sk border border-line/20"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Layer arrange */}
       <div className="grid grid-cols-2 gap-1 font-hand">

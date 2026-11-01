@@ -1,6 +1,9 @@
 import { useEffect, useRef } from "react";
-import { Point, TextElement, ToolType } from "../elements/types";
+import { ImageElement, LinkElement, Point, TextElement, ToolType } from "../elements/types";
 import { useAppStore } from "../store/useAppStore";
+import { useSceneStore } from "../store/useSceneStore";
+import { useResurfaceStore } from "../lib/resurface/store";
+import { useLightboxStore } from "../lib/lightbox/store";
 import { EraserTool } from "../tools/EraserTool";
 import { FreedrawTool } from "../tools/FreedrawTool";
 import { LineTool } from "../tools/LineTool";
@@ -54,8 +57,27 @@ export function useCanvas(
     function triggerRender() {
       const state = useAppStore.getState();
       const isCleanView = state.mode === "wallpaper" || state.isPreviewing;
+
+      let renderElements = state.elements;
+      if (state.mode === "wallpaper") {
+        const resurfaceState = useResurfaceStore.getState();
+        if (resurfaceState.currentPick.type === "item") {
+          renderElements = [];
+        } else if (
+          resurfaceState.currentPick.type === "board" &&
+          resurfaceState.currentPick.boardId
+        ) {
+          const pickedScene = useSceneStore
+            .getState()
+            .scenes.find((s) => s.id === resurfaceState.currentPick.boardId);
+          if (pickedScene) {
+            renderElements = pickedScene.elements;
+          }
+        }
+      }
+
       renderer.render({
-        elements: state.elements,
+        elements: renderElements,
         draft: isCleanView ? null : state.draft,
         selectedIds: isCleanView ? new Set() : state.selectedIds,
         zoom: isCleanView ? 1 : state.zoom,
@@ -73,7 +95,13 @@ export function useCanvas(
     }
 
     // Subscribe to Zustand state changes to trigger re-renders
-    const unsubscribe = useAppStore.subscribe(() => {
+    const unsubscribeApp = useAppStore.subscribe(() => {
+      triggerRender();
+    });
+    const unsubscribeResurface = useResurfaceStore.subscribe(() => {
+      triggerRender();
+    });
+    const unsubscribeScene = useSceneStore.subscribe(() => {
       triggerRender();
     });
 
@@ -116,6 +144,25 @@ export function useCanvas(
 
       const rawPos = { x: e.clientX, y: e.clientY };
       const pos = screenToCanvas(e.clientX, e.clientY);
+
+      // Ctrl/Cmd + Click on LinkElement opens URL in new tab (http/https only)
+      if ((e.ctrlKey || e.metaKey) && e.button === 0) {
+        const hitEl = [...state.elements].reverse().find((el) => {
+          if (el.type !== "link") return false;
+          const local = el.angle ? rotatePoint(pos, getCenter(el), -el.angle) : pos;
+          return elementContains(el, local);
+        }) as LinkElement | undefined;
+
+        if (
+          hitEl &&
+          hitEl.url &&
+          (hitEl.url.startsWith("http://") || hitEl.url.startsWith("https://"))
+        ) {
+          window.open(hitEl.url, "_blank", "noopener,noreferrer");
+          return;
+        }
+      }
+
       const tool = tools[state.currentTool];
       if (tool) {
         tool.onPointerDown({ pos, rawPos, e, canvas: canvas! });
@@ -185,7 +232,7 @@ export function useCanvas(
       }
     };
 
-    // Double-click to edit existing text, add text into shapes, or start typing anywhere like Excalidraw
+    // Double-click to inspect images in lightbox, edit text, add text into shapes, or start typing
     const onDoubleClick = (e: MouseEvent) => {
       const state = useAppStore.getState();
       if (state.mode !== "drawing" || state.isPreviewing) return;
@@ -198,6 +245,39 @@ export function useCanvas(
           ? rotatePoint(pos, getCenter(el), -el.angle)
           : pos;
         if (elementContains(el, local)) {
+          // Double-click an image in selection/drawing mode opens full-resolution lightbox
+          if (el.type === "image") {
+            const imgEl = el as ImageElement;
+            if (imgEl.assetId) {
+              const selectedImages = state.elements.filter(
+                (item) => item.type === "image" && state.selectedIds.has(item.id),
+              ) as ImageElement[];
+
+              const candidates =
+                selectedImages.length > 1
+                  ? selectedImages
+                  : (state.elements.filter(
+                      (item) => item.type === "image",
+                    ) as ImageElement[]);
+
+              const lightboxItems = candidates.map((item) => ({
+                id: item.id,
+                assetId: item.assetId,
+                elementId: item.id,
+                caption: item.caption,
+                sourceUrl: item.sourceUrl,
+                width: item.width,
+                height: item.height,
+              }));
+
+              const startIndex = lightboxItems.findIndex((it) => it.id === imgEl.id);
+              useLightboxStore.getState().open(
+                lightboxItems,
+                startIndex >= 0 ? startIndex : 0,
+              );
+              return;
+            }
+          }
           if (el.type === "text") {
             openTextEditor({ x: el.x, y: el.y }, el as TextElement);
             return;
@@ -340,7 +420,9 @@ export function useCanvas(
       if (fontInterval) {
         clearInterval(fontInterval);
       }
-      unsubscribe();
+      unsubscribeApp();
+      unsubscribeResurface();
+      unsubscribeScene();
     };
   }, [canvasRef]);
 }

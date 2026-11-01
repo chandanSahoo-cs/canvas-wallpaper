@@ -19,10 +19,12 @@ import {
   groupElements,
   ungroupElements,
 } from "../lib/groups";
+import { autoArrangeElements, ArrangeLayout } from "../lib/arrange";
 import { isColorLight } from "../lib/utils";
 import { duplicateElements, preparePastedElements } from "./clipboardHelpers";
 import { flipElements } from "../lib/flipElements";
 import { ThemeMode, getStoredTheme, setTheme } from "../lib/theme";
+import { BG_COLOR_KEY } from "../lib/scenes/storage";
 
 const HISTORY_LIMIT = 50;
 
@@ -133,6 +135,7 @@ export interface AppState {
   clipboard: CanvasElement[];
   toggleLockSelected: () => void;
   groupSelected: () => void;
+  arrangeSelected: (layout: ArrangeLayout, spacing?: number) => void;
   ungroupSelected: () => void;
   sendBackward: () => void;
   sendForward: () => void;
@@ -155,6 +158,24 @@ export interface AppState {
 
 let pasteOffsetMultiplier = 1;
 
+const getInitialBackground = (): BackgroundConfig => {
+  try {
+    if (typeof localStorage !== "undefined") {
+      const cached = localStorage.getItem(BG_COLOR_KEY);
+      if (cached && typeof cached === "string" && cached.startsWith("#")) {
+        return { type: "color", color: cached.toLowerCase() };
+      }
+    }
+  } catch {}
+  const theme = getStoredTheme();
+  return {
+    type: "color",
+    color: theme === "dark" ? "#0e1a1f" : "#f6faf8",
+  };
+};
+
+const initialBg = getInitialBackground();
+
 export const useAppStore = create<AppState>((set, get) => ({
   mode: "wallpaper",
   currentTool: "selection",
@@ -170,12 +191,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   zoom: 1.0,
   scrollOffset: { x: 0, y: 0 },
 
-  background: {
-    type: "color",
-    color: "#14141a",
-  },
+  background: initialBg,
 
-  currentStrokeColor: "#ffffff",
+  currentStrokeColor: isColorLight(initialBg.color) ? "#0e1a1f" : "#ffffff",
   currentFillColor: "transparent",
   currentFillStyle: "solid",
   currentStrokeWidth: 1.5,
@@ -350,6 +368,26 @@ export const useAppStore = create<AppState>((set, get) => ({
   setThemeMode: (mode: ThemeMode) => {
     setTheme(mode);
     set({ themeMode: mode });
+
+    const currentBg = get().background;
+    if (currentBg.type === "color") {
+      const curColor = (currentBg.color || "").toLowerCase();
+      const isDefaultNeutral =
+        curColor === "#14141a" ||
+        curColor === "#0e1a1f" ||
+        curColor === "#f6faf8" ||
+        curColor === "#f5f5f7" ||
+        curColor === "#ffffff";
+
+      if (isDefaultNeutral) {
+        const effectiveTheme =
+          mode === "system"
+            ? (typeof window !== "undefined" && window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+            : mode;
+        const targetColor = effectiveTheme === "dark" ? "#0e1a1f" : "#f6faf8";
+        get().setBackground({ type: "color", color: targetColor });
+      }
+    }
   },
 
   showBoundaryMarker: true,
@@ -376,34 +414,41 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setBackground: (bg) => {
     const prevBg = get().background;
+    const defaultColor = getStoredTheme() === "dark" ? "#0e1a1f" : "#f6faf8";
     const newBg: BackgroundConfig =
       typeof bg === "string"
-        ? { type: "color", color: bg }
-        : { ...prevBg, ...bg, type: bg.type || prevBg.type || "color" };
+        ? { type: "color", color: bg.toLowerCase() }
+        : {
+            ...prevBg,
+            ...bg,
+            color: (bg.color || prevBg.color || defaultColor).toLowerCase(),
+            type: bg.type || prevBg.type || "color",
+          };
 
-    const prevColor = prevBg.color || "#14141a";
-    const newColor = newBg.color || "#14141a";
+    const prevColor = prevBg.color || defaultColor;
+    const newColor = newBg.color || defaultColor;
     const prevIsLight = isColorLight(prevColor);
     const newIsLight = isColorLight(newColor);
 
     let nextStroke = get().currentStrokeColor;
     let nextElements = get().elements;
 
-    // When background switches between light and dark, adapt default monochrome colors
     if (prevIsLight !== newIsLight) {
       if (newIsLight) {
-        // Switched to light background: default stroke becomes black (#1e1e1e)
-        if (nextStroke === "#ffffff") nextStroke = "#1e1e1e";
+        if (nextStroke === "#ffffff" || nextStroke === "#eaf4f1") nextStroke = "#0e1a1f";
         nextElements = nextElements.map((el) =>
-          el.strokeColor === "#ffffff" ? { ...el, strokeColor: "#1e1e1e" } : el,
+          el.strokeColor === "#ffffff" || el.strokeColor === "#eaf4f1"
+            ? { ...el, strokeColor: "#0e1a1f" }
+            : el,
         );
       } else {
-        // Switched to dark background: default stroke becomes white (#ffffff)
-        if (nextStroke === "#1e1e1e" || nextStroke === "#000000")
-          nextStroke = "#ffffff";
+        if (nextStroke === "#1e1e1e" || nextStroke === "#000000" || nextStroke === "#0e1a1f")
+          nextStroke = "#eaf4f1";
         nextElements = nextElements.map((el) =>
-          el.strokeColor === "#1e1e1e" || el.strokeColor === "#000000"
-            ? { ...el, strokeColor: "#ffffff" }
+          el.strokeColor === "#1e1e1e" ||
+          el.strokeColor === "#000000" ||
+          el.strokeColor === "#0e1a1f"
+            ? { ...el, strokeColor: "#eaf4f1" }
             : el,
         );
       }
@@ -414,6 +459,13 @@ export const useAppStore = create<AppState>((set, get) => ({
       currentStrokeColor: nextStroke,
       elements: nextElements,
     });
+
+    try {
+      if (typeof localStorage !== "undefined" && newBg.color) {
+        localStorage.setItem(BG_COLOR_KEY, newBg.color.toLowerCase());
+      }
+    } catch {}
+
     get().saveToStorage();
   },
 
@@ -579,6 +631,15 @@ export const useAppStore = create<AppState>((set, get) => ({
         selectedIds.has(el.id) ? { ...el, locked: shouldLock } : el,
       ),
     }));
+    get().saveToStorage();
+  },
+
+  arrangeSelected: (layout: ArrangeLayout, spacing: number = 20) => {
+    const { selectedIds, elements } = get();
+    if (selectedIds.size < 2) return;
+    get().pushHistory();
+    const nextElements = autoArrangeElements(elements, selectedIds, layout, spacing);
+    set({ elements: nextElements });
     get().saveToStorage();
   },
 

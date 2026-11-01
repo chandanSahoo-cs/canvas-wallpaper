@@ -131,7 +131,8 @@ export function getBBox(el: CanvasElement): BoundingBox {
     el.type === "rectangle" ||
     el.type === "diamond" ||
     el.type === "ellipse" ||
-    el.type === "image"
+    el.type === "image" ||
+    el.type === "link"
   ) {
     return normBox(el);
   }
@@ -228,7 +229,7 @@ export function rectsIntersect(a: BoundingBox, b: BoundingBox): boolean {
 }
 
 export function elementContains(el: CanvasElement, localPos: Point): boolean {
-  if (el.type === "text" || el.type === "image") {
+  if (el.type === "text" || el.type === "image" || el.type === "link") {
     const b = getBBox(el);
     return (
       localPos.x >= b.x - 4 &&

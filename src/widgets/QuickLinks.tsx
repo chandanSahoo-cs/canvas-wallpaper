@@ -38,8 +38,8 @@ export const QuickLinks: React.FC<QuickLinksProps> = ({
   const isLight =
     propIsLight !== undefined
       ? propIsLight
-      : !(background?.type === "image" && background?.imageUrl) &&
-        isColorLight(background?.color || "#14141a");
+      : !(background?.type === "image" && background?.imageAssetId) &&
+        isColorLight(background?.color || "#f6faf8");
 
   if (!showQuickLinks) return null;
 

@@ -1,3 +1,4 @@
+import { loadFullImageBitmap } from "../lib/assets";
 import rough from "roughjs";
 import { useAppStore } from "../store/useAppStore";
 import { TextElement, ImageElement } from "../elements/types";
@@ -26,28 +27,13 @@ export async function exportWallpaperAsPng(): Promise<void> {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
   // 1. Draw background
-  if (background.type === "image" && background.imageUrl) {
-    const bgImg = new Image();
-    bgImg.src = background.imageUrl;
-    await new Promise((resolve) => {
-      let settled = false;
-      const done = () => {
-        if (!settled) {
-          settled = true;
-          resolve(true);
-        }
-      };
-      if (bgImg.complete) {
-        done();
-      } else {
-        bgImg.onload = done;
-        bgImg.onerror = done;
-        setTimeout(done, 3000);
-      }
-    });
-    ctx.drawImage(bgImg, 0, 0, width, height);
+  if (background.type === "image" && background.imageAssetId) {
+    const bgBitmap = await loadFullImageBitmap(background.imageAssetId);
+    if (bgBitmap) {
+      ctx.drawImage(bgBitmap, 0, 0, width, height);
+    }
   } else {
-    ctx.fillStyle = background.color || "#14141a";
+    ctx.fillStyle = background.color || "#f6faf8";
     ctx.fillRect(0, 0, width, height);
   }
 
@@ -96,7 +82,7 @@ export async function exportWallpaperAsPng(): Promise<void> {
     ctx.restore();
   }
 
-  // 2. Draw elements
+  // 2. Draw elements in order (full resolution images, bypassing LOD)
   const rc = rough.canvas(offscreen);
 
   for (const el of elements) {
@@ -195,7 +181,7 @@ export async function exportWallpaperAsPng(): Promise<void> {
         const fontSize =
           textEl.fontSize || FONT_SIZE_MAP[textEl.strokeWidth] || 20;
         ctx.font = `${fontSize}px ${getFontFamilyString(textEl.fontFamily)}`;
-        const isLightBg = isColorLight(background.color || "#14141a");
+        const isLightBg = isColorLight(background.color || "#f6faf8");
         ctx.fillStyle = textEl.strokeColor || (isLightBg ? "#1e1e1e" : "#ffffff");
         ctx.textBaseline = "top";
         const lines = textStr.split("\n");
@@ -211,33 +197,14 @@ export async function exportWallpaperAsPng(): Promise<void> {
       }
       case "image": {
         const imgEl = el as ImageElement;
-        const img = new Image();
-        if (imgEl.dataUrl.startsWith("http")) {
-          img.crossOrigin = "anonymous";
-        }
-        img.src = imgEl.dataUrl;
-        await new Promise((resolve) => {
-          let settled = false;
-          const done = () => {
-            if (!settled) {
-              settled = true;
-              resolve(true);
-            }
-          };
-          if (img.complete) {
-            done();
-          } else {
-            img.onload = done;
-            img.onerror = done;
-            setTimeout(done, 3000);
+        if (!imgEl.assetId) break;
+        try {
+          const bitmap = await loadFullImageBitmap(imgEl.assetId);
+          if (bitmap) {
+            ctx.drawImage(bitmap, imgEl.x, imgEl.y, imgEl.width, imgEl.height);
           }
-        });
-        if (img.naturalWidth > 0) {
-          try {
-            ctx.drawImage(img, imgEl.x, imgEl.y, imgEl.width, imgEl.height);
-          } catch (e) {
-            console.warn("Could not draw image to export canvas:", e);
-          }
+        } catch (e) {
+          console.warn("Could not draw image to export canvas:", e);
         }
         break;
       }

@@ -37,8 +37,8 @@ export const WidgetLayoutOverlay: React.FC<WidgetLayoutOverlayProps> = ({
   const isLight =
     propIsLight !== undefined
       ? propIsLight
-      : !(background?.type === "image" && background?.imageUrl) &&
-        isColorLight(background?.color || "#14141a");
+      : !(background?.type === "image" && background?.imageAssetId) &&
+        isColorLight(background?.color || "#f6faf8");
 
   const [activeDrag, setActiveDrag] = useState<WidgetKey | null>(null);
   const [isConfigOpen, setIsConfigOpen] = useState(false);

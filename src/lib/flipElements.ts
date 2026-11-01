@@ -41,7 +41,8 @@ export function flipElements(
       el.type === "rectangle" ||
       el.type === "diamond" ||
       el.type === "ellipse" ||
-      el.type === "image"
+      el.type === "image" ||
+      el.type === "link"
     ) {
       const newX = isH ? 2 * cx - (el.x + el.width) : el.x;
       const newY = isH ? el.y : 2 * cy - (el.y + el.height);

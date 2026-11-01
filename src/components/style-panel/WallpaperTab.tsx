@@ -7,19 +7,29 @@ import {
   LayoutTemplate,
 } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { optimizeImageDataUrl } from "../../lib/imageInsert";
+import { ingestImage } from "../../lib/assets";
 import { useAppStore } from "../../store/useAppStore";
 import { useSceneStore } from "../../store/useSceneStore";
 import { WALLPAPER_PRESETS } from "../../lib/wallpaperPresets";
 
 const BG_PRESETS = [
-  "#14141a",
-  "#1e1e24",
-  "#f5f5f7",
-  "#0b3d91",
-  "#2d6a4f",
-  "#2b1b3d",
+  "#f6faf8", // Light Paper
+  "#0e1a1f", // Dark Ink Paper
+  "#46baeb", // Brand Blue
+  "#00bf63", // Brand Green
+  "#f59e0b", // Warm Amber
+  "#15262d", // Dark Surface
 ];
+
+function normalizeHex(color?: string, fallback = "#f6faf8"): string {
+  if (!color || typeof color !== "string") return fallback;
+  const s = color.trim().toLowerCase();
+  if (/^#[0-9a-f]{6}$/.test(s)) return s;
+  if (/^#[0-9a-f]{3}$/.test(s)) {
+    return `#${s[1]}${s[1]}${s[2]}${s[2]}${s[3]}${s[3]}`;
+  }
+  return fallback;
+}
 
 const PATTERN_OPTIONS = [
   { id: "none", label: "None" },
@@ -42,25 +52,24 @@ export const WallpaperTab: React.FC = () => {
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleBackgroundImageUpload = (
+  const handleBackgroundImageUpload = async (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      const img = new Image();
-      img.onload = () => {
-        const optimized = optimizeImageDataUrl(img, 1920);
-        setBackground({
-          type: "image",
-          imageUrl: optimized,
-        });
-      };
-      img.src = dataUrl;
-    };
-    reader.readAsDataURL(file);
+    try {
+      const asset = await ingestImage(file, {
+        title: file.name,
+        savedAt: Date.now(),
+      });
+      setBackground({
+        type: "image",
+        color: background.color || "#f6faf8",
+        imageAssetId: asset.id,
+      });
+    } catch (err: any) {
+      alert(err?.message || "Failed to set background image.");
+    }
     e.target.value = "";
   };
 
@@ -120,8 +129,7 @@ export const WallpaperTab: React.FC = () => {
               onClick={() => setBackground({ type: "color", color: c })}
               className={cn(
                 "w-6 h-6 rounded-sk-sm border-2 transition-transform cursor-pointer active:scale-90",
-                (background.color || "#14141a").toLowerCase() ===
-                  c.toLowerCase()
+                normalizeHex(background.color) === c.toLowerCase()
                   ? "border-line shadow-hard-sm scale-110 z-10"
                   : "border-line/30 hover:border-line/70 hover:scale-105",
               )}
@@ -136,9 +144,9 @@ export const WallpaperTab: React.FC = () => {
           >
             <input
               type="color"
-              value={background.color || "#14141a"}
+              value={normalizeHex(background.color)}
               onChange={(e) =>
-                setBackground({ type: "color", color: e.target.value })
+                setBackground({ type: "color", color: e.target.value.toLowerCase() })
               }
               className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
             />

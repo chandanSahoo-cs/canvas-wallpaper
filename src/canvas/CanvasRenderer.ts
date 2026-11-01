@@ -1,13 +1,14 @@
 import rough from "roughjs";
 import { useAppStore } from "../store/useAppStore";
-import { CanvasElement, Point } from "../elements/types";
-import { getCenter, RotationOverlay } from "./geometry";
+import { CanvasElement, LinkElement, Point } from "../elements/types";
+import { getCenter, getScreenBBox, RotationOverlay } from "./geometry";
 import { getRoughDrawable, roughOptions } from "./rough-cache";
 import {
   drawArrow,
   drawFreedraw,
   drawText,
   drawImage,
+  drawLinkCard,
 } from "./renderer/elementDrawing";
 import {
   drawLockBadge,
@@ -77,10 +78,26 @@ export class CanvasRenderer {
       -scrollOffset.y * zoom * dpr,
     );
 
-    // Draw all elements and draft
+    // Calculate visible viewport bounds in world coordinates with padding for smooth panning
+    const margin = 64;
+    const viewMinX = scrollOffset.x - margin;
+    const viewMinY = scrollOffset.y - margin;
+    const viewMaxX = scrollOffset.x + this.canvas.width / (dpr * zoom) + margin;
+    const viewMaxY = scrollOffset.y + this.canvas.height / (dpr * zoom) + margin;
+
+    // Draw all visible elements and draft using viewport culling
     const all = draft ? [...elements, draft] : elements;
     for (const el of all) {
-      this.drawElement(el);
+      if (el !== draft && !selectedIds.has(el.id)) {
+        const box = getScreenBBox(el);
+        const inView =
+          box.x <= viewMaxX &&
+          box.x + box.w >= viewMinX &&
+          box.y <= viewMaxY &&
+          box.y + box.h >= viewMinY;
+        if (!inView) continue;
+      }
+      this.drawElement(el, zoom);
     }
 
     // Draw wallpaper boundary marker (editor view)
@@ -104,7 +121,7 @@ export class CanvasRenderer {
     }
   }
 
-  private drawElement(el: CanvasElement): void {
+  private drawElement(el: CanvasElement, zoom: number = 1): void {
     const editingText = useAppStore.getState().editingText;
     if (editingText?.elementId && el.id === editingText.elementId) {
       return;
@@ -161,7 +178,11 @@ export class CanvasRenderer {
         break;
       }
       case "image": {
-        drawImage(this.ctx, el, this.onNeedRender);
+        drawImage(this.ctx, el, zoom, this.onNeedRender);
+        break;
+      }
+      case "link": {
+        drawLinkCard(this.ctx, this.rc, el as LinkElement, zoom, this.onNeedRender);
         break;
       }
     }

@@ -75,7 +75,23 @@ export interface ImageElement extends BaseElement {
   y: number;
   width: number;
   height: number;
-  dataUrl: string;
+  assetId: string;
+  caption?: string;
+  showCaption?: boolean;
+  sourceUrl?: string;
+}
+
+export interface LinkElement extends BaseElement {
+  type: "link";
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  url: string;
+  title: string;
+  domain: string;
+  faviconAssetId?: string;
+  previewAssetId?: string;
 }
 
 export type CanvasElement =
@@ -86,7 +102,8 @@ export type CanvasElement =
   | ArrowElement
   | FreedrawElement
   | TextElement
-  | ImageElement;
+  | ImageElement
+  | LinkElement;
 
 export type ToolType =
   | "selection"
@@ -116,6 +133,7 @@ export interface BackgroundConfig {
   type: BackgroundType;
   color: string; // solid color or fallback
   gradient?: string; // CSS gradient string
-  imageUrl?: string; // base64 data url
+  imageAssetId?: string; // Asset id in IndexedDB
   pattern?: PatternType;
+  fit?: "cover" | "contain";
 }

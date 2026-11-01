@@ -1,14 +1,21 @@
-import { BackgroundConfig, CanvasElement } from "../elements/types";
+import { BackgroundConfig, CanvasElement, ImageElement } from "../elements/types";
 import { newId, randomSeed } from "../lib/utils";
 import { useAppStore } from "../store/useAppStore";
 import { useSceneStore } from "../store/useSceneStore";
+import {
+  bundleAssets,
+  SerializedAssetBundle,
+  unpackAndIngestAssets,
+} from "../lib/assets";
 
 export interface WallpaperFileData {
   app: "PaperTab";
   version: number;
+  schemaVersion?: number;
   name?: string;
   background: BackgroundConfig;
   elements: CanvasElement[];
+  embeddedAssets?: Record<string, SerializedAssetBundle>;
   exportedAt: number;
 }
 
@@ -120,13 +127,8 @@ function sanitizeElement(el: any): CanvasElement | null {
   }
 
   if (el.type === "image") {
-    const dataUrl =
-      typeof el.dataUrl === "string" &&
-      (el.dataUrl.startsWith("data:image/") ||
-        el.dataUrl.startsWith("https://"))
-        ? el.dataUrl
-        : "";
-    if (!dataUrl) return null;
+    const assetId = typeof el.assetId === "string" ? el.assetId : "";
+    if (!assetId) return null;
     return {
       ...base,
       x: typeof el.x === "number" && Number.isFinite(el.x) ? el.x : 0,
@@ -139,42 +141,62 @@ function sanitizeElement(el: any): CanvasElement | null {
         typeof el.height === "number" && Number.isFinite(el.height)
           ? Math.max(1, el.height)
           : 100,
-      dataUrl,
-    } as CanvasElement;
+      assetId,
+      caption: typeof el.caption === "string" ? el.caption.slice(0, 500) : undefined,
+      showCaption: Boolean(el.showCaption),
+      sourceUrl: typeof el.sourceUrl === "string" ? el.sourceUrl.slice(0, 2000) : undefined,
+    } as ImageElement;
   }
 
   return null;
 }
 
 function sanitizeBackground(bg: any): BackgroundConfig {
-  if (!bg || typeof bg !== "object") return { type: "color", color: "#14141a" };
+  if (!bg || typeof bg !== "object") return { type: "color", color: "#f6faf8" };
+  const pattern = ["none", "dots", "grid", "lines"].includes(bg.pattern)
+    ? bg.pattern
+    : undefined;
+
   if (bg.type === "image") {
-    const imageUrl =
-      typeof bg.imageUrl === "string" &&
-      (bg.imageUrl.startsWith("data:image/") ||
-        bg.imageUrl.startsWith("https://"))
-        ? bg.imageUrl
-        : "";
     return {
       type: "image",
-      imageUrl,
-      color: typeof bg.color === "string" ? bg.color.slice(0, 50) : "#14141a",
+      imageAssetId: typeof bg.imageAssetId === "string" ? bg.imageAssetId : undefined,
+      color: typeof bg.color === "string" ? bg.color.slice(0, 50) : "#f6faf8",
+      pattern,
     };
   }
   return {
     type: "color",
-    color: typeof bg.color === "string" ? bg.color.slice(0, 50) : "#14141a",
+    color: typeof bg.color === "string" ? bg.color.slice(0, 50) : "#f6faf8",
+    pattern,
   };
 }
 
-export function exportWallpaperFile(sceneName?: string) {
+export async function exportWallpaperFile(sceneName?: string): Promise<void> {
   const { background, elements } = useAppStore.getState();
+
+  // Collect all asset IDs referenced in current wallpaper
+  const assetIds = new Set<string>();
+  if (background.type === "image" && background.imageAssetId) {
+    assetIds.add(background.imageAssetId);
+  }
+  for (const el of elements) {
+    if (el.type === "image" && (el as ImageElement).assetId) {
+      assetIds.add((el as ImageElement).assetId);
+    }
+  }
+
+  // Bundle full resolution assets
+  const embeddedAssets = await bundleAssets(assetIds);
+
   const data: WallpaperFileData = {
     app: "PaperTab",
-    version: 2,
+    version: 3,
+    schemaVersion: 2,
     name: sceneName || "My Wallpaper",
     background,
     elements,
+    embeddedAssets,
     exportedAt: Date.now(),
   };
 
@@ -193,14 +215,17 @@ export function exportWallpaperFile(sceneName?: string) {
   URL.revokeObjectURL(url);
 }
 
-export function importWallpaperFile(file: File): Promise<boolean> {
+export async function importWallpaperFile(file: File): Promise<boolean> {
   return new Promise((resolve) => {
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (e) => {
       try {
         const raw = e.target?.result as string;
         const data = JSON.parse(raw);
         if (data.elements && Array.isArray(data.elements)) {
+          // Ingest and deduplicate embedded assets
+          const idMap = await unpackAndIngestAssets(data.embeddedAssets);
+
           const appStore = useAppStore.getState();
           const sceneStore = useSceneStore.getState();
           appStore.pushHistory();
@@ -211,15 +236,29 @@ export function importWallpaperFile(file: File): Promise<boolean> {
               data.name.trim().slice(0, 50),
             );
           }
+
           if (data.background) {
-            appStore.setBackground(sanitizeBackground(data.background));
+            const sanitizedBg = sanitizeBackground(data.background);
+            if (sanitizedBg.imageAssetId && idMap.has(sanitizedBg.imageAssetId)) {
+              sanitizedBg.imageAssetId = idMap.get(sanitizedBg.imageAssetId);
+            }
+            appStore.setBackground(sanitizedBg);
           }
 
           const sanitizedElements = data.elements
             .map(sanitizeElement)
             .filter(
               (el: CanvasElement | null): el is CanvasElement => el !== null,
-            );
+            )
+            .map((el: CanvasElement) => {
+              if (el.type === "image") {
+                const imgEl = el as ImageElement;
+                if (idMap.has(imgEl.assetId)) {
+                  return { ...imgEl, assetId: idMap.get(imgEl.assetId)! };
+                }
+              }
+              return el;
+            });
 
           appStore.setElements(sanitizedElements);
           appStore.saveToStorage();

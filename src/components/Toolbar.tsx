@@ -22,7 +22,11 @@ import { useAppStore } from "../store/useAppStore";
 import { ToolType } from "../elements/types";
 import { cn } from "../lib/utils";
 import { ExportMenu } from "./toolbar/ExportMenu";
+import { FolderOpen, Inbox } from "lucide-react";
+import { useInboxStore } from "../lib/inbox/store";
+import { useLibraryStore } from "../lib/library/store";
 import { ZoomControls } from "./toolbar/ZoomControls";
+import { StressTestButton } from "./toolbar/StressTestButton";
 
 interface ToolbarProps {
   onOpenShortcuts?: () => void;
@@ -103,6 +107,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
   const future = useAppStore((s) => s.future);
   const showBoundaryMarker = useAppStore((s) => s.showBoundaryMarker);
   const toggleBoundaryMarker = useAppStore((s) => s.toggleBoundaryMarker);
+  const isInboxOpen = useInboxStore((s) => s.isOpen);
+  const unreadCount = useInboxStore((s) => s.unreadCount);
 
   return (
     <div
@@ -192,7 +198,36 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
 
       {/* Cluster 3: Utilities + Done */}
       <div className="flex items-center gap-0.5">
+        <button
+          title="Library & Search (M)"
+          aria-label="Open library and search"
+          onClick={() => useLibraryStore.getState().toggleOpen()}
+          className="w-8 h-8 rounded-sk flex items-center justify-center text-ink/70 hover:text-ink hover:bg-paper hover:border-line/30 border-2 border-transparent transition-all duration-150 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer"
+        >
+          <FolderOpen className="w-4 h-4 text-brand-blue" />
+        </button>
+
+        {/* Inbox Button */}
+        <button
+          title={`Inbox (I)${unreadCount > 0 ? ` - ${unreadCount} new` : ""}`}
+          aria-label="Open Inbox"
+          onClick={() => useInboxStore.getState().toggleOpen()}
+          className={cn(
+            "relative w-8 h-8 rounded-sk flex items-center justify-center transition-all duration-150 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer border-2",
+            isInboxOpen
+              ? "bg-brand-blue/20 text-blue-text border-line"
+              : "text-ink/70 hover:text-ink hover:bg-paper hover:border-line/30 border-transparent",
+          )}
+        >
+          <Inbox className="w-4 h-4 text-brand-blue" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 px-1 min-w-[14px] h-[14px] rounded-full bg-brand-green text-on-accent text-[9px] font-hand font-bold flex items-center justify-center border border-line shadow-hard-sm">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </button>
         <ExportMenu />
+        <StressTestButton />
 
         {/* Keyboard Shortcuts */}
         {onOpenShortcuts && (

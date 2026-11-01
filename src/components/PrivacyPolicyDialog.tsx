@@ -73,11 +73,11 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
 
         {/* Content */}
         <div className="overflow-y-auto py-4 pr-1 space-y-3 text-xs text-ink">
-          {/* Card 1: Local Storage Only */}
+          {/* Card 1: Local Storage & IndexedDB Only */}
           <div className="p-3.5 rounded-sk bg-paper border-2 border-line space-y-1.5">
             <div className="flex items-center gap-2 text-ink font-hand font-bold text-xs">
               <Database className="w-4 h-4 text-brand-blue" />
-              <span>Zero Personal Data Collected</span>
+              <span>Zero Personal Data Collected & Local-Only Assets</span>
             </div>
             <p className="leading-relaxed font-sans text-muted">
               PaperTab does not collect, track, store, or sell any personal data,
@@ -85,8 +85,12 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
               configure is saved strictly on your local device via{" "}
               <code className="px-1 py-0.5 bg-surface border border-line/40 rounded-sk-sm text-[11px] font-mono text-ink">
                 chrome.storage.local
-              </code>
-              .
+              </code>{" "}
+              (for scene indices and widget layouts) and local browser{" "}
+              <code className="px-1 py-0.5 bg-surface border border-line/40 rounded-sk-sm text-[11px] font-mono text-ink">
+                IndexedDB
+              </code>{" "}
+              (for high-resolution images, thumbnails, and visual assets). Assets are stored exclusively on your device, never uploaded to any remote server or cloud, and PaperTab has zero telemetry or network egress.
             </p>
             <p className="text-[11px] font-sans text-muted">
               No tracking cookies or advertising identifiers are used.
@@ -104,8 +108,30 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
               outbound web requests made are direct user-initiated actions:
             </p>
             <ul className="list-disc list-inside space-y-0.5 text-muted font-sans pl-1">
-              <li>Web searches you explicitly submit through the Search bar</li>
-              <li>Favicon loading for quick links you manually create</li>
+              <li>
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
+                  storage
+                </code>{" "}
+                — save wallpapers, boards, Inbox items, and widget layouts locally
+              </li>
+              <li>
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
+                  unlimitedStorage
+                </code>{" "}
+                — prevent browser evicting your canvas drawings and IndexedDB assets
+              </li>
+              <li>
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
+                  contextMenus
+                </code>{" "}
+                — right-click menu items to save images, selected text, links, or pages directly to PaperTab
+              </li>
+              <li>
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
+                  optional_host_permissions (https://*/*)
+                </code>{" "}
+                — requested only at runtime if you choose to enable saving images from any website. All items remain strictly on your device; no analytics or telemetry ever leave your machine.
+              </li>
             </ul>
           </div>
 
@@ -129,7 +155,7 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
                 <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
                   unlimitedStorage
                 </code>{" "}
-                — prevent browser evicting your canvas drawings
+                — prevent browser evicting your canvas drawings and IndexedDB assets
               </li>
             </ul>
           </div>

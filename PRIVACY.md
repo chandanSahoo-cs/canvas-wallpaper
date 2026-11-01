@@ -1,6 +1,6 @@
 # Privacy Policy for PaperTab
 
-**Last updated:** September 24, 2026
+**Last updated:** November 1, 2026
 
 PaperTab is committed to respecting and protecting your privacy. This browser extension is designed from the ground up to be private, local-first, and secure.
 
@@ -9,8 +9,9 @@ PaperTab is committed to respecting and protecting your privacy. This browser ex
 ### 1. Data Collection & Storage
 
 - **Zero Personal Data Collected:** PaperTab does **not** collect, harvest, track, or sell any personal information, browsing history, user accounts, or telemetry.
-- **Local Client Storage Only:** All your drawings, sketches, scenes, background preferences, widget layout coordinates, and quick links are stored strictly on your local device using the browser's `chrome.storage.local` API (and fallback `localStorage`). No sketch or canvas data is ever transmitted to any external server.
-- **No Cookies:** The extension does not set or track HTTP cookies or advertising identifiers.
+- **Local Client Storage Only:** All your drawings, sketches, scenes, background preferences, widget layout coordinates, and quick links are stored strictly on your local device using the browser's `chrome.storage.local` API.
+- **Local IndexedDB Asset Store:** All high-resolution images, thumbnails, and visual assets you import or paste onto the board are stored exclusively in your browser's local `IndexedDB` (`papertab_assets`). No image or asset bytes are ever transmitted to any external server or cloud service. PaperTab has zero network egress for your media and sketches.
+- **No Cookies or Tracking:** The extension does not set or track HTTP cookies or advertising identifiers.
 
 ---
 
@@ -25,7 +26,7 @@ PaperTab does not communicate with any external backend servers of its own. The 
 
 ### 3. Extension Permissions
 
-- **`storage` & `unlimitedStorage`:** Used exclusively to store your drawings, wallpaper scenes, and widget configurations locally on your machine so they persist reliably across browser sessions without file size quota limitations.
+- **`storage` & `unlimitedStorage`:** Used exclusively to store your drawings, wallpaper scenes, widget configurations, and IndexedDB assets locally on your machine so they persist reliably across browser sessions without file size quota limitations.
 
 ---
 
