@@ -9,6 +9,7 @@ if (typeof global.localStorage === 'undefined') {
   };
 }
 const path = require('path');
+const fs = require('fs');
 const { createJiti } = require('jiti');
 const jiti = createJiti(path.resolve(__filename));
 
@@ -1286,6 +1287,175 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   const extractedBytes1 = roundtripInspection.entries.get("assets/hash-asset-1.png");
   assert(extractedBytes1.length === rawAssetBytes1.length, "Extracted asset 1 length matches bit-for-bit");
   assert(extractedBytes1[0] === 0x89 && extractedBytes1[4] === 0xaa, "Extracted asset 1 bytes match bit-for-bit");
+
+  // ==========================================
+  // SECTION 26: Onboarding Tour V2 Engine, Anchors & Static Verification (Phase 4)
+  // ==========================================
+  console.log("\n--- SECTION 26: Onboarding Tour V2 Engine, Anchors & Static Verification (Phase 4) ---");
+
+  const {
+    calculatePopoverPosition,
+  } = jiti('../src/lib/tour/positioning.ts');
+
+  const {
+    CHAPTERS,
+    TOUR_STEPS,
+  } = jiti('../src/lib/tour/chapters.ts');
+
+  const {
+    TOUR_VERSION,
+    TOUR_STORAGE_KEY,
+    TOUR_CHAPTERS_KEY,
+  } = jiti('../src/store/useOnboardingStore.ts');
+
+  const {
+    SHORTCUT_SECTIONS,
+  } = jiti('../src/lib/shortcuts/registry.ts');
+
+  const {
+    auditTour,
+  } = jiti('../src/lib/tour/audit.ts');
+
+  // 1. Popover Positioning Math & Viewport Clamping
+  const vpHD = { width: 1280, height: 720 };
+  const vpSmall = { width: 800, height: 600 };
+  const popoverDim = { width: 360, height: 220 };
+
+  // Center placement
+  const centerPos = calculatePopoverPosition(null, popoverDim, "center", vpHD);
+  assert(centerPos.actualPlacement === "center", "Calculates center placement when target is null");
+  assert(centerPos.left === Math.round((1280 - 360) / 2), "Centers horizontally at 1280px");
+  assert(centerPos.top === Math.round((720 - 220) / 2), "Centers vertically at 720px");
+
+  // Standard bottom placement
+  const targetTopCenter = { top: 20, left: 500, width: 280, height: 50 };
+  const bottomPos = calculatePopoverPosition(targetTopCenter, popoverDim, "bottom", vpHD, 16, 12);
+  assert(bottomPos.actualPlacement === "bottom", "Places popover at bottom when space permits");
+  assert(bottomPos.top === 20 + 50 + 12, "Applies correct gap below target (82px)");
+
+  // Flip from bottom to top when overflowing bottom viewport
+  const targetNearBottom = { top: 600, left: 500, width: 280, height: 50 };
+  const flippedTopPos = calculatePopoverPosition(targetNearBottom, popoverDim, "bottom", vpHD, 16, 12);
+  assert(flippedTopPos.actualPlacement === "top", "Flips popover from bottom to top when overflowing bottom");
+  assert(flippedTopPos.top === 600 - 220 - 12, "Positions above target when flipped (368px)");
+
+  // Flip from top to bottom when overflowing top viewport
+  const targetNearTop = { top: 10, left: 500, width: 280, height: 50 };
+  const flippedBottomPos = calculatePopoverPosition(targetNearTop, popoverDim, "top", vpHD, 16, 12);
+  assert(flippedBottomPos.actualPlacement === "bottom", "Flips popover from top to bottom when overflowing top");
+
+  // Flip from right to left when overflowing right screen edge
+  const targetNearRight = { top: 200, left: 1100, width: 150, height: 60 };
+  const flippedLeftPos = calculatePopoverPosition(targetNearRight, popoverDim, "right", vpHD, 16, 12);
+  assert(flippedLeftPos.actualPlacement === "left", "Flips popover from right to left when overflowing right edge");
+  assert(flippedLeftPos.left === 1100 - 360 - 12, "Positions to left of target when flipped");
+
+  // Viewport clamping on small 800x600 screen
+  const targetExtremeCorner = { top: 580, left: 750, width: 100, height: 40 };
+  const clampedSmall = calculatePopoverPosition(targetExtremeCorner, popoverDim, "bottom", vpSmall, 16, 12);
+  assert(clampedSmall.left <= 800 - 360 - 16, "Strictly clamps left coordinate inside 800px screen margin");
+  assert(clampedSmall.left >= 16, "Strictly clamps left coordinate >= 16px padding");
+  assert(clampedSmall.top <= 600 - 220 - 16, "Strictly clamps top coordinate inside 600px screen margin");
+  assert(clampedSmall.top >= 16, "Strictly clamps top coordinate >= 16px padding");
+
+  // 2. Step Registry & Constraints
+  assert(CHAPTERS.length === 6, "Exactly 6 structured chapters defined");
+  const expectedChapterIds = ["core", "collect", "organize", "find", "wallpaper", "safe"];
+  for (const cid of expectedChapterIds) {
+    assert(CHAPTERS.some((c) => c.id === cid), `Chapter ${cid} exists in chapter registry`);
+  }
+
+  assert(TOUR_STEPS.length >= 20, `Tour steps list is comprehensive (${TOUR_STEPS.length} steps)`);
+  for (const step of TOUR_STEPS) {
+    assert(expectedChapterIds.includes(step.chapterId), `Step ${step.id} has valid chapterId (${step.chapterId})`);
+    assert(step.badge && step.badge.length > 0, `Step ${step.id} has non-empty badge`);
+    assert(step.title && step.title.length > 0, `Step ${step.id} has non-empty title`);
+    assert(step.description && step.description.length > 0, `Step ${step.id} has non-empty description`);
+    const wordCount = step.description.trim().split(/\s+/).length;
+    assert(wordCount <= 35, `Step ${step.id} adheres to <= 35 words limit (actual: ${wordCount} words)`);
+    assert(["top", "bottom", "left", "right", "center"].includes(step.placement), `Step ${step.id} has valid placement (${step.placement})`);
+  }
+
+  // 3. Static Codebase Anchor Verification
+  function scanFiles(dir) {
+    let results = [];
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const ent of entries) {
+      const fullPath = path.join(dir, ent.name);
+      if (ent.isDirectory()) {
+        results = results.concat(scanFiles(fullPath));
+      } else if (ent.name.endsWith(".tsx") || ent.name.endsWith(".ts")) {
+        results.push(fullPath);
+      }
+    }
+    return results;
+  }
+
+  const allSourceFiles = scanFiles(path.resolve(__dirname, "../src"));
+  const foundCodeAnchors = new Set();
+  for (const filePath of allSourceFiles) {
+    const fileContent = fs.readFileSync(filePath, "utf8");
+    const matches = fileContent.matchAll(/data-tour="([^"]+)"/g);
+    for (const m of matches) {
+      foundCodeAnchors.add(m[1]);
+    }
+  }
+
+  // Ensure every step targeting [data-tour="..."] exists in code
+  for (const step of TOUR_STEPS) {
+    if (step.targetSelector) {
+      const m = step.targetSelector.match(/\[data-tour="([^"]+)"\]/);
+      if (m) {
+        const anchorName = m[1];
+        assert(foundCodeAnchors.has(anchorName), `Static anchor [data-tour="${anchorName}"] exists in src/ (Step: ${step.id})`);
+      }
+    }
+  }
+
+  // Verify critical UI anchors are present in code
+  const criticalAnchors = [
+    "wallpaper-dock",
+    "toolbar",
+    "style-panel",
+    "scene-switcher",
+    "inbox-tray",
+    "library-modal",
+    "settings-dialog",
+    "auto-arrange",
+    "wallpaper-tab",
+    "widgets-section",
+    "widget-layout-section",
+    "resurface-settings",
+    "web-capture-permission",
+    "backup-section",
+    "storage-health-section",
+    "take-the-tour",
+    "lightbox-modal",
+    "backup-modal",
+    "storage-health-modal",
+  ];
+  for (const ca of criticalAnchors) {
+    assert(foundCodeAnchors.has(ca), `Critical UI anchor data-tour="${ca}" is present in codebase`);
+  }
+
+  // 4. Single Source of Truth for Shortcuts
+  assert(SHORTCUT_SECTIONS.length === 4, "Shortcut sections contains 4 categories");
+  const allShortcuts = SHORTCUT_SECTIONS.flatMap((s) => s.shortcuts);
+  assert(allShortcuts.some((s) => s.keys.includes("E") && s.description.includes("Enter Drawing mode")), "Shortcuts registry documents E for entering drawing mode");
+  assert(allShortcuts.some((s) => s.keys.includes("Esc")), "Shortcuts registry documents Esc for exit/deselect");
+  assert(allShortcuts.some((s) => s.keys.includes("Ctrl") && s.keys.includes("A")), "Shortcuts registry documents Ctrl+A select all");
+
+  // 5. Versioning & Persistence
+  assert(TOUR_VERSION === 2, "TOUR_VERSION is bumped to 2 for tour upgrade");
+  assert(TOUR_STORAGE_KEY.includes("v2"), "TOUR_STORAGE_KEY isolates version 2 storage");
+  assert(TOUR_CHAPTERS_KEY.includes("v2"), "TOUR_CHAPTERS_KEY isolates version 2 chapter progress");
+
+  // 6. DEV Audit Helper
+  const auditReport = auditTour();
+  assert(auditReport.totalChapters === 6, "auditTour reports 6 chapters");
+  assert(auditReport.totalSteps === TOUR_STEPS.length, `auditTour reports ${TOUR_STEPS.length} total steps`);
+  assert(Array.isArray(auditReport.missingDomAnchors), "auditTour provides missingDomAnchors array");
+  assert(Array.isArray(auditReport.clippedOrOverflowingPopovers), "auditTour provides clippedOrOverflowingPopovers array");
 
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 

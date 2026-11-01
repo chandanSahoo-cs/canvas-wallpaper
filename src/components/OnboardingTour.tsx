@@ -20,6 +20,7 @@ import {
 } from "../store/useOnboardingStore";
 import { useAppStore } from "../store/useAppStore";
 import { calculatePopoverPosition, Rect } from "../lib/tour/positioning";
+import "../lib/tour/audit";
 import { cn } from "../lib/utils";
 
 
