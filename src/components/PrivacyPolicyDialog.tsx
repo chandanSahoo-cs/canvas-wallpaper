@@ -35,29 +35,29 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 z-60 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-150 select-none"
+      className="fixed inset-0 z-60 bg-ink/60 flex items-center justify-center p-4 animate-in fade-in duration-150 select-none"
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="privacy-dialog-title"
         onClick={(e) => e.stopPropagation()}
-        className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl border border-neutral-200 text-neutral-800 animate-in zoom-in-95 duration-150 max-h-[85vh] flex flex-col"
+        className="bg-surface text-ink border-2 border-line rounded-sk-lg p-6 w-full max-w-lg shadow-hard max-h-[85vh] flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-neutral-100 shrink-0">
+        <div className="flex items-center justify-between pb-3.5 border-b-2 border-line shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-neutral-100 border border-neutral-200 flex items-center justify-center text-neutral-800 shrink-0">
-              <ShieldCheck className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-sk bg-paper border-2 border-line flex items-center justify-center text-ink shrink-0">
+              <ShieldCheck className="w-4 h-4 text-brand-green" />
             </div>
             <div>
               <h2
                 id="privacy-dialog-title"
-                className="text-sm font-semibold leading-tight text-neutral-900"
+                className="font-hand text-lg font-bold leading-tight text-ink"
               >
                 Privacy Policy
               </h2>
-              <p className="text-xs text-neutral-400 mt-0.5">
+              <p className="text-xs font-sans text-muted mt-0.5">
                 100% Local-First • No Tracking • No Telemetry
               </p>
             </div>
@@ -65,105 +65,95 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
           <button
             onClick={onClose}
             aria-label="Close privacy policy"
-            className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+            className="p-1 rounded-sk-sm text-ink/70 hover:text-ink hover:bg-paper border border-transparent hover:border-line/30 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto py-4 pr-1 space-y-3.5 text-xs text-neutral-600 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-neutral-200 [&::-webkit-scrollbar-thumb]:rounded-full">
+        <div className="overflow-y-auto py-4 pr-1 space-y-3 text-xs text-ink">
           {/* Card 1: Local Storage Only */}
-          <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200/80 space-y-1.5">
-            <div className="flex items-center gap-2 text-neutral-800 font-semibold text-xs">
-              <Database className="w-4 h-4 text-neutral-700" />
+          <div className="p-3.5 rounded-sk bg-paper border-2 border-line space-y-1.5">
+            <div className="flex items-center gap-2 text-ink font-hand font-bold text-xs">
+              <Database className="w-4 h-4 text-brand-blue" />
               <span>Zero Personal Data Collected</span>
             </div>
-            <p className="leading-relaxed text-neutral-600">
-              PaperTab does <strong>not</strong> collect, track, store, or sell
-              any personal data, browsing history, or analytics. Everything you
-              draw, sketch, or configure is saved strictly on your local device
-              via{" "}
-              <code className="px-1 py-0.5 bg-neutral-200/70 rounded text-[11px] font-mono text-neutral-800">
+            <p className="leading-relaxed font-sans text-muted">
+              PaperTab does not collect, track, store, or sell any personal data,
+              browsing history, or analytics. Everything you draw, sketch, or
+              configure is saved strictly on your local device via{" "}
+              <code className="px-1 py-0.5 bg-surface border border-line/40 rounded-sk-sm text-[11px] font-mono text-ink">
                 chrome.storage.local
               </code>
               .
             </p>
-            <p className="text-[11px] text-neutral-500">
+            <p className="text-[11px] font-sans text-muted">
               No tracking cookies or advertising identifiers are used.
             </p>
           </div>
 
           {/* Card 2: Network Requests */}
-          <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200/80 space-y-1.5">
-            <div className="flex items-center gap-2 text-neutral-800 font-semibold text-xs">
-              <Globe className="w-4 h-4 text-neutral-700" />
-              <span>External Network Requests</span>
+          <div className="p-3.5 rounded-sk bg-paper border-2 border-line space-y-1.5">
+            <div className="flex items-center gap-2 text-ink font-hand font-bold text-xs">
+              <Globe className="w-4 h-4 text-brand-blue" />
+              <span>Network Requests</span>
             </div>
-            <p className="leading-relaxed text-neutral-600">
-              The extension has zero background servers. The only network
-              requests are initiated directly by you:
+            <p className="leading-relaxed font-sans text-muted">
+              PaperTab operates entirely offline within your browser. The only
+              outbound web requests made are direct user-initiated actions:
             </p>
-            <ul className="list-disc pl-4 space-y-1 text-neutral-600 leading-relaxed">
-              <li>
-                <strong>Web Search:</strong> Submitting a query navigates
-                directly to your chosen provider (Google, DuckDuckGo, Bing, or
-                Brave Search).
-              </li>
-              <li>
-                <strong>Quick Link Icons:</strong> Shortcut tiles fetch website
-                favicons via Google's public favicon service. No user identity
-                is attached.
-              </li>
+            <ul className="list-disc list-inside space-y-0.5 text-muted font-sans pl-1">
+              <li>Web searches you explicitly submit through the Search bar</li>
+              <li>Favicon loading for quick links you manually create</li>
             </ul>
           </div>
 
-          {/* Card 3: Permissions Explanation */}
-          <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200/80 space-y-1.5">
-            <div className="flex items-center gap-2 text-neutral-800 font-semibold text-xs">
-              <KeyRound className="w-4 h-4 text-neutral-700" />
-              <span>Permissions Used</span>
+          {/* Card 3: Permissions */}
+          <div className="p-3.5 rounded-sk bg-paper border-2 border-line space-y-1.5">
+            <div className="flex items-center gap-2 text-ink font-hand font-bold text-xs">
+              <KeyRound className="w-4 h-4 text-brand-blue" />
+              <span>Minimal Permissions</span>
             </div>
-            <p className="leading-relaxed text-neutral-600">
-              PaperTab requests the bare minimum permissions required for core
-              functionality:
+            <p className="leading-relaxed font-sans text-muted">
+              The extension requests only the minimum permissions required:
             </p>
-            <ul className="list-disc pl-4 space-y-1 text-neutral-600 leading-relaxed">
+            <ul className="list-disc list-inside space-y-0.5 text-muted font-sans pl-1">
               <li>
-                <code className="px-1 py-0.5 bg-neutral-200/70 rounded text-[11px] font-mono text-neutral-800">
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
                   storage
-                </code>
-                : To persist your drawings, multi-scene wallpapers, and widget
-                preferences locally in your browser.
+                </code>{" "}
+                — save wallpapers, scenes, and widget layout locally
+              </li>
+              <li>
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
+                  unlimitedStorage
+                </code>{" "}
+                — prevent browser evicting your canvas drawings
               </li>
             </ul>
           </div>
 
-          {/* Card 4: Payments & Monetization */}
-          <div className="p-3.5 rounded-xl bg-neutral-50 border border-neutral-200/80 space-y-1.5">
-            <div className="flex items-center gap-2 text-neutral-800 font-semibold text-xs">
-              <CreditCard className="w-4 h-4 text-neutral-700" />
-              <span>Payments & Future Upgrades</span>
+          {/* Card 4: Payments */}
+          <div className="p-3.5 rounded-sk bg-paper border-2 border-line space-y-1.5">
+            <div className="flex items-center gap-2 text-ink font-hand font-bold text-xs">
+              <CreditCard className="w-4 h-4 text-brand-blue" />
+              <span>Free & Open</span>
             </div>
-            <p className="leading-relaxed text-neutral-600">
-              If optional premium features or upgrades are introduced in the
-              future, transactions will be processed securely through standard
-              payment providers. PaperTab does not store or process your financial
-              credentials.
+            <p className="leading-relaxed font-sans text-muted">
+              PaperTab is 100% free with no subscriptions, in-app purchases, or
+              paywalled features.
             </p>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="pt-3 border-t border-neutral-100 flex items-center justify-between text-xs text-neutral-500 shrink-0">
-          <span className="text-[11px] text-neutral-400">
-            Last updated: September 2026
-          </span>
+        <div className="pt-3 border-t-2 border-line flex items-center justify-end shrink-0">
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium transition-colors cursor-pointer"
+            className="px-4 py-1.5 rounded-sk bg-brand-green text-on-accent border-2 border-line shadow-hard font-hand font-bold text-xs hover:brightness-105 active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-pressed cursor-pointer"
           >
-            Understood
+            I Understand
           </button>
         </div>
       </div>

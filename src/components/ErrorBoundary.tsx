@@ -25,16 +25,16 @@ export class ErrorBoundary extends Component<Props, State> {
   public render() {
     if (this.state.hasError) {
       return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-[#14141a] text-white p-6 font-sans select-none">
-          <div className="max-w-md w-full p-6 rounded-2xl bg-white/10 backdrop-blur-md border border-white/10 text-center flex flex-col items-center gap-4">
-            <h1 className="text-lg font-semibold">Something went wrong</h1>
-            <p className="text-xs text-white/70">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-paper text-ink p-6 select-none">
+          <div className="max-w-md w-full p-6 rounded-sk-lg bg-surface text-ink border-2 border-line shadow-hard text-center flex flex-col items-center gap-4">
+            <h1 className="text-xl font-hand font-bold text-ink">Something went wrong</h1>
+            <p className="text-xs font-sans text-muted leading-relaxed">
               An unexpected error occurred while loading your canvas wallpaper.
             </p>
             <div className="flex gap-2.5">
               <button
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 text-xs font-medium rounded-xl bg-white text-neutral-900 hover:bg-neutral-100 transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-hand font-bold rounded-sk bg-brand-green text-on-accent border-2 border-line shadow-hard hover:brightness-105 active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-pressed transition-all cursor-pointer"
               >
                 Reload Tab
               </button>
@@ -47,7 +47,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   } catch {}
                   window.location.reload();
                 }}
-                className="px-4 py-2 text-xs font-medium rounded-xl bg-white/10 text-white hover:bg-white/20 transition-colors cursor-pointer"
+                className="px-4 py-2 text-xs font-hand font-bold rounded-sk bg-surface text-ink border-2 border-line shadow-hard hover:bg-paper active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-pressed transition-all cursor-pointer"
               >
                 Reset Default
               </button>

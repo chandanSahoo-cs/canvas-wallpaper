@@ -7,7 +7,6 @@ import {
   LayoutGrid,
   Layers,
   ArrowRight,
-  Compass,
   CheckCircle2,
 } from "lucide-react";
 import {
@@ -82,7 +81,6 @@ export const OnboardingTour: React.FC = () => {
     };
 
     if (!findAndSet()) {
-      // Retry in case element is mounting
       const timer = setTimeout(findAndSet, 60);
       return () => clearTimeout(timer);
     }
@@ -129,7 +127,7 @@ export const OnboardingTour: React.FC = () => {
   const getPopoverStyle = (): React.CSSProperties => {
     const PADDING = 16;
     const POPOVER_WIDTH = 340;
-    const POPOVER_HEIGHT = 200; // estimated
+    const POPOVER_HEIGHT = 200;
 
     if (!targetRect || step.placement === "center") {
       return {
@@ -157,7 +155,6 @@ export const OnboardingTour: React.FC = () => {
       top = targetRect.top + targetRect.height / 2 - POPOVER_HEIGHT / 2;
     }
 
-    // Viewport clamping
     const maxLeft = window.innerWidth - POPOVER_WIDTH - PADDING;
     const maxTop = window.innerHeight - POPOVER_HEIGHT - PADDING;
 
@@ -174,24 +171,24 @@ export const OnboardingTour: React.FC = () => {
   /* ---------------- WELCOME MODAL ---------------- */
   if (isWelcomeOpen) {
     return (
-      <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 select-none animate-in fade-in duration-200">
+      <div className="fixed inset-0 z-[70] bg-ink/60 flex items-center justify-center p-4 select-none animate-in fade-in duration-150">
         <div
           role="dialog"
           aria-modal="true"
-          className="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-neutral-200/90 text-neutral-800 animate-in zoom-in-95 duration-200 relative overflow-hidden"
+          className="bg-surface text-ink border-2 border-line rounded-sk-lg p-6 sm:p-7 max-w-md w-full shadow-hard relative overflow-hidden"
         >
           {/* Close X */}
           <button
             onClick={() => closeWelcomeModal(true)}
             aria-label="Skip onboarding"
-            className="absolute top-4 right-4 p-1.5 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+            className="absolute top-4 right-4 p-1.5 rounded-sk-sm text-ink/70 hover:text-ink hover:bg-paper border border-transparent hover:border-line/30 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
           </button>
 
           {/* Icon & Title */}
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-2xl bg-neutral-100 border border-neutral-200/80 flex items-center justify-center shadow-xs overflow-hidden p-1.5">
+            <div className="w-10 h-10 rounded-sk bg-paper border-2 border-line flex items-center justify-center p-1.5 shadow-hard-sm">
               <img
                 src="/icon/48.png"
                 alt="PaperTab"
@@ -199,58 +196,58 @@ export const OnboardingTour: React.FC = () => {
               />
             </div>
             <div>
-              <div className="text-[10px] uppercase tracking-wider font-semibold text-neutral-400">
+              <div className="text-[10px] uppercase font-hand font-bold tracking-wider text-muted">
                 Welcome to
               </div>
-              <h2 className="text-lg font-bold text-neutral-900 leading-tight">
+              <h2 className="font-hand text-xl font-bold text-ink leading-tight">
                 PaperTab
               </h2>
             </div>
           </div>
 
-          <p className="text-xs text-neutral-600 leading-relaxed mb-4">
-            Transform your new tab into an interactive whiteboard canvas with live widgets, creative drawing tools, and multi-scene workspaces.
+          <p className="text-xs font-sans text-muted leading-relaxed mb-4">
+            Transform your new tab into an interactive sketchbook canvas with live widgets, drawing tools, and multi-scene boards.
           </p>
 
           {/* 3 Quick Highlight Cards */}
           <div className="flex flex-col gap-2.5 mb-5">
-            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-neutral-50 border border-neutral-100">
-              <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-3 p-2.5 rounded-sk bg-paper border-2 border-line">
+              <div className="w-7 h-7 rounded-sk-sm bg-brand-blue text-on-accent border border-line flex items-center justify-center shrink-0">
                 <Pencil className="w-3.5 h-3.5" />
               </div>
               <div className="text-xs">
-                <span className="font-semibold text-neutral-800">
+                <span className="font-hand font-bold text-ink">
                   Infinite Canvas:
                 </span>{" "}
-                <span className="text-neutral-500">
-                  Doodle, take notes, or create diagrams with pen & shapes.
+                <span className="font-sans text-muted">
+                  Doodle, take notes, or create diagrams with ink & shapes.
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-neutral-50 border border-neutral-100">
-              <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-3 p-2.5 rounded-sk bg-paper border-2 border-line">
+              <div className="w-7 h-7 rounded-sk-sm bg-brand-green text-on-accent border border-line flex items-center justify-center shrink-0">
                 <LayoutGrid className="w-3.5 h-3.5" />
               </div>
               <div className="text-xs">
-                <span className="font-semibold text-neutral-800">
+                <span className="font-hand font-bold text-ink">
                   Live Widgets:
                 </span>{" "}
-                <span className="text-neutral-500">
+                <span className="font-sans text-muted">
                   Clock, search bar, and shortcuts you can drag anywhere.
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-2.5 rounded-xl bg-neutral-50 border border-neutral-100">
-              <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+            <div className="flex items-center gap-3 p-2.5 rounded-sk bg-paper border-2 border-line">
+              <div className="w-7 h-7 rounded-sk-sm bg-surface text-ink border border-line flex items-center justify-center shrink-0">
                 <Layers className="w-3.5 h-3.5" />
               </div>
               <div className="text-xs">
-                <span className="font-semibold text-neutral-800">
+                <span className="font-hand font-bold text-ink">
                   Multiple Boards:
                 </span>{" "}
-                <span className="text-neutral-500">
+                <span className="font-sans text-muted">
                   Switch between separate canvases for work, study, or ideas.
                 </span>
               </div>
@@ -261,7 +258,7 @@ export const OnboardingTour: React.FC = () => {
           <div className="flex flex-col gap-2">
             <button
               onClick={startTour}
-              className="w-full py-2.5 px-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white font-medium text-xs flex items-center justify-center gap-2 shadow-md active:scale-98 transition-all cursor-pointer"
+              className="w-full py-2.5 px-4 rounded-sk bg-brand-green text-on-accent border-2 border-line shadow-hard font-hand font-bold text-xs flex items-center justify-center gap-2 hover:brightness-105 active:translate-x-[2px] active:translate-y-[2px] active:shadow-hard-pressed transition-all cursor-pointer"
             >
               <span>Take a 30-Second Tour</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -269,7 +266,7 @@ export const OnboardingTour: React.FC = () => {
 
             <button
               onClick={() => closeWelcomeModal(true)}
-              className="w-full py-2 text-xs text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer"
+              className="w-full py-2 text-xs font-hand font-bold text-muted hover:text-ink transition-colors cursor-pointer text-center"
             >
               Skip & Start Creating
             </button>
@@ -289,21 +286,21 @@ export const OnboardingTour: React.FC = () => {
       {/* 1. Backdrop / Spotlight Cutout */}
       {targetRect ? (
         <div
-          className="fixed rounded-2xl pointer-events-none transition-all duration-300 ease-out z-[60]"
+          className="fixed rounded-sk pointer-events-none transition-all duration-300 ease-out z-[60]"
           style={{
             top: Math.max(0, targetRect.top - 8),
             left: Math.max(0, targetRect.left - 8),
             width: targetRect.width + 16,
             height: targetRect.height + 16,
-            boxShadow: "0 0 0 9999px rgba(0, 0, 0, 0.65)",
-            border: "2px solid rgba(255, 255, 255, 0.5)",
+            boxShadow: "0 0 0 9999px rgba(14, 26, 31, 0.70)",
+            border: "2px solid var(--blue)",
           }}
         />
       ) : (
-        <div className="fixed inset-0 bg-black/65 backdrop-blur-xs z-[60] transition-opacity duration-300 pointer-events-none" />
+        <div className="fixed inset-0 bg-ink/70 z-[60] transition-opacity duration-300 pointer-events-none" />
       )}
 
-      {/* Transparent Click Shield to block accidental clicks during tour */}
+      {/* Transparent Click Shield */}
       <div
         className="fixed inset-0 z-[61]"
         onClick={(e) => e.stopPropagation()}
@@ -314,17 +311,17 @@ export const OnboardingTour: React.FC = () => {
         ref={popoverRef}
         style={getPopoverStyle()}
         className={cn(
-          "z-[62] bg-white rounded-2xl p-5 shadow-2xl border border-neutral-200/90 w-[340px] text-neutral-800 animate-in fade-in duration-200 flex flex-col gap-3",
+          "z-[62] bg-surface text-ink border-2 border-line rounded-sk-lg p-5 shadow-hard w-[340px] animate-in fade-in duration-200 flex flex-col gap-3",
           step.placement === "center" && "max-w-md w-full sm:p-6",
         )}
       >
         {/* Header row: Badge, Step counter, Close button */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-semibold text-[10px] uppercase tracking-wider">
+            <span className="px-2 py-0.5 rounded-sk-sm bg-brand-blue text-on-accent font-hand font-bold text-[10px] uppercase tracking-wider border border-line">
               {step.badge}
             </span>
-            <span className="text-[11px] font-medium text-neutral-400">
+            <span className="text-[11px] font-mono text-muted">
               {currentStepIndex + 1} of {TOUR_STEPS.length}
             </span>
           </div>
@@ -332,7 +329,7 @@ export const OnboardingTour: React.FC = () => {
           <button
             onClick={completeTour}
             title="Skip Tour (Esc)"
-            className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+            className="p-1 rounded-sk-sm text-ink/70 hover:text-ink hover:bg-paper border border-transparent hover:border-line/30 transition-colors cursor-pointer"
           >
             <X className="w-3.5 h-3.5" />
           </button>
@@ -340,39 +337,39 @@ export const OnboardingTour: React.FC = () => {
 
         {/* Title and Description */}
         <div>
-          <h3 className="text-sm font-semibold text-neutral-900 leading-tight">
+          <h3 className="font-hand text-base font-bold text-ink leading-tight">
             {step.title}
           </h3>
-          <p className="text-xs text-neutral-600 leading-relaxed mt-1.5 whitespace-pre-line">
+          <p className="text-xs font-sans text-muted leading-relaxed mt-1.5 whitespace-pre-line">
             {step.description}
           </p>
         </div>
 
         {/* Footer: Progress Dots + Buttons */}
-        <div className="flex items-center justify-between pt-2 border-t border-neutral-100 mt-1">
+        <div className="flex items-center justify-between pt-2.5 border-t border-line/20 mt-1">
           {/* Dots */}
           <div className="flex items-center gap-1">
             {TOUR_STEPS.map((_, idx) => (
               <span
                 key={idx}
                 className={cn(
-                  "w-1.5 h-1.5 rounded-full transition-all duration-200",
+                  "h-1.5 rounded-sk-sm transition-all duration-200 border border-line/40",
                   idx === currentStepIndex
-                    ? "w-4 bg-neutral-900"
+                    ? "w-4 bg-brand-blue border-line"
                     : idx < currentStepIndex
-                      ? "bg-neutral-400"
-                      : "bg-neutral-200",
+                      ? "w-1.5 bg-ink"
+                      : "w-1.5 bg-paper",
                 )}
               />
             ))}
           </div>
 
           {/* Action buttons */}
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-2">
             {currentStepIndex > 0 && (
               <button
                 onClick={prevStep}
-                className="px-2.5 py-1.5 rounded-xl text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 text-xs font-medium transition-colors cursor-pointer flex items-center gap-1"
+                className="px-2.5 py-1.5 rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line font-hand font-bold text-xs transition-colors cursor-pointer flex items-center gap-1"
               >
                 <ChevronLeft className="w-3.5 h-3.5" />
                 <span>Back</span>
@@ -381,11 +378,11 @@ export const OnboardingTour: React.FC = () => {
 
             <button
               onClick={isLastStep ? completeTour : nextStep}
-              className="px-3.5 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-semibold shadow-xs active:scale-95 transition-all cursor-pointer flex items-center gap-1"
+              className="px-3.5 py-1.5 rounded-sk bg-brand-green text-on-accent border-2 border-line shadow-hard-sm font-hand font-bold text-xs hover:brightness-105 active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer flex items-center gap-1"
             >
               {isLastStep ? (
                 <>
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>Start Creating</span>
                 </>
               ) : (
