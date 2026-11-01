@@ -113,6 +113,33 @@ const {
   useAppStore,
 } = jiti('../src/store/useAppStore.ts');
 
+const {
+  validateHttpUrl,
+  isImageContentTypeAllowed,
+  BurstRateLimiter,
+  sanitizePlainText,
+  sanitizeTitle,
+} = jiti('../src/lib/inbox/validation.ts');
+
+const {
+  MAX_IMAGE_FETCH_BYTES,
+  FETCH_TIMEOUT_MS,
+  INBOX_STORAGE_KEY,
+} = jiti('../src/lib/inbox/types.ts');
+
+const {
+  getInboxItems,
+  saveInboxItems,
+  addInboxItem,
+  dismissInboxItem,
+  undoDismissInboxItem,
+  updateInboxItemState,
+} = jiti('../src/lib/inbox/storage.ts');
+
+const {
+  createLinkElement,
+} = jiti('../src/lib/inbox/placement.ts');
+
 let passed = 0;
 let failed = 0;
 
@@ -808,6 +835,89 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   useAppStore.getState().setBackground({ type: "color", color: "#46baeb" });
   useAppStore.getState().setThemeMode("dark");
   assert(useAppStore.getState().background.color === "#46baeb", "Custom accent background color is preserved across theme mode changes");
+
+  // --- SECTION 19: Web Capture & Inbox Pipeline (URL, Guards, Rate Limiting, Transitions) ---
+  console.log("\n--- SECTION 19: Web Capture & Inbox Pipeline (Phase 2 & 3) ---");
+  assert(Boolean(validateHttpUrl("https://github.com/GoogleDeepMind")) === true, "validateHttpUrl allows valid HTTPS url");
+  assert(Boolean(validateHttpUrl("http://example.com/test?q=1")) === true, "validateHttpUrl allows valid HTTP url");
+  assert(validateHttpUrl("javascript:alert(1)") === null, "validateHttpUrl strictly rejects javascript: scheme");
+  assert(validateHttpUrl("data:text/html,<script>evil()</script>") === null, "validateHttpUrl strictly rejects data: scheme");
+  assert(validateHttpUrl("file:///C:/passwords.txt") === null, "validateHttpUrl strictly rejects file: scheme");
+  assert(validateHttpUrl("chrome://extensions") === null, "validateHttpUrl strictly rejects chrome: scheme");
+  assert(validateHttpUrl("https://example.com/" + "a".repeat(2048)) === null, "validateHttpUrl rejects URLs exceeding 2048 characters");
+
+  assert(isImageContentTypeAllowed("image/png") === true, "Allowed MIME includes image/png");
+  assert(isImageContentTypeAllowed("image/jpeg") === true, "Allowed MIME includes image/jpeg");
+  assert(isImageContentTypeAllowed("image/webp") === true, "Allowed MIME includes image/webp");
+  assert(isImageContentTypeAllowed("image/gif") === true, "Allowed MIME includes image/gif");
+  assert(isImageContentTypeAllowed("image/avif") === true, "Allowed MIME includes image/avif");
+  assert(isImageContentTypeAllowed("image/svg+xml") === false, "Allowed MIME strictly rejects SVG content-type");
+  assert(isImageContentTypeAllowed("text/html") === false, "Allowed MIME rejects text/html");
+  assert(MAX_IMAGE_FETCH_BYTES === 25 * 1024 * 1024, "MAX_IMAGE_FETCH_BYTES cap is strictly 25 MB");
+  assert(FETCH_TIMEOUT_MS === 15000, "FETCH_TIMEOUT_MS is strictly 15s");
+
+  assert(sanitizePlainText("<script>alert(1)</script><b>Hello World</b>") === "alert(1)Hello World", "sanitizePlainText strips HTML tags and control chars");
+  assert(sanitizeTitle("My  Page\nTitle\r\nHere") === "My Page Title Here", "sanitizeTitle collapses whitespace into single line");
+
+  // Rate limiter sliding window check
+  const limiter = new BurstRateLimiter(10, 5000);
+  let burstAllowed = 0;
+  for (let i = 0; i < 10; i++) {
+    if (limiter.allow()) burstAllowed++;
+  }
+  assert(burstAllowed === 10, "BurstRateLimiter allows 10 calls in 5-second burst window");
+  assert(limiter.allow() === false, "BurstRateLimiter blocks the 11th burst call");
+
+  // Inbox storage and state transitions
+  global.localStorage.removeItem(INBOX_STORAGE_KEY);
+  const item1 = await addInboxItem({
+    kind: "link",
+    url: "https://papertab.app",
+    title: "PaperTab App",
+  });
+  assert(item1.state === "new", "New inbox item defaults to state 'new'");
+  const allInbox1 = await getInboxItems();
+  assert(allInbox1.length === 1 && allInbox1[0].id === item1.id, "getInboxItems retrieves newly saved item");
+
+  await dismissInboxItem(item1.id);
+  const allInbox2 = await getInboxItems();
+  assert(allInbox2[0].state === "dismissed", "dismissInboxItem transitions item state to 'dismissed'");
+
+  await undoDismissInboxItem(item1.id);
+  const allInbox3 = await getInboxItems();
+  assert(allInbox3[0].state === "new", "undoDismissInboxItem restores item state to 'new'");
+
+  await updateInboxItemState(item1.id, "placed");
+  const allInbox4 = await getInboxItems();
+  assert(allInbox4[0].state === "placed", "updateInboxItemState transitions item state to 'placed'");
+
+  // --- SECTION 20: Link Card Geometry & Hit Testing (Phase 4) ---
+  console.log("\n--- SECTION 20: Link Card Geometry & Hit Testing (Phase 4) ---");
+  const linkEl = createLinkElement("https://github.com/GoogleDeepMind", "Google DeepMind", 600, 400);
+  assert(linkEl.type === "link", "createLinkElement creates type 'link'");
+  assert(linkEl.domain === "github.com", "createLinkElement parses clean domain 'github.com'");
+  assert(linkEl.width === 280, "Link card default width is 280px");
+  assert(linkEl.height === 80, "Link card default height is 80px");
+
+  const linkBBox = getBBox(linkEl);
+  assert(linkBBox.x === 600 - 140, "Link card bbox X starts at posX - width / 2");
+  assert(linkBBox.y === 400 - 40, "Link card bbox Y starts at posY - height / 2");
+  assert(linkBBox.w === 280, "Link card bbox width is 280");
+  assert(linkBBox.h === 80, "Link card bbox height is 80");
+
+  const linkCenter = getCenter(linkEl);
+  assert(linkCenter.x === 600, "Link card center X matches target pos X (600)");
+  assert(linkCenter.y === 400, "Link card center Y matches target pos Y (400)");
+
+  assert(elementContains(linkEl, { x: 600, y: 400 }) === true, "elementContains detects hit inside link card");
+  assert(elementContains(linkEl, { x: 461, y: 361 }) === true, "elementContains detects hit near link card corner");
+  assert(elementContains(linkEl, { x: 100, y: 100 }) === false, "elementContains rejects point far outside link card");
+
+  // Rotated link element bounds
+  linkEl.angle = Math.PI / 2; // 90 degrees
+  const rotatedBBox = jiti('../src/canvas/geometry.ts').getScreenBBox(linkEl);
+  assert(Math.abs(rotatedBBox.w - 80) < 1, "Rotated link card screen bbox width becomes original height (~80px)");
+  assert(Math.abs(rotatedBBox.h - 280) < 1, "Rotated link card screen bbox height becomes original width (~280px)");
 
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 
