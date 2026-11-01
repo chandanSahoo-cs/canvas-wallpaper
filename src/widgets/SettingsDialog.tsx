@@ -122,6 +122,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-dialog-title"
+        data-tour="settings-dialog"
         className="bg-surface text-ink border-2 border-line rounded-sk-lg p-6 w-full max-w-md shadow-hard max-h-[85vh] flex flex-col"
       >
         <div className="flex items-center justify-between pb-3.5 border-b-2 border-line shrink-0">
@@ -175,7 +176,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Individual Widget Toggles */}
-          <div className="flex flex-col gap-3">
+          <div data-tour="widgets-section" className="flex flex-col gap-3">
             {/* Clock */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -289,7 +290,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Widget Layout & Alignment */}
-          <div className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
+          <div data-tour="widget-layout-section" className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
             <div className="flex items-center justify-between">
               <div className="text-sm font-hand font-bold text-ink">
                 Layout & Placement
@@ -317,7 +318,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Interface Theme (System / Light / Dark) */}
-          <div className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
+          <div data-tour="theme-section" className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Sun className="w-4 h-4 text-brand-blue" />
@@ -373,7 +374,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* New Tab Shows (Resurfacing) */}
-          <div className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
+          <div data-tour="resurface-settings" className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Shuffle className="w-4 h-4 text-brand-blue" />
@@ -543,7 +544,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Web Capture & Host Permissions */}
-          <div className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
+          <div data-tour="web-capture-permission" className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Globe className="w-4 h-4 text-brand-blue shrink-0" />
@@ -595,7 +596,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Backup & Restore (.zip) */}
-          <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
+          <div data-tour="backup-section" className="flex items-center justify-between pt-3.5 border-t border-line/20">
             <div className="flex items-center gap-2.5">
               <Archive className="w-4 h-4 text-brand-blue" />
               <div>
@@ -614,7 +615,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Storage Health & Diagnostics */}
-          <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
+          <div data-tour="storage-health-section" className="flex items-center justify-between pt-3.5 border-t border-line/20">
             <div className="flex items-center gap-2.5">
               <HardDrive className="w-4 h-4 text-brand-blue" />
               <div>
@@ -633,7 +634,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Feature Walkthrough Tour */}
-          <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
+          <div data-tour="take-the-tour" className="flex items-center justify-between pt-3.5 border-t border-line/20">
             <div className="flex items-center gap-2.5">
               <Compass className="w-4 h-4 text-muted" />
               <div>

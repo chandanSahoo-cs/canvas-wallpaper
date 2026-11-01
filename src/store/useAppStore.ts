@@ -49,6 +49,12 @@ export interface AppState {
   isPreviewing: boolean;
   isPresetsOpen: boolean;
   setIsPresetsOpen: (open: boolean) => void;
+  isSettingsOpen: boolean;
+  setIsSettingsOpen: (open: boolean) => void;
+  isShortcutsOpen: boolean;
+  setIsShortcutsOpen: (open: boolean) => void;
+  isBackupOpen: boolean;
+  setIsBackupOpen: (open: boolean) => void;
 
   // Theme mode
   themeMode: ThemeMode;
@@ -187,6 +193,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   isPreviewing: false,
   isPresetsOpen: false,
   setIsPresetsOpen: (open) => set({ isPresetsOpen: open }),
+  isSettingsOpen: false,
+  setIsSettingsOpen: (open) => set({ isSettingsOpen: open }),
+  isShortcutsOpen: false,
+  setIsShortcutsOpen: (open) => set({ isShortcutsOpen: open }),
+  isBackupOpen: false,
+  setIsBackupOpen: (open) => set({ isBackupOpen: open }),
 
   zoom: 1.0,
   scrollOffset: { x: 0, y: 0 },

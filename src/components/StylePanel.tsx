@@ -144,11 +144,13 @@ export const StylePanel: React.FC = () => {
   return (
     <div
       id="tour-style-panel"
+      data-tour="style-panel"
       className="fixed top-20 left-4 z-20 w-64 max-h-[calc(100vh-6rem)] bg-surface text-ink border-2 border-line shadow-hard rounded-sk-lg p-3.5 flex flex-col gap-3.5 text-xs select-none overflow-y-auto overflow-x-hidden"
     >
       {/* Top Tabs: Tool / Element Styles vs Wallpaper Canvas */}
       <div className="flex items-center bg-paper p-1 border-2 border-line rounded-sk gap-1 shrink-0">
         <button
+          data-tour="styles-tab"
           onClick={() => setActiveTab("styles")}
           className={cn(
             "flex-1 py-1 px-2 rounded-sk-sm font-hand font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer",
@@ -165,6 +167,7 @@ export const StylePanel: React.FC = () => {
           </span>
         </button>
         <button
+          data-tour="wallpaper-tab"
           onClick={() => setActiveTab("wallpaper")}
           className={cn(
             "flex-1 py-1 px-2 rounded-sk-sm font-hand font-bold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer",

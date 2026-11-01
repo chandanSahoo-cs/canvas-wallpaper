@@ -209,6 +209,7 @@ export const LightboxModal: React.FC = () => {
       role="dialog"
       aria-modal="true"
       aria-label="Image Lightbox"
+      data-tour="lightbox-modal"
       className="fixed inset-0 z-50 bg-[#0E1A1F]/90 backdrop-blur-md flex flex-col justify-between overflow-hidden select-none animate-in fade-in duration-150"
     >
       {/* Toast Feedback */}

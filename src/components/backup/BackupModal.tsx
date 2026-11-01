@@ -119,7 +119,7 @@ export const BackupModal: React.FC<BackupModalProps> = ({
       aria-labelledby="backup-modal-title"
       className="fixed inset-0 z-50 bg-[#0E1A1F]/60 backdrop-blur-xs flex items-center justify-center p-4 select-none animate-in fade-in duration-150"
     >
-      <div className="bg-surface text-ink border-2 border-line rounded-sk-lg p-6 w-full max-w-lg shadow-hard flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
+      <div data-tour="backup-modal" className="bg-surface text-ink border-2 border-line rounded-sk-lg p-6 w-full max-w-lg shadow-hard flex flex-col gap-4 max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b-2 border-line">
           <div className="flex items-center gap-2.5">
