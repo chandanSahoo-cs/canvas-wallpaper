@@ -142,7 +142,7 @@ export const StylePanel: React.FC = () => {
   return (
     <div
       id="tour-style-panel"
-      className="fixed top-20 left-4 z-20 w-64 max-h-[calc(100vh-6rem)] bg-surface text-ink border-2 border-line shadow-hard rounded-sk-lg p-3.5 flex flex-col gap-3.5 text-xs select-none overflow-y-auto overflow-x-hidden [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-line/20 [&::-webkit-scrollbar-thumb]:rounded-sk"
+      className="fixed top-20 left-4 z-20 w-64 max-h-[calc(100vh-6rem)] bg-surface text-ink border-2 border-line shadow-hard rounded-sk-lg p-3.5 flex flex-col gap-3.5 text-xs select-none overflow-y-auto overflow-x-hidden"
     >
       {/* Top Tabs: Tool / Element Styles vs Wallpaper Canvas */}
       <div className="flex items-center bg-paper p-1 border-2 border-line rounded-sk gap-1 shrink-0">

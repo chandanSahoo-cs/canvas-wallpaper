@@ -117,6 +117,36 @@
     outline: 2px solid var(--blue);
     outline-offset: 2px;
   }
+
+  /* Sketchbook Custom Scrollbars */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--muted);
+    border: 1.5px solid var(--line);
+    border-radius: var(--radius-sk-sm);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--blue);
+    border-color: var(--line);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }
 
 .sketch-border {
