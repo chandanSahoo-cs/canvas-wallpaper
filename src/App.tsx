@@ -19,13 +19,14 @@ import { LibraryModal } from "./components/library/LibraryModal";
 import { InboxTray } from "./components/inbox/InboxTray";
 import { useAppStore } from "./store/useAppStore";
 import { useSceneStore } from "./store/useSceneStore";
+import { useResurfaceStore } from "./lib/resurface/store";
 import { useWidgetStore } from "./store/useWidgetStore";
 import { useWallpaperBackground } from "./hooks/useWallpaperBackground";
 import { useTextEditing } from "./hooks/useTextEditing";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useCanvasPaste } from "./hooks/useCanvasPaste";
 import { useCanvasDrop } from "./hooks/useCanvasDrop";
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, ExternalLink } from "lucide-react";
 import { useViewportRecorder } from "./hooks/useViewportRecorder";
 import { useViewportBoundary } from "./hooks/useViewportBoundary";
 import { cn } from "./lib/utils";
@@ -48,12 +49,27 @@ export const App: React.FC = () => {
   const isPresetsOpen = useAppStore((s) => s.isPresetsOpen);
   const setIsPresetsOpen = useAppStore((s) => s.setIsPresetsOpen);
   const loadScenesFromStorage = useSceneStore((s) => s.loadScenesFromStorage);
+  const scenes = useSceneStore((s) => s.scenes);
+
+  const resurfaceConfig = useResurfaceStore((s) => s.config);
+  const resurfacePick = useResurfaceStore((s) => s.currentPick);
+  const itemImageUrl = useResurfaceStore((s) => s.itemImageUrl);
+
+  const effectiveBackground = React.useMemo(() => {
+    if (mode === "wallpaper" && resurfacePick.type === "board" && resurfacePick.boardId) {
+      const pickedScene = scenes.find((s) => s.id === resurfacePick.boardId);
+      if (pickedScene?.background) {
+        return pickedScene.background;
+      }
+    }
+    return background;
+  }, [mode, resurfacePick, scenes, background]);
 
   const isLayoutMode = useWidgetStore((s) => s.isLayoutMode);
   const setIsLayoutMode = useWidgetStore((s) => s.setIsLayoutMode);
 
   // Modular custom hooks for separated concerns
-  const { bgStyle, isLight } = useWallpaperBackground(background);
+  const { bgStyle, isLight } = useWallpaperBackground(effectiveBackground);
   const { editingText, handleCommitText, handleCancelText } = useTextEditing();
   useKeyboardShortcuts({
     onToggleShortcuts: () => setIsShortcutsOpen((prev) => !prev),
@@ -65,7 +81,9 @@ export const App: React.FC = () => {
 
   // Initialize storage
   useEffect(() => {
-    loadScenesFromStorage();
+    loadScenesFromStorage().then(() => {
+      useResurfaceStore.getState().syncFromScenes(useSceneStore.getState().scenes);
+    });
     useWidgetStore.getState().loadFromStorage();
     requestStoragePersistence();
 
@@ -105,6 +123,49 @@ export const App: React.FC = () => {
             : "pointer-events-auto",
         )}
       />
+
+      {/* Resurfaced Full-Screen Item Image (Wallpaper Mode) */}
+      {mode === "wallpaper" && resurfacePick.type === "item" && itemImageUrl && (
+        <div className="absolute inset-0 pointer-events-none z-0 flex items-center justify-center overflow-hidden">
+          <img
+            src={itemImageUrl}
+            alt={resurfacePick.item?.title || "Resurfaced wallpaper item"}
+            className={cn(
+              "w-full h-full select-none pointer-events-none",
+              resurfaceConfig.fit === "cover" ? "object-cover" : "object-contain",
+            )}
+          />
+        </div>
+      )}
+
+      {/* Resurfaced Item Caption & Source Overlay */}
+      {mode === "wallpaper" &&
+        resurfacePick.type === "item" &&
+        resurfaceConfig.showCaption &&
+        (resurfacePick.item?.caption ||
+          resurfacePick.item?.title ||
+          resurfacePick.item?.sourceUrl) && (
+          <div className="fixed bottom-6 left-6 z-20 pointer-events-auto max-w-sm rounded-sk-lg bg-surface/95 text-ink border-2 border-line shadow-hard p-3 backdrop-blur-md flex flex-col gap-1 select-none animate-in fade-in duration-200">
+            {(resurfacePick.item?.caption || resurfacePick.item?.title) && (
+              <div className="font-hand font-bold text-sm text-ink line-clamp-2">
+                {resurfacePick.item.caption || resurfacePick.item.title}
+              </div>
+            )}
+            {resurfacePick.item?.sourceUrl && (
+              <a
+                href={resurfacePick.item.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-brand-blue hover:underline truncate"
+              >
+                <ExternalLink className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">
+                  {resurfacePick.item.sourceTitle || resurfacePick.item.sourceUrl}
+                </span>
+              </a>
+            )}
+          </div>
+        )}
 
       {/* Visual Drop Target Highlight */}
       {isDraggingOver && (

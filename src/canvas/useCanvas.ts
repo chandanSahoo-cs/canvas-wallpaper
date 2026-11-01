@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { LinkElement, Point, TextElement, ToolType } from "../elements/types";
 import { useAppStore } from "../store/useAppStore";
+import { useSceneStore } from "../store/useSceneStore";
+import { useResurfaceStore } from "../lib/resurface/store";
 import { EraserTool } from "../tools/EraserTool";
 import { FreedrawTool } from "../tools/FreedrawTool";
 import { LineTool } from "../tools/LineTool";
@@ -54,8 +56,27 @@ export function useCanvas(
     function triggerRender() {
       const state = useAppStore.getState();
       const isCleanView = state.mode === "wallpaper" || state.isPreviewing;
+
+      let renderElements = state.elements;
+      if (state.mode === "wallpaper") {
+        const resurfaceState = useResurfaceStore.getState();
+        if (resurfaceState.currentPick.type === "item") {
+          renderElements = [];
+        } else if (
+          resurfaceState.currentPick.type === "board" &&
+          resurfaceState.currentPick.boardId
+        ) {
+          const pickedScene = useSceneStore
+            .getState()
+            .scenes.find((s) => s.id === resurfaceState.currentPick.boardId);
+          if (pickedScene) {
+            renderElements = pickedScene.elements;
+          }
+        }
+      }
+
       renderer.render({
-        elements: state.elements,
+        elements: renderElements,
         draft: isCleanView ? null : state.draft,
         selectedIds: isCleanView ? new Set() : state.selectedIds,
         zoom: isCleanView ? 1 : state.zoom,
@@ -73,7 +94,13 @@ export function useCanvas(
     }
 
     // Subscribe to Zustand state changes to trigger re-renders
-    const unsubscribe = useAppStore.subscribe(() => {
+    const unsubscribeApp = useAppStore.subscribe(() => {
+      triggerRender();
+    });
+    const unsubscribeResurface = useResurfaceStore.subscribe(() => {
+      triggerRender();
+    });
+    const unsubscribeScene = useSceneStore.subscribe(() => {
       triggerRender();
     });
 
@@ -359,7 +386,9 @@ export function useCanvas(
       if (fontInterval) {
         clearInterval(fontInterval);
       }
-      unsubscribe();
+      unsubscribeApp();
+      unsubscribeResurface();
+      unsubscribeScene();
     };
   }, [canvasRef]);
 }

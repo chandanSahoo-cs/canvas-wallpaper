@@ -919,6 +919,83 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   assert(Math.abs(rotatedBBox.w - 80) < 1, "Rotated link card screen bbox width becomes original height (~80px)");
   assert(Math.abs(rotatedBBox.h - 280) < 1, "Rotated link card screen bbox height becomes original width (~280px)");
 
+  // --- SECTION 21: Resurfacing Index & Synchronous Selection (Phase 1) ---
+  console.log("\n--- SECTION 21: Resurfacing Index & Synchronous Selection (Phase 1) ---");
+  const {
+    DEFAULT_RESURFACE_CONFIG,
+    DEFAULT_RESURFACE_INDEX,
+    buildResurfaceIndex,
+    selectResurfacePick,
+  } = jiti('../src/lib/resurface/storage.ts');
+
+  assert(DEFAULT_RESURFACE_CONFIG.mode === "current", "Default resurface mode is 'current'");
+  assert(DEFAULT_RESURFACE_CONFIG.fit === "cover", "Default resurface fit is 'cover'");
+  assert(DEFAULT_RESURFACE_CONFIG.showCaption === true, "Default resurface showCaption is true");
+
+  const resurfaceScenes = [
+    {
+      id: "board-1",
+      name: "Main Sketchbook",
+      elements: [
+        { id: "img-1", type: "image", assetId: "asset-aaa", caption: "Sunrise Drawing", width: 400, height: 300, sourceUrl: "https://example.com/art1" },
+        { id: "line-1", type: "line" },
+      ],
+      background: { type: "color", color: "#f6faf8" },
+      createdAt: 1000,
+    },
+    {
+      id: "board-2",
+      name: "Inspirations",
+      elements: [
+        { id: "img-2", type: "image", assetId: "asset-bbb", caption: "Architecture Photo", width: 600, height: 400 },
+      ],
+      background: { type: "image", imageAssetId: "asset-bg-1" },
+      createdAt: 2000,
+    },
+  ];
+
+  const resurfaceInbox = [
+    {
+      id: "inbox-1",
+      kind: "image",
+      assetId: "asset-ccc",
+      title: "Web Capture Item",
+      source: { url: "https://unsplash.com/photo-1", title: "Unsplash Photo" },
+      state: "new",
+      savedAt: 3000,
+    },
+  ];
+
+  const index = buildResurfaceIndex(resurfaceScenes, resurfaceInbox);
+  assert(index.boardIds.length === 2, "Resurface index collects all boards");
+  assert(index.boardNames["board-1"] === "Main Sketchbook", "Resurface index preserves board names");
+  assert(index.items.length === 4, "Resurface index aggregates scene images, scene background, and inbox images");
+  assert(index.items.some(it => it.assetId === "asset-aaa"), "Index includes scene element image");
+  assert(index.items.some(it => it.assetId === "asset-bg-1"), "Index includes scene background image");
+  assert(index.items.some(it => it.assetId === "asset-ccc"), "Index includes inbox image");
+
+  // Selection test: 'current' mode always returns activeSceneId
+  const pickCurrent = selectResurfacePick({ mode: "current", fit: "cover", showCaption: true, exclusions: [] }, index, "board-1");
+  assert(pickCurrent.mode === "current" && pickCurrent.boardId === "board-1", "Current mode returns active board");
+
+  // Selection test: 'shuffle' mode
+  const pickShuffle = selectResurfacePick({ mode: "shuffle", fit: "cover", showCaption: true, exclusions: ["board-1"] }, index, "board-1");
+  assert(pickShuffle.mode === "shuffle" && pickShuffle.boardId === "board-2", "Shuffle mode selects non-excluded board");
+
+  // Selection test: 'shuffle' avoids immediate repeat when >1 candidates exist
+  const pickShuffleNoRepeat = selectResurfacePick({ mode: "shuffle", fit: "cover", showCaption: true, exclusions: [], lastShownId: "board-1" }, index, "board-1");
+  assert(pickShuffleNoRepeat.boardId === "board-2", "Shuffle mode avoids immediate repeat of lastShownId");
+
+  // Selection test: 'random_item' mode
+  const pickRandom = selectResurfacePick({ mode: "random_item", fit: "cover", showCaption: true, exclusions: ["asset-aaa", "asset-bbb", "asset-bg-1"] }, index, "board-1");
+  assert(pickRandom.mode === "random_item" && pickRandom.type === "item", "Random item mode picks an item");
+  assert(pickRandom.item.assetId === "asset-ccc", "Random item respects exclusion list");
+
+  // Selection test: 'daily' pick mode deterministic output
+  const pickDaily1 = selectResurfacePick({ mode: "daily", fit: "cover", showCaption: true, exclusions: [] }, index, "board-1");
+  const pickDaily2 = selectResurfacePick({ mode: "daily", fit: "cover", showCaption: true, exclusions: [] }, index, "board-1");
+  assert(pickDaily1.item.id === pickDaily2.item.id, "Daily pick is strictly deterministic for current day");
+
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 
   if (failed > 0) {

@@ -16,7 +16,10 @@ import {
   RefreshCw,
   Globe,
   Shield,
+  Shuffle,
+  Trash2,
 } from "lucide-react";
+import { useResurfaceStore } from "../lib/resurface/store";
 import {
   requestHostPermission,
   removeHostPermission,
@@ -64,6 +67,13 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   };
   const themeMode = useAppStore((s) => s.themeMode);
   const setThemeMode = useAppStore((s) => s.setThemeMode);
+
+  const resurfaceConfig = useResurfaceStore((s) => s.config);
+  const setResurfaceMode = useResurfaceStore((s) => s.setMode);
+  const setResurfaceFit = useResurfaceStore((s) => s.setFit);
+  const setResurfaceShowCaption = useResurfaceStore((s) => s.setShowCaption);
+  const removeExclusion = useResurfaceStore((s) => s.removeExclusion);
+  const clearExclusions = useResurfaceStore((s) => s.clearExclusions);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -354,6 +364,156 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                 <span>Dark</span>
               </button>
             </div>
+          </div>
+
+          {/* New Tab Shows (Resurfacing) */}
+          <div className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Shuffle className="w-4 h-4 text-brand-blue" />
+                <div>
+                  <div className="text-sm font-hand font-bold text-ink">New Tab Shows</div>
+                  <div className="text-xs font-sans text-muted">
+                    Display pick when opening a new tab
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-1.5 p-1 bg-paper border-2 border-line rounded-sk">
+              <button
+                type="button"
+                onClick={() => setResurfaceMode("current")}
+                className={cn(
+                  "py-1.5 px-2 rounded-sk-sm text-xs font-hand font-bold transition-all cursor-pointer border-2",
+                  resurfaceConfig.mode === "current"
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                    : "border-transparent text-ink/70 hover:text-ink hover:bg-surface/50",
+                )}
+              >
+                Current Board (default)
+              </button>
+              <button
+                type="button"
+                onClick={() => setResurfaceMode("shuffle")}
+                className={cn(
+                  "py-1.5 px-2 rounded-sk-sm text-xs font-hand font-bold transition-all cursor-pointer border-2",
+                  resurfaceConfig.mode === "shuffle"
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                    : "border-transparent text-ink/70 hover:text-ink hover:bg-surface/50",
+                )}
+              >
+                Shuffle Boards
+              </button>
+              <button
+                type="button"
+                onClick={() => setResurfaceMode("random_item")}
+                className={cn(
+                  "py-1.5 px-2 rounded-sk-sm text-xs font-hand font-bold transition-all cursor-pointer border-2",
+                  resurfaceConfig.mode === "random_item"
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                    : "border-transparent text-ink/70 hover:text-ink hover:bg-surface/50",
+                )}
+              >
+                Random Item
+              </button>
+              <button
+                type="button"
+                onClick={() => setResurfaceMode("daily")}
+                className={cn(
+                  "py-1.5 px-2 rounded-sk-sm text-xs font-hand font-bold transition-all cursor-pointer border-2",
+                  resurfaceConfig.mode === "daily"
+                    ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                    : "border-transparent text-ink/70 hover:text-ink hover:bg-surface/50",
+                )}
+              >
+                Daily Pick
+              </button>
+            </div>
+
+            {/* Fit and Caption controls for item mode */}
+            {(resurfaceConfig.mode === "random_item" || resurfaceConfig.mode === "daily") && (
+              <div className="flex items-center justify-between pt-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-xs font-sans text-muted">Fit:</span>
+                  <div className="inline-flex bg-paper border border-line/30 rounded-sk p-0.5 text-xs font-hand font-bold">
+                    <button
+                      type="button"
+                      onClick={() => setResurfaceFit("cover")}
+                      className={cn(
+                        "px-2 py-0.5 rounded-sk-sm cursor-pointer transition-all",
+                        resurfaceConfig.fit === "cover"
+                          ? "bg-brand-blue text-on-accent"
+                          : "text-ink/70 hover:text-ink",
+                      )}
+                    >
+                      Cover
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setResurfaceFit("contain")}
+                      className={cn(
+                        "px-2 py-0.5 rounded-sk-sm cursor-pointer transition-all",
+                        resurfaceConfig.fit === "contain"
+                          ? "bg-brand-blue text-on-accent"
+                          : "text-ink/70 hover:text-ink",
+                      )}
+                    >
+                      Contain
+                    </button>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setResurfaceShowCaption(!resurfaceConfig.showCaption)}
+                  className={cn(
+                    "py-1 px-2.5 rounded-sk font-hand font-bold text-xs border-2 transition-all cursor-pointer",
+                    resurfaceConfig.showCaption
+                      ? "bg-brand-blue text-on-accent border-line shadow-hard-sm"
+                      : "bg-paper text-ink/70 border-line/30 hover:border-line",
+                  )}
+                >
+                  {resurfaceConfig.showCaption ? "Caption On" : "Caption Off"}
+                </button>
+              </div>
+            )}
+
+            {/* Exclusion List Management */}
+            {resurfaceConfig.exclusions.length > 0 && (
+              <div className="mt-1 p-2 bg-paper/60 border border-line/30 rounded-sk flex flex-col gap-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-sans font-medium text-ink">
+                    Never Show Again ({resurfaceConfig.exclusions.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={clearExclusions}
+                    className="text-[11px] font-hand font-bold text-danger hover:underline cursor-pointer"
+                  >
+                    Clear all
+                  </button>
+                </div>
+                <div className="max-h-24 overflow-y-auto flex flex-wrap gap-1 pr-1">
+                  {resurfaceConfig.exclusions.map((id) => (
+                    <span
+                      key={id}
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sk-sm bg-surface border border-line/30 text-[10px] font-mono text-ink"
+                    >
+                      <span className="max-w-[120px] truncate">{id}</span>
+                      <button
+                        type="button"
+                        onClick={() => removeExclusion(id)}
+                        className="text-muted hover:text-danger cursor-pointer"
+                        title="Remove from exclusions"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Rebuild Search Index */}
