@@ -13,7 +13,10 @@ import {
   Sun,
   Moon,
   Monitor,
+  RefreshCw,
 } from "lucide-react";
+import { useSceneStore } from "../store/useSceneStore";
+import { loadAllLibraryItems } from "../lib/library/crossReference";
 import { useWidgetStore } from "../store/useWidgetStore";
 import { useOnboardingStore } from "../store/useOnboardingStore";
 import { useAppStore } from "../store/useAppStore";
@@ -31,6 +34,22 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   onClose,
 }) => {
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [isRebuildingIndex, setIsRebuildingIndex] = useState(false);
+  const [indexRebuiltMessage, setIndexRebuiltMessage] = useState(false);
+
+  const handleRebuildIndex = async () => {
+    setIsRebuildingIndex(true);
+    try {
+      const scenes = useSceneStore.getState().scenes;
+      await loadAllLibraryItems(scenes);
+      setIndexRebuiltMessage(true);
+      setTimeout(() => setIndexRebuiltMessage(false), 2500);
+    } catch (err) {
+      console.error("Failed to rebuild search index:", err);
+    } finally {
+      setIsRebuildingIndex(false);
+    }
+  };
   const themeMode = useAppStore((s) => s.themeMode);
   const setThemeMode = useAppStore((s) => s.setThemeMode);
 
@@ -323,6 +342,26 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                 <span>Dark</span>
               </button>
             </div>
+          </div>
+
+          {/* Rebuild Search Index */}
+          <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
+            <div className="flex items-center gap-2.5">
+              <RefreshCw className={cn("w-4 h-4 text-muted", isRebuildingIndex && "animate-spin text-brand-blue")} />
+              <div>
+                <div className="text-sm font-hand font-bold text-ink">Search Index</div>
+                <div className="text-xs font-sans text-muted">
+                  {indexRebuiltMessage ? "Index up to date!" : "Re-index all assets and text across boards"}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleRebuildIndex}
+              disabled={isRebuildingIndex}
+              className="py-1.5 px-3 rounded-sk bg-paper hover:bg-surface text-ink font-hand font-bold text-xs border-2 border-line shadow-hard-sm active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer disabled:opacity-50"
+            >
+              {isRebuildingIndex ? "Rebuilding..." : indexRebuiltMessage ? "Done" : "Rebuild"}
+            </button>
           </div>
 
           {/* Feature Walkthrough Tour */}

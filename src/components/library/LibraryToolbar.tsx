@@ -31,6 +31,7 @@ interface LibraryToolbarProps {
   onClearFilter: (key: keyof LibraryFilters) => void;
   onResetFilters: () => void;
   onSortChange: (sort: LibrarySortBy) => void;
+  onOpenTagManager?: () => void;
 }
 
 export const LibraryToolbar: React.FC<LibraryToolbarProps> = ({
@@ -44,6 +45,7 @@ export const LibraryToolbar: React.FC<LibraryToolbarProps> = ({
   onClearFilter,
   onResetFilters,
   onSortChange,
+  onOpenTagManager,
 }) => {
   const hasActiveFilters =
     Boolean(filters.query) ||
@@ -127,6 +129,19 @@ export const LibraryToolbar: React.FC<LibraryToolbarProps> = ({
                 </option>
               ))}
             </select>
+          )}
+
+          {/* Manage Tags Button */}
+          {onOpenTagManager && (
+            <button
+              type="button"
+              title="Manage tags, colors, and merging"
+              onClick={onOpenTagManager}
+              className="px-2 py-1.5 text-xs font-hand font-bold rounded-sk bg-paper text-ink border-2 border-line/30 hover:border-line hover:bg-surface cursor-pointer flex items-center gap-1"
+            >
+              <Tag className="w-3.5 h-3.5 text-brand-blue" />
+              <span>Tags...</span>
+            </button>
           )}
 
           {/* Sort By Dropdown */}

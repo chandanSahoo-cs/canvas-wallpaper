@@ -3,6 +3,7 @@ import { hexDistanceOklab, hexToRgb, rgbToOklab } from "../assets/color";
 import { hammingDistance } from "../assets/hash";
 import { Scene, useSceneStore } from "../../store/useSceneStore";
 import { ImageElement, TextElement } from "../../elements/types";
+import { searchIndex, SearchDoc } from "../search/searchIndex";
 import {
   BoardPlacement,
   LibraryFilters,
@@ -126,6 +127,21 @@ export async function loadAllLibraryItems(
     }
   }
 
+    // Index all items in fast in-memory search index
+  const searchDocs: SearchDoc[] = items.map((it) => ({
+    id: it.id,
+    type: it.type,
+    title: it.title,
+    tags: it.tags,
+    note: it.note,
+    captions: it.placements.map((p) => p.caption).filter(Boolean) as string[],
+    sourceUrl: it.sourceUrl,
+    boardNames: it.placements.map((p) => p.sceneName),
+    textContent: it.textContent,
+    createdAt: it.createdAt,
+  }));
+  searchIndex.rebuild(searchDocs);
+
   return items;
 }
 
@@ -206,19 +222,12 @@ export function filterLibraryItems(
     result = result.filter((it) => duplicateIds.has(it.id));
   }
 
-  // Full-text query filter
+  // Fast ranked full-text & prefix search via SearchIndex
   if (filters.query && filters.query.trim()) {
-    const q = filters.query.toLowerCase().trim();
-    result = result.filter((it) => {
-      if (it.title.toLowerCase().includes(q)) return true;
-      if (it.note && it.note.toLowerCase().includes(q)) return true;
-      if (it.textContent && it.textContent.toLowerCase().includes(q)) return true;
-      if (it.sourceUrl && it.sourceUrl.toLowerCase().includes(q)) return true;
-      if (it.tags.some((t) => t.toLowerCase().includes(q))) return true;
-      if (it.placements.some((p) => p.sceneName.toLowerCase().includes(q))) return true;
-      if (it.placements.some((p) => p.caption && p.caption.toLowerCase().includes(q))) return true;
-      return false;
-    });
+    const searchResults = searchIndex.search(filters.query);
+    const scoreMap = new Map(searchResults.map((r) => [r.id, r.score]));
+    result = result.filter((it) => scoreMap.has(it.id));
+    result.sort((a, b) => (scoreMap.get(b.id) || 0) - (scoreMap.get(a.id) || 0));
   }
 
   return result;

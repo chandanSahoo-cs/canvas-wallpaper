@@ -1,3 +1,13 @@
+
+if (typeof global.localStorage === 'undefined') {
+  const memStore = new Map();
+  global.localStorage = {
+    getItem: (key) => (memStore.has(key) ? memStore.get(key) : null),
+    setItem: (key, val) => memStore.set(key, String(val)),
+    removeItem: (key) => memStore.delete(key),
+    clear: () => memStore.clear(),
+  };
+}
 const path = require('path');
 const { createJiti } = require('jiti');
 const jiti = createJiti(path.resolve(__filename));
@@ -63,6 +73,21 @@ const {
   filterLibraryItems,
   sortLibraryItems,
 } = jiti('../src/lib/library/crossReference.ts');
+
+const {
+  tokenize,
+  LocalSearchIndex,
+  highlightMatches,
+} = jiti('../src/lib/search/searchIndex.ts');
+
+const {
+  TAG_LABEL_COLORS,
+  getAllTagInfos,
+  createOrUpdateTag,
+  renameTag,
+  deleteTag,
+  mergeTags,
+} = jiti('../src/lib/search/tags.ts');
 
 const {
   SCHEMA_VERSION,
@@ -454,6 +479,80 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   // Sort by size
   const sortedSize = sortLibraryItems(mockItems, 'size');
   assert(sortedSize[0].id === 'img-2' && sortedSize[1].id === 'img-1', 'Sort by size orders by bytes descending');
+
+  
+  // --- SECTION 15: Tags and Search Index (Phase 3) ---
+  console.log('\n--- SECTION 15: Tags and Search Index (Phase 3) ---');
+
+  // 1. Tokenizer
+  const tokens = tokenize('PaperTab: hand-drawn #sketchbook UI/UX');
+  assert(tokens.includes('papertab') && tokens.includes('hand') && tokens.includes('drawn') && tokens.includes('sketchbook'), 'Tokenize splits on punctuation and normalizes to lowercase');
+  assert(tokenize('').length === 0, 'Tokenize empty string returns empty array');
+
+  // 2. Search Index Ranking & Prefix Matching
+  const testIndex = new LocalSearchIndex();
+  testIndex.addOrUpdateDoc({
+    id: 'doc-tag-match',
+    type: 'image',
+    title: 'Generic board item',
+    tags: ['papertab'],
+    textContent: 'some other content',
+    createdAt: 1000,
+  });
+  testIndex.addOrUpdateDoc({
+    id: 'doc-content-match',
+    type: 'text',
+    title: 'Meeting Notes',
+    tags: ['work'],
+    textContent: 'Discussing the papertab release roadmap',
+    createdAt: 1000,
+  });
+
+  const exactSearch = testIndex.search('papertab');
+  assert(exactSearch.length === 2, 'Search query returns all matching docs');
+  assert(exactSearch[0].id === 'doc-tag-match', 'Tag match (weight 12) ranks higher than text content match (weight 6)');
+
+  // Prefix match
+  const prefixSearch = testIndex.search('paper');
+  assert(prefixSearch.length === 2, 'Prefix search matches docs containing tokens starting with "paper"');
+
+  // Highlighting
+  const highlightSegments = highlightMatches('PaperTab hand-crafted notebook', 'papertab');
+  assert(highlightSegments.some(s => s.isMatch && s.text.toLowerCase() === 'papertab'), 'Highlight matches accurately identifies matching segment tokens');
+
+  // Performance benchmark (500 docs index + search < 50ms)
+  const perfIndex = new LocalSearchIndex();
+  const t0 = Date.now();
+  for (let i = 0; i < 500; i++) {
+    perfIndex.addOrUpdateDoc({
+      id: 'perf-' + i,
+      type: 'image',
+      title: 'Item ' + i + ' screenshot mockup diagram',
+      tags: ['tag-' + (i % 10), 'design'],
+      note: 'A quick note about feature ' + i,
+      createdAt: Date.now() - i * 1000,
+    });
+  }
+  const searchResults = perfIndex.search('screenshot');
+  const duration = Date.now() - t0;
+  assert(searchResults.length === 500, 'Search index accurately queries 500 documents');
+  assert(duration < 50, 'Search index latency is under 50ms for 500 docs (' + duration + 'ms)');
+
+  // 3. Tag Colors & CRUD
+  assert(TAG_LABEL_COLORS.length === 6, 'TAG_LABEL_COLORS has exactly 6 colors');
+  assert(TAG_LABEL_COLORS.includes('#46BAEB') && TAG_LABEL_COLORS.includes('#00BF63'), 'Tag label colors include brand blue and green');
+
+  // Tag CRUD in storage
+  const createdTag = await createOrUpdateTag('inspiration', '#46BAEB');
+  assert(createdTag.name === 'inspiration' && createdTag.color === '#46BAEB', 'createOrUpdateTag registers tag with specified color');
+
+  await renameTag('inspiration', 'ideas');
+  const storedTags = JSON.parse(global.localStorage.getItem('papertab_tag_registry') || '{}');
+  assert(!storedTags['inspiration'] && storedTags['ideas'] === '#46BAEB', 'renameTag transfers color and updates key in registry');
+
+  await deleteTag('ideas');
+  const storedTagsAfterDelete = JSON.parse(global.localStorage.getItem('papertab_tag_registry') || '{}');
+  assert(!storedTagsAfterDelete['ideas'], 'deleteTag removes tag from registry');
 
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 

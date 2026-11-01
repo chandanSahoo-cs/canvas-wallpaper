@@ -13,6 +13,7 @@ import { getBBox, getCenter } from "../../canvas/geometry";
 import { LibraryToolbar } from "./LibraryToolbar";
 import { VirtualizedGrid } from "./VirtualizedGrid";
 import { LibrarySelectionBar } from "./LibrarySelectionBar";
+import { TagManagerModal } from "./TagManagerModal";
 
 export const LibraryModal: React.FC = () => {
   const isOpen = useLibraryStore((s) => s.isOpen);
@@ -32,6 +33,7 @@ export const LibraryModal: React.FC = () => {
 
   const [rawItems, setRawItems] = useState<LibraryItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isTagManagerOpen, setIsTagManagerOpen] = useState(false);
 
   const refreshItems = useCallback(async () => {
     setIsLoading(true);
@@ -178,6 +180,7 @@ export const LibraryModal: React.FC = () => {
           onClearFilter={clearFilter}
           onResetFilters={resetFilters}
           onSortChange={setSortBy}
+          onOpenTagManager={() => setIsTagManagerOpen(true)}
         />
 
         {/* Virtualized Grid */}
@@ -202,6 +205,13 @@ export const LibraryModal: React.FC = () => {
           onClearSelection={clearSelection}
           onRefreshItems={refreshItems}
           onCloseLibrary={() => setIsOpen(false)}
+        />
+
+        {/* Tag Manager Modal */}
+        <TagManagerModal
+          isOpen={isTagManagerOpen}
+          onClose={() => setIsTagManagerOpen(false)}
+          onTagsUpdated={refreshItems}
         />
       </div>
     </div>
