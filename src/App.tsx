@@ -14,6 +14,7 @@ import { PreviewPill } from "./components/PreviewPill";
 import { SettingsDialog } from "./widgets/SettingsDialog";
 import { WidgetLayoutOverlay } from "./widgets/WidgetLayoutOverlay";
 import { OnboardingTour } from "./components/OnboardingTour";
+import { WebCapturePromptToast } from "./components/WebCapturePromptToast";
 import { PresetGalleryDialog } from "./components/PresetGalleryDialog";
 import { LibraryModal } from "./components/library/LibraryModal";
 import { InboxTray } from "./components/inbox/InboxTray";
@@ -186,6 +187,7 @@ export const App: React.FC = () => {
       {/* Feature Onboarding Tour & Welcome Modal */}
       <LibraryModal />
       <OnboardingTour />
+      <WebCapturePromptToast />
 
       {/* Idle Metadata Backfill Progress */} 
       <BackfillProgressIndicator />

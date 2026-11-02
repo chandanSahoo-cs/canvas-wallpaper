@@ -44,6 +44,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   const [isRebuildingIndex, setIsRebuildingIndex] = useState(false);
   const [indexRebuiltMessage, setIndexRebuiltMessage] = useState(false);
   const [hasCapturePermission, setHasCapturePermission] = useState(false);
+  const [showCaptureExplainer, setShowCaptureExplainer] = useState(false);
 
   useEffect(() => {
     return subscribeHostPermission(setHasCapturePermission);
@@ -396,11 +397,53 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     </span>
                   </div>
                   <div className="text-xs font-sans text-muted">
-                    Allow saving images directly from any site. Items are saved 100% locally to your Inbox.
+                    Save images directly from protected websites (Pinterest, Instagram, Twitter). Saved 100% locally to your Inbox.
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Pre-prompt Explainer Box */}
+            {!hasCapturePermission && showCaptureExplainer && (
+              <div className="p-3 bg-brand-blue/10 border-2 border-brand-blue rounded-sk flex flex-col gap-2 text-xs animate-in fade-in duration-150">
+                <div className="font-hand font-bold text-xs text-blue-text flex items-center gap-1.5">
+                  <Shield className="w-3.5 h-3.5 shrink-0" />
+                  <span>Why PaperTab needs this permission:</span>
+                </div>
+                <ul className="list-disc pl-4 space-y-1 font-sans text-[11px] text-ink/80 leading-relaxed">
+                  <li>
+                    <strong>Bypasses download protection:</strong> Sites like Pinterest, Instagram, and Twitter block external tools from saving photos unless granted access.
+                  </li>
+                  <li>
+                    <strong>100% on-device & private:</strong> PaperTab only downloads the specific image you right-click. It never reads your browsing history, cookies, or passwords.
+                  </li>
+                </ul>
+                <p className="font-sans text-[10px] text-muted italic">
+                  Clicking below will open Chrome's confirmation prompt.
+                </p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const granted = await requestHostPermission();
+                      setHasCapturePermission(granted);
+                      setShowCaptureExplainer(false);
+                    }}
+                    className="py-1 px-3 rounded-sk bg-brand-green text-on-accent border-2 border-line shadow-hard-sm hover:brightness-105 font-hand font-bold text-xs cursor-pointer active:translate-x-[1px] active:translate-y-[1px]"
+                  >
+                    Continue to Chrome Prompt
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowCaptureExplainer(false)}
+                    className="py-1 px-2.5 rounded-sk bg-paper text-muted hover:text-ink font-hand text-xs border border-line/30 hover:border-line cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="flex items-center gap-2 mt-0.5">
               {hasCapturePermission ? (
                 <button
@@ -413,18 +456,15 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                 >
                   Revoke Permission
                 </button>
-              ) : (
+              ) : !showCaptureExplainer ? (
                 <button
                   type="button"
-                  onClick={async () => {
-                    const granted = await requestHostPermission();
-                    setHasCapturePermission(granted);
-                  }}
+                  onClick={() => setShowCaptureExplainer(true)}
                   className="py-1.5 px-3 rounded-sk bg-brand-green text-on-accent border-2 border-line shadow-hard-sm hover:brightness-105 font-hand font-bold text-xs active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
                 >
-                  Allow Saving Images from Any Site
+                  Enable Web Capture (Learn Why)
                 </button>
-              )}
+              ) : null}
             </div>
           </div>
 
