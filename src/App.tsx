@@ -17,6 +17,9 @@ import { OnboardingTour } from "./components/OnboardingTour";
 import { WebCapturePromptToast } from "./components/WebCapturePromptToast";
 import { PresetGalleryDialog } from "./components/PresetGalleryDialog";
 import { LibraryModal } from "./components/library/LibraryModal";
+import { LightboxModal } from "./components/lightbox/LightboxModal";
+import { BackupModal } from "./components/backup/BackupModal";
+import { BackupNudgeBanner } from "./components/backup/BackupNudgeBanner";
 import { InboxTray } from "./components/inbox/InboxTray";
 import { useAppStore } from "./store/useAppStore";
 import { useSceneStore } from "./store/useSceneStore";
@@ -26,7 +29,7 @@ import { useTextEditing } from "./hooks/useTextEditing";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useCanvasPaste } from "./hooks/useCanvasPaste";
 import { useCanvasDrop } from "./hooks/useCanvasDrop";
-import { Image as ImageIcon } from "lucide-react";
+import { Image as ImageIcon, ExternalLink } from "lucide-react";
 import { useViewportRecorder } from "./hooks/useViewportRecorder";
 import { useViewportBoundary } from "./hooks/useViewportBoundary";
 import { cn } from "./lib/utils";
@@ -37,6 +40,7 @@ export const App: React.FC = () => {
 
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
+  const [isBackupOpen, setIsBackupOpen] = useState(false);
 
   // Store bindings
   const mode = useAppStore((s) => s.mode);
@@ -49,6 +53,7 @@ export const App: React.FC = () => {
   const isPresetsOpen = useAppStore((s) => s.isPresetsOpen);
   const setIsPresetsOpen = useAppStore((s) => s.setIsPresetsOpen);
   const loadScenesFromStorage = useSceneStore((s) => s.loadScenesFromStorage);
+  const scenes = useSceneStore((s) => s.scenes);
 
   const isLayoutMode = useWidgetStore((s) => s.isLayoutMode);
   const setIsLayoutMode = useWidgetStore((s) => s.setIsLayoutMode);
@@ -186,8 +191,18 @@ export const App: React.FC = () => {
 
       {/* Feature Onboarding Tour & Welcome Modal */}
       <LibraryModal />
+      <LightboxModal />
       <OnboardingTour />
       <WebCapturePromptToast />
+
+      {/* Backup & Restore Modal */}
+      <BackupModal
+        isOpen={isBackupOpen}
+        onClose={() => setIsBackupOpen(false)}
+      />
+
+      {/* Non-Annoying Backup Reminder Banner */}
+      <BackupNudgeBanner onOpenBackup={() => setIsBackupOpen(true)} />
 
       {/* Idle Metadata Backfill Progress */} 
       <BackfillProgressIndicator />

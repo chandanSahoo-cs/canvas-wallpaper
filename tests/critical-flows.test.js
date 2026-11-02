@@ -919,6 +919,297 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   assert(Math.abs(rotatedBBox.w - 80) < 1, "Rotated link card screen bbox width becomes original height (~80px)");
   assert(Math.abs(rotatedBBox.h - 280) < 1, "Rotated link card screen bbox height becomes original width (~280px)");
 
+  // --- SECTION 22: Lightbox Store & Inspection (Phase 2) ---
+  console.log("\n--- SECTION 22: Lightbox Store & Inspection (Phase 2) ---");
+  const { useLightboxStore } = jiti('../src/lib/lightbox/store.ts');
+
+  assert(useLightboxStore.getState().isOpen === false, "Lightbox starts closed");
+  assert(useLightboxStore.getState().zoom === 1, "Lightbox starts with zoom 1");
+
+  const testLightboxItems = [
+    { id: "img-1", assetId: "asset-1", caption: "Photo 1" },
+    { id: "img-2", assetId: "asset-2", caption: "Photo 2" },
+    { id: "img-3", assetId: "asset-3", caption: "Photo 3" },
+  ];
+
+  useLightboxStore.getState().open(testLightboxItems, 1);
+  assert(useLightboxStore.getState().isOpen === true, "open() opens lightbox");
+  assert(useLightboxStore.getState().currentIndex === 1, "open() sets startIndex correctly");
+  assert(useLightboxStore.getState().items.length === 3, "open() loads all candidate items");
+
+  // Cyclical next
+  useLightboxStore.getState().next();
+  assert(useLightboxStore.getState().currentIndex === 2, "next() advances to index 2");
+  useLightboxStore.getState().next();
+  assert(useLightboxStore.getState().currentIndex === 0, "next() wraps around to index 0");
+
+  // Cyclical prev
+  useLightboxStore.getState().prev();
+  assert(useLightboxStore.getState().currentIndex === 2, "prev() wraps around to index 2");
+
+  // Zoom bounds clamping
+  useLightboxStore.getState().setZoom(10);
+  assert(useLightboxStore.getState().zoom === 8, "setZoom clamps to max 8x");
+  useLightboxStore.getState().setZoom(0.01);
+  assert(useLightboxStore.getState().zoom === 0.25, "setZoom clamps to min 0.25x");
+
+  // Pan and reset
+  useLightboxStore.getState().setPan({ x: 120, y: -45 });
+  assert(useLightboxStore.getState().pan.x === 120 && useLightboxStore.getState().pan.y === -45, "setPan sets coordinates");
+  useLightboxStore.getState().resetTransform();
+  assert(useLightboxStore.getState().zoom === 1, "resetTransform resets zoom to 1");
+  assert(useLightboxStore.getState().pan.x === 0 && useLightboxStore.getState().pan.y === 0, "resetTransform resets pan to 0,0");
+
+  // Close
+  useLightboxStore.getState().close();
+  assert(useLightboxStore.getState().isOpen === false, "close() closes lightbox");
+  assert(useLightboxStore.getState().items.length === 0, "close() clears items list");
+
+  // --- SECTION 23: ZIP Engine, Backup & Security Bounds (Phase 3) ---
+  console.log("\n--- SECTION 23: ZIP Engine, Backup & Security Bounds (Phase 3) ---");
+  const { crc32: testCrc32 } = jiti('../src/lib/backup/crc32.ts');
+  const { ZipWriter } = jiti('../src/lib/backup/zipWriter.ts');
+  const { ZipReader, MAX_BACKUP_ENTRIES, MAX_BACKUP_TOTAL_BYTES } = jiti('../src/lib/backup/zipReader.ts');
+  const { inspectBackupZip } = jiti('../src/lib/backup/import.ts');
+
+  // 1. Standard CRC-32 test vectors
+  const emptyBytes = new Uint8Array(0);
+  assert(testCrc32(emptyBytes) === 0, "CRC-32 of empty bytes is 0");
+  const standardVector = new TextEncoder().encode("123456789");
+  assert(testCrc32(standardVector) === 0xcbf43926, "CRC-32 matches standard test vector 0xCBF43926");
+
+  // 2. Store-only ZIP writer and reader roundtrip
+  const testWriter = new ZipWriter();
+  testWriter.addFile("manifest.json", JSON.stringify({ schemaVersion: 3, appVersion: "1.0.0", exportedAt: 123456789, counts: { scenes: 1, assets: 1, inbox: 0 } }));
+  testWriter.addFile("scenes/main.json", JSON.stringify({ id: "main", name: "Board 1", elements: [] }));
+  testWriter.addFile("assets/photo-1.png", new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x01, 0x02, 0x03]));
+  testWriter.addFile("sources.csv", "Asset ID,Hash,Title,Source URL,Saved At\n1,abc,Test,https://google.com,2026-11-01");
+
+  const zipBytes = testWriter.toUint8Array();
+  assert(zipBytes.length > 200, "ZipWriter generates non-empty binary archive");
+
+  const testReader = new ZipReader(zipBytes);
+  const extractedMap = testReader.extractAll();
+  assert(extractedMap.size === 4, "ZipReader extracts exactly 4 files");
+  assert(extractedMap.has("manifest.json"), "Archive contains manifest.json");
+  assert(extractedMap.has("scenes/main.json"), "Archive contains scenes/main.json");
+  assert(extractedMap.has("assets/photo-1.png"), "Archive contains assets/photo-1.png");
+  assert(extractedMap.has("sources.csv"), "Archive contains sources.csv");
+
+  const decodedManifest = JSON.parse(new TextDecoder().decode(extractedMap.get("manifest.json")));
+  assert(decodedManifest.schemaVersion === 3, "Manifest roundtrip preserves schemaVersion");
+
+  const extractedBinary = extractedMap.get("assets/photo-1.png");
+  assert(extractedBinary.length === 11, "Extracted asset matches exact byte length");
+  assert(extractedBinary[0] === 0x89 && extractedBinary[1] === 0x50, "PNG magic bytes are preserved bit-for-bit");
+
+  // 3. Path Traversal & Security Rejection
+  const maliciousWriter1 = new ZipWriter();
+  maliciousWriter1.addFile("../evil.txt", "pwn");
+  const badZipBytes1 = maliciousWriter1.toUint8Array();
+  let caughtTraversal = false;
+  try {
+    new ZipReader(badZipBytes1).extractAll();
+  } catch (err) {
+    caughtTraversal = true;
+  }
+  assert(caughtTraversal, "ZipReader strictly rejects relative path traversal (../)");
+
+  const maliciousWriter2 = new ZipWriter();
+  maliciousWriter2.addFile("/etc/passwd", "pwn");
+  const badZipBytes2 = maliciousWriter2.toUint8Array();
+  let caughtAbsolute = false;
+  try {
+    new ZipReader(badZipBytes2).extractAll();
+  } catch (err) {
+    caughtAbsolute = true;
+  }
+  assert(caughtAbsolute, "ZipReader strictly rejects absolute paths (/...)");
+
+  // 4. Inspection helper test
+  const inspectionResult = await inspectBackupZip(zipBytes);
+  assert(inspectionResult.manifest.schemaVersion === 3, "inspectBackupZip validates manifest schemaVersion");
+  assert(inspectionResult.sceneCount === 1, "inspectBackupZip detects 1 scene");
+  assert(inspectionResult.assetCount === 1, "inspectBackupZip detects 1 asset");
+  assert(inspectionResult.fileCount === 4, "inspectBackupZip detects 4 total entries");
+
+  // --- SECTION 24: Storage Health, Diagnostics & Backup Nudge (Phase 4) ---
+  console.log("\n--- SECTION 24: Storage Health, Diagnostics & Backup Nudge (Phase 4) ---");
+  const {
+    LAST_BACKUP_KEY,
+    BACKUP_NUDGE_DISMISSED_KEY,
+    getLastBackupTimestamp,
+    recordBackupCompleted,
+    dismissBackupNudge,
+    shouldShowBackupNudge,
+  } = jiti('../src/lib/storage/health.ts');
+
+  // Test Backup Nudge state machine
+  localStorage.removeItem(LAST_BACKUP_KEY);
+  localStorage.removeItem(BACKUP_NUDGE_DISMISSED_KEY);
+
+  assert(getLastBackupTimestamp() === null, "Initial backup timestamp is null");
+  assert(shouldShowBackupNudge().show === false, "Does not show nudge when no backup recorded yet");
+
+  // Recent backup (today)
+  recordBackupCompleted();
+  assert(typeof getLastBackupTimestamp() === "number", "recordBackupCompleted saves timestamp");
+  assert(shouldShowBackupNudge().show === false, "Does not show nudge on recent backup");
+
+  // Backup 14 days ago
+  const fourteenDaysAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+  localStorage.setItem(LAST_BACKUP_KEY, fourteenDaysAgo.toString());
+  const nudge14 = shouldShowBackupNudge();
+  assert(nudge14.show === true, "Shows backup nudge when last backup was 14 days ago");
+  assert(nudge14.daysSinceBackup === 14, "Nudge correctly calculates 14 days since backup");
+
+  // Dismissing the nudge suppresses it for 7 days
+  dismissBackupNudge();
+  assert(shouldShowBackupNudge().show === false, "Dismissing nudge suppresses reminder");
+
+  // Reset keys
+  localStorage.removeItem(LAST_BACKUP_KEY);
+  localStorage.removeItem(BACKUP_NUDGE_DISMISSED_KEY);
+
+  // --- SECTION 25: Acceptance Round-Trip, Scale & ZIP Verification (Phase 5) ---
+  console.log("\n--- SECTION 25: Acceptance Round-Trip, Scale & ZIP Verification (Phase 5) ---");
+
+  // 1. Empty ZIP test
+  const emptyWriter = new ZipWriter();
+  const emptyZipBytes = emptyWriter.toUint8Array();
+  assert(emptyZipBytes.length === 22, "Empty ZIP is exactly 22 bytes (EOCD record only)");
+  const emptyReader = new ZipReader(emptyZipBytes);
+  const emptyEntries = emptyReader.extractAll();
+  assert(emptyEntries.size === 0, "Empty ZIP yields 0 extracted entries without error");
+
+  // 2. Single small file test
+  const singleWriter = new ZipWriter();
+  singleWriter.addFile("hello.txt", "Hello PaperTab!");
+  const singleZipBytes = singleWriter.toUint8Array();
+  const singleReader = new ZipReader(singleZipBytes);
+  const singleEntries = singleReader.extractAll();
+  assert(singleEntries.size === 1, "Single file ZIP extracts 1 entry");
+  assert(new TextDecoder().decode(singleEntries.get("hello.txt")) === "Hello PaperTab!", "Single file content matches original");
+
+  // 3. 300+ files scale & performance measurement
+  const scaleWriter = new ZipWriter();
+  const fileCountTarget = 320;
+  const tStartWriter = Date.now();
+  for (let i = 0; i < fileCountTarget; i++) {
+    scaleWriter.addFile(`assets/asset_${i}.dat`, new Uint8Array([i % 256, (i * 7) % 256, (i * 13) % 256]));
+  }
+  const scaleZipBytes = scaleWriter.toUint8Array();
+  const tWriterDone = Date.now();
+
+  const tStartReader = Date.now();
+  const scaleReader = new ZipReader(scaleZipBytes);
+  const scaleExtracted = scaleReader.extractAll();
+  const tReaderDone = Date.now();
+
+  assert(scaleExtracted.size === fileCountTarget, `Extracted all ${fileCountTarget} files at scale`);
+  const writerTimeMs = tWriterDone - tStartWriter;
+  const readerTimeMs = tReaderDone - tStartReader;
+  assert(writerTimeMs < 1000, `ZIP packaging for ${fileCountTarget} items completed in <1000ms (${writerTimeMs}ms)`);
+  assert(readerTimeMs < 1000, `ZIP reading for ${fileCountTarget} items completed in <1000ms (${readerTimeMs}ms)`);
+
+  // 4. Path traversal & absolute path rejection edge cases
+  const maliciousWriter3 = new ZipWriter();
+  maliciousWriter3.addFile("C:\\foo.txt", "evil windows drive path");
+  const badZipBytes3 = maliciousWriter3.toUint8Array();
+  let caughtDrivePath = false;
+  try {
+    new ZipReader(badZipBytes3).extractAll();
+  } catch (err) {
+    caughtDrivePath = true;
+  }
+  assert(caughtDrivePath, "ZipReader strictly rejects Windows drive letter paths (C:\\...)");
+
+  const maliciousWriter4 = new ZipWriter();
+  maliciousWriter4.addFile("/foo.txt", "evil leading root path");
+  const badZipBytes4 = maliciousWriter4.toUint8Array();
+  let caughtRootPath = false;
+  try {
+    new ZipReader(badZipBytes4).extractAll();
+  } catch (err) {
+    caughtRootPath = true;
+  }
+  assert(caughtRootPath, "ZipReader strictly rejects leading root paths (/...)");
+
+  // 5. Round-trip backup export -> inspect -> restore verification
+  const roundtripWriter = new ZipWriter();
+  const testManifest = {
+    schemaVersion: 3,
+    appVersion: "1.0.0",
+    exportedAt: Date.now(),
+    counts: { scenes: 2, assets: 2, inbox: 1 },
+  };
+  roundtripWriter.addFile("manifest.json", JSON.stringify(testManifest));
+
+  const originalScene1 = {
+    id: "scene-alpha",
+    name: "Art Board Alpha",
+    elements: [
+      { id: "img-1", type: "image", assetId: "hash-asset-1", caption: "Original Photo" },
+      { id: "text-1", type: "text", text: "Important Note" },
+    ],
+    background: { type: "color", color: "#f6faf8" },
+    createdAt: 100000,
+  };
+  const originalScene2 = {
+    id: "scene-beta",
+    name: "Art Board Beta",
+    elements: [],
+    background: { type: "image", imageAssetId: "hash-asset-2" },
+    createdAt: 200000,
+  };
+  roundtripWriter.addFile("scenes/scene-alpha.json", JSON.stringify(originalScene1));
+  roundtripWriter.addFile("scenes/scene-beta.json", JSON.stringify(originalScene2));
+
+  // Binary asset data
+  const rawAssetBytes1 = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0xaa, 0xbb, 0xcc, 0xdd]);
+  const rawAssetBytes2 = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x11, 0x22, 0x33, 0x44]);
+  roundtripWriter.addFile("assets/hash-asset-1.png", rawAssetBytes1);
+  roundtripWriter.addFile("assets/hash-asset-2.jpg", rawAssetBytes2);
+
+  const libraryPayload = {
+    tags: {
+      "inspiration": { color: "#46BAEB" },
+      "concept": { color: "#00BF63" },
+    },
+    inbox: [
+      { id: "inbox-item-1", kind: "image", assetId: "hash-asset-1", title: "Saved Reference", state: "new", savedAt: 100 },
+    ],
+  };
+  roundtripWriter.addFile("library.json", JSON.stringify(libraryPayload));
+  roundtripWriter.addFile("sources.csv", "Asset ID,Hash,Title,Source URL,Saved At\n1,h1,Ref,https://example.com,2026-11-01");
+
+  const roundtripZip = roundtripWriter.toUint8Array();
+
+  // Inspect the roundtrip zip
+  const roundtripInspection = await inspectBackupZip(roundtripZip);
+  assert(roundtripInspection.manifest.schemaVersion === 3, "Roundtrip manifest schemaVersion matches");
+  assert(roundtripInspection.sceneCount === 2, "Roundtrip detects 2 scenes");
+  assert(roundtripInspection.assetCount === 2, "Roundtrip detects 2 assets");
+  assert(roundtripInspection.fileCount === 7, "Roundtrip detects 7 total archive files");
+
+  // Verify extracted scene structures match original bit-for-bit
+  const parsedScene1 = JSON.parse(new TextDecoder().decode(roundtripInspection.entries.get("scenes/scene-alpha.json")));
+  assert(parsedScene1.id === originalScene1.id, "Extracted scene 1 id matches original");
+  assert(parsedScene1.elements.length === 2, "Extracted scene 1 element count matches original");
+  assert(parsedScene1.elements[0].caption === "Original Photo", "Extracted scene 1 image caption matches");
+  assert(parsedScene1.elements[1].text === "Important Note", "Extracted scene 1 text content matches");
+
+  const parsedScene2 = JSON.parse(new TextDecoder().decode(roundtripInspection.entries.get("scenes/scene-beta.json")));
+  assert(parsedScene2.background.imageAssetId === "hash-asset-2", "Extracted scene 2 background imageAssetId matches");
+
+  const parsedLib = JSON.parse(new TextDecoder().decode(roundtripInspection.entries.get("library.json")));
+  assert(parsedLib.tags["inspiration"].color === "#46BAEB", "Extracted tag color matches original");
+  assert(parsedLib.inbox.length === 1 && parsedLib.inbox[0].id === "inbox-item-1", "Extracted inbox item matches original");
+
+  const extractedBytes1 = roundtripInspection.entries.get("assets/hash-asset-1.png");
+  assert(extractedBytes1.length === rawAssetBytes1.length, "Extracted asset 1 length matches bit-for-bit");
+  assert(extractedBytes1[0] === 0x89 && extractedBytes1[4] === 0xaa, "Extracted asset 1 bytes match bit-for-bit");
+
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 
   if (failed > 0) {
