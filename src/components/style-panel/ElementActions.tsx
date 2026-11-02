@@ -103,7 +103,7 @@ export const ElementActions: React.FC<ElementActionsProps> = ({
 
       {/* Auto-Arrange Layout (Grid, Masonry, Row, Column) */}
       {selectedMembers.length >= 2 && (
-        <div className="pt-2 border-t border-line/20 flex flex-col gap-1.5">
+        <div data-tour="auto-arrange" className="pt-2 border-t border-line/20 flex flex-col gap-1.5">
           <div className="flex items-center justify-between text-[10px] font-hand font-bold tracking-wider text-muted uppercase">
             <span>Arrange Layout</span>
             <span className="font-mono text-[9px] text-muted">{spacing}px</span>

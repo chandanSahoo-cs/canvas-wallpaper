@@ -14,6 +14,7 @@ import { PreviewPill } from "./components/PreviewPill";
 import { SettingsDialog } from "./widgets/SettingsDialog";
 import { WidgetLayoutOverlay } from "./widgets/WidgetLayoutOverlay";
 import { OnboardingTour } from "./components/OnboardingTour";
+import { TourHintPill } from "./components/TourHintPill";
 import { WebCapturePromptToast } from "./components/WebCapturePromptToast";
 import { PresetGalleryDialog } from "./components/PresetGalleryDialog";
 import { LibraryModal } from "./components/library/LibraryModal";
@@ -32,15 +33,21 @@ import { useCanvasDrop } from "./hooks/useCanvasDrop";
 import { Image as ImageIcon, ExternalLink } from "lucide-react";
 import { useViewportRecorder } from "./hooks/useViewportRecorder";
 import { useViewportBoundary } from "./hooks/useViewportBoundary";
+import { useOnboardingStore } from "./store/useOnboardingStore";
 import { cn } from "./lib/utils";
 
 export const App: React.FC = () => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   useCanvas(canvasRef);
 
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isShortcutsOpen, setIsShortcutsOpen] = useState(false);
-  const [isBackupOpen, setIsBackupOpen] = useState(false);
+  const isSettingsOpen = useAppStore((s) => s.isSettingsOpen);
+  const setIsSettingsOpen = useAppStore((s) => s.setIsSettingsOpen);
+  const isShortcutsOpen = useAppStore((s) => s.isShortcutsOpen);
+  const setIsShortcutsOpen = useAppStore((s) => s.setIsShortcutsOpen);
+  const isBackupOpen = useAppStore((s) => s.isBackupOpen);
+  const setIsBackupOpen = useAppStore((s) => s.setIsBackupOpen);
+
+
 
   // Store bindings
   const mode = useAppStore((s) => s.mode);
@@ -52,6 +59,7 @@ export const App: React.FC = () => {
   const scrollOffset = useAppStore((s) => s.scrollOffset);
   const isPresetsOpen = useAppStore((s) => s.isPresetsOpen);
   const setIsPresetsOpen = useAppStore((s) => s.setIsPresetsOpen);
+  const isTourActive = useOnboardingStore((s) => s.isTourActive);
   const loadScenesFromStorage = useSceneStore((s) => s.loadScenesFromStorage);
   const scenes = useSceneStore((s) => s.scenes);
 
@@ -62,7 +70,7 @@ export const App: React.FC = () => {
   const { bgStyle, isLight } = useWallpaperBackground(background);
   const { editingText, handleCommitText, handleCancelText } = useTextEditing();
   useKeyboardShortcuts({
-    onToggleShortcuts: () => setIsShortcutsOpen((prev) => !prev),
+    onToggleShortcuts: () => setIsShortcutsOpen(!useAppStore.getState().isShortcutsOpen),
   });
   useCanvasPaste();
   const { isDraggingOver } = useCanvasDrop({ canvasRef });
@@ -106,7 +114,7 @@ export const App: React.FC = () => {
         aria-label="PaperTab drawing canvas"
         className={cn(
           "absolute inset-0 w-full h-full touch-none",
-          mode === "wallpaper" || isPreviewing
+          mode === "wallpaper" || isPreviewing || isTourActive
             ? "pointer-events-none"
             : "pointer-events-auto",
         )}
@@ -193,6 +201,7 @@ export const App: React.FC = () => {
       <LibraryModal />
       <LightboxModal />
       <OnboardingTour />
+      <TourHintPill />
       <WebCapturePromptToast />
 
       {/* Backup & Restore Modal */}

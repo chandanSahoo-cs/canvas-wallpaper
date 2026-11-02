@@ -113,6 +113,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
   return (
     <div
       id="tour-toolbar"
+      data-tour="toolbar"
       className="fixed top-4 left-1/2 -translate-x-1/2 z-30 bg-surface border-2 border-line shadow-hard rounded-sk-lg p-1.5 flex items-center gap-1 select-none"
     >
       {/* Cluster 1: Primary Tools */}
@@ -199,6 +200,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
       {/* Cluster 3: Utilities + Done */}
       <div className="flex items-center gap-0.5">
         <button
+          data-tour="library-button"
           title="Library & Search (M)"
           aria-label="Open library and search"
           onClick={() => useLibraryStore.getState().toggleOpen()}
@@ -209,6 +211,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
 
         {/* Inbox Button */}
         <button
+          data-tour="inbox-button"
           title={`Inbox (I)${unreadCount > 0 ? ` - ${unreadCount} new` : ""}`}
           aria-label="Open Inbox"
           onClick={() => useInboxStore.getState().toggleOpen()}
@@ -232,6 +235,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
         {/* Keyboard Shortcuts */}
         {onOpenShortcuts && (
           <button
+            data-tour="shortcuts-button"
             title="Keyboard Shortcuts (?)"
             onClick={onOpenShortcuts}
             className="w-8 h-8 rounded-sk flex items-center justify-center text-ink/70 hover:text-ink hover:bg-paper hover:border-line/30 border-2 border-transparent transition-all duration-150 active:translate-x-[1px] active:translate-y-[1px] cursor-pointer"

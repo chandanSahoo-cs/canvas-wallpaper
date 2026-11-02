@@ -1,93 +1,12 @@
 import React, { useEffect } from "react";
 import { X, Command, Compass } from "lucide-react";
 import { useOnboardingStore } from "../store/useOnboardingStore";
+import { SHORTCUT_SECTIONS } from "../lib/shortcuts/registry";
 
 interface ShortcutsDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-interface ShortcutItem {
-  keys: string[];
-  description: string;
-}
-
-interface ShortcutSection {
-  title: string;
-  shortcuts: ShortcutItem[];
-}
-
-const SHORTCUT_SECTIONS: ShortcutSection[] = [
-  {
-    title: "Drawing Tools",
-    shortcuts: [
-      { keys: ["V", "1"], description: "Selection tool" },
-      { keys: ["R", "2"], description: "Rectangle shape" },
-      { keys: ["D", "3"], description: "Diamond shape" },
-      { keys: ["O", "4"], description: "Ellipse / Circle" },
-      { keys: ["A", "5"], description: "Arrow" },
-      { keys: ["L", "6"], description: "Straight Line" },
-      { keys: ["P", "7"], description: "Freehand Pencil" },
-      { keys: ["T", "8"], description: "Text element" },
-      { keys: ["E", "9"], description: "Eraser tool" },
-      {
-        keys: ["Shift", "Drag"],
-        description: "Keep 1:1 aspect ratio / 15° snap",
-      },
-      { keys: ["Alt", "Drag"], description: "Draw / resize from center" },
-    ],
-  },
-  {
-    title: "Edit & Clipboard",
-    shortcuts: [
-      { keys: ["Ctrl", "C"], description: "Copy selected element(s)" },
-      { keys: ["Ctrl", "V"], description: "Paste element(s) or images" },
-      { keys: ["Ctrl", "X"], description: "Cut selected element(s)" },
-      { keys: ["Ctrl", "D"], description: "Duplicate selection" },
-      { keys: ["Alt", "Drag"], description: "Duplicate element on drag" },
-      { keys: ["Del"], description: "Delete selected element(s)" },
-      { keys: ["Ctrl", "Z"], description: "Undo last action" },
-      { keys: ["Ctrl", "Y"], description: "Redo action" },
-    ],
-  },
-  {
-    title: "Navigation & View",
-    shortcuts: [
-      { keys: ["Space", "Drag"], description: "Pan across canvas" },
-      { keys: ["Ctrl", "Scroll"], description: "Zoom in / out" },
-      { keys: ["Ctrl", "+", "-"], description: "Zoom in / out" },
-      { keys: ["Ctrl", "0"], description: "Reset zoom & center canvas to (0,0)" },
-      { keys: ["Shift", "0"], description: "Center canvas to (0,0)" },
-      { keys: ["Shift", "Scroll"], description: "Pan horizontally" },
-      { keys: ["M"], description: "Open Library & Search" },
-      { keys: ["I"], description: "Toggle Web Capture Inbox" },
-      { keys: ["H"], description: "Toggle clean preview (hide UI)" },
-      { keys: ["B"], description: "Toggle wallpaper boundary marker" },
-      { keys: ["E"], description: "Enter Drawing mode (Wallpaper)" },
-      { keys: ["Esc"], description: "Exit Drawing mode / Deselect" },
-      { keys: ["?"], description: "Open this shortcuts cheatsheet" },
-    ],
-  },
-  {
-    title: "Layers & Groups",
-    shortcuts: [
-      {
-        keys: ["Arrow keys"],
-        description: "Nudge element 1px (Shift for 10px)",
-      },
-      { keys: ["Ctrl", "G"], description: "Group selected elements" },
-      {
-        keys: ["Ctrl", "Shift", "G"],
-        description: "Ungroup selected elements",
-      },
-      { keys: ["Ctrl", "Shift", "L"], description: "Lock or unlock element" },
-      { keys: ["Shift", "H"], description: "Flip selected horizontally" },
-      { keys: ["Shift", "V"], description: "Flip selected vertically" },
-      { keys: ["Ctrl", "]"], description: "Bring forward" },
-      { keys: ["Ctrl", "["], description: "Send backward" },
-    ],
-  },
-];
 
 export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
   isOpen,
@@ -113,13 +32,16 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
       className="fixed inset-0 z-50 bg-ink/60 flex items-center justify-center p-4 select-none animate-in fade-in duration-150"
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="shortcuts-dialog-title"
         onClick={(e) => e.stopPropagation()}
         className="bg-surface text-ink border-2 border-line rounded-sk-lg p-6 w-full max-w-2xl shadow-hard max-h-[85vh] flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center justify-between pb-3.5 border-b-2 border-line shrink-0">
           <div>
-            <h2 className="font-hand text-lg font-bold text-ink leading-tight">
+            <h2 id="shortcuts-dialog-title" className="font-hand text-lg font-bold text-ink leading-tight">
               Keyboard Shortcuts
             </h2>
             <p className="text-xs font-sans text-muted mt-0.5">
@@ -128,6 +50,7 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
           </div>
           <button
             onClick={onClose}
+            aria-label="Close shortcuts"
             className="p-1 rounded-sk-sm text-ink/70 hover:text-ink hover:bg-paper border border-transparent hover:border-line/30 transition-colors cursor-pointer"
           >
             <X className="w-4 h-4" />
@@ -175,12 +98,12 @@ export const ShortcutsDialog: React.FC<ShortcutsDialogProps> = ({
             <button
               onClick={() => {
                 onClose();
-                useOnboardingStore.getState().resetTour();
+                useOnboardingStore.getState().startTour();
               }}
               className="flex items-center gap-1.5 font-hand font-bold text-ink/80 hover:text-ink cursor-pointer"
             >
               <Compass className="w-3.5 h-3.5 text-brand-blue" />
-              <span>Feature Tour</span>
+              <span>Replay Tour</span>
             </button>
           </div>
           <button

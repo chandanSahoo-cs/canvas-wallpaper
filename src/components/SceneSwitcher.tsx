@@ -92,7 +92,11 @@ export const SceneSwitcher: React.FC = () => {
   return (
     <div ref={popoverRef} className="relative select-none">
       {/* Switcher Pill Button */}
-      <div className="flex items-center gap-1 bg-surface border-2 border-line shadow-hard rounded-sk p-1">
+      <div
+        id="tour-scene-switcher"
+        data-tour="scene-switcher"
+        className="flex items-center gap-1 bg-surface border-2 border-line shadow-hard rounded-sk p-1"
+      >
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 px-2.5 py-1 rounded-sk-sm hover:bg-paper transition-colors cursor-pointer"

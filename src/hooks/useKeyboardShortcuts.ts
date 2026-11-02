@@ -4,6 +4,7 @@ import { openTextEditor } from "../tools/TextTool";
 import { TextElement, ToolType } from "../elements/types";
 import { useLibraryStore } from "../lib/library/store";
 import { useInboxStore } from "../lib/inbox/store";
+import { useOnboardingStore } from "../store/useOnboardingStore";
 
 const TOOL_SHORTCUT_MAP: Record<string, ToolType> = {
   v: "selection",
@@ -76,6 +77,13 @@ export function useKeyboardShortcuts({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Suppress non-tour shortcuts while the onboarding tour or welcome modal is active
+      if (
+        useOnboardingStore.getState().isTourActive ||
+        useOnboardingStore.getState().isWelcomeOpen
+      ) {
+        return;
+      }
       // Never trigger canvas shortcuts while typing into text editor or inputs
       if (useAppStore.getState().editingText) return;
       if (isInputElement(e.target)) return;

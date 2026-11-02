@@ -20,6 +20,7 @@ import {
   Trash2,
   Archive,
   HardDrive,
+  Check,
 } from "lucide-react";
 import { BackupModal } from "../components/backup/BackupModal";
 import { StorageHealthModal } from "../components/storage/StorageHealthModal";
@@ -31,7 +32,7 @@ import {
 import { useSceneStore } from "../store/useSceneStore";
 import { loadAllLibraryItems } from "../lib/library/crossReference";
 import { useWidgetStore } from "../store/useWidgetStore";
-import { useOnboardingStore } from "../store/useOnboardingStore";
+import { useOnboardingStore, CHAPTERS } from "../store/useOnboardingStore";
 import { useAppStore } from "../store/useAppStore";
 import { PrivacyPolicyDialog } from "../components/PrivacyPolicyDialog";
 import { SearchEngineDropdown } from "./settings/SearchEngineDropdown";
@@ -53,6 +54,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
   const [showCaptureExplainer, setShowCaptureExplainer] = useState(false);
   const [isBackupOpen, setIsBackupOpen] = useState(false);
   const [isHealthOpen, setIsHealthOpen] = useState(false);
+  const completedChapters = useOnboardingStore((s) => s.completedChapters);
   useEffect(() => {
     return subscribeHostPermission(setHasCapturePermission);
   }, []);
@@ -114,6 +116,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="settings-dialog-title"
+        data-tour="settings-dialog"
         className="bg-surface text-ink border-2 border-line rounded-sk-lg p-6 w-full max-w-md shadow-hard max-h-[85vh] flex flex-col"
       >
         <div className="flex items-center justify-between pb-3.5 border-b-2 border-line shrink-0">
@@ -167,7 +170,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Individual Widget Toggles */}
-          <div className="flex flex-col gap-3">
+          <div data-tour="widgets-section" className="flex flex-col gap-3">
             {/* Clock */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -281,7 +284,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Widget Layout & Alignment */}
-          <div className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
+          <div data-tour="widget-layout-section" className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
             <div className="flex items-center justify-between">
               <div className="text-sm font-hand font-bold text-ink">
                 Layout & Placement
@@ -309,7 +312,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Interface Theme (System / Light / Dark) */}
-          <div className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
+          <div data-tour="theme-section" className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Sun className="w-4 h-4 text-brand-blue" />
@@ -385,7 +388,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Web Capture & Host Permissions */}
-          <div className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
+          <div data-tour="web-capture-permission" className="flex flex-col gap-2 pt-3.5 border-t border-line/20">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <Globe className="w-4 h-4 text-brand-blue shrink-0" />
@@ -476,7 +479,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Backup & Restore (.zip) */}
-          <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
+          <div data-tour="backup-section" className="flex items-center justify-between pt-3.5 border-t border-line/20">
             <div className="flex items-center gap-2.5">
               <Archive className="w-4 h-4 text-brand-blue" />
               <div>
@@ -495,7 +498,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
           </div>
 
           {/* Storage Health & Diagnostics */}
-          <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
+          <div data-tour="storage-health-section" className="flex items-center justify-between pt-3.5 border-t border-line/20">
             <div className="flex items-center gap-2.5">
               <HardDrive className="w-4 h-4 text-brand-blue" />
               <div>
@@ -513,26 +516,67 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
             </button>
           </div>
 
-          {/* Feature Walkthrough Tour */}
-          <div className="flex items-center justify-between pt-3.5 border-t border-line/20">
-            <div className="flex items-center gap-2.5">
-              <Compass className="w-4 h-4 text-muted" />
-              <div>
-                <div className="text-sm font-hand font-bold text-ink">Feature Walkthrough</div>
-                <div className="text-xs font-sans text-muted">
-                  Interactive guided tour
+          {/* Take the Tour Chapters Section */}
+          <div data-tour="take-the-tour" className="flex flex-col gap-2.5 pt-3.5 border-t border-line/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <Compass className="w-4 h-4 text-brand-blue" />
+                <div>
+                  <div className="text-sm font-hand font-bold text-ink">Take the Tour</div>
+                  <div className="text-xs font-sans text-muted">
+                    Interactive guided walkthroughs
+                  </div>
                 </div>
               </div>
             </div>
-            <button
-              onClick={() => {
-                onClose();
-                useOnboardingStore.getState().resetTour();
-              }}
-              className="py-1.5 px-3 rounded-sk bg-paper hover:bg-surface text-ink font-hand font-bold text-xs border-2 border-line shadow-hard-sm active:translate-x-[1px] active:translate-y-[1px] transition-all cursor-pointer"
-            >
-              Start Tour
-            </button>
+
+            <div className="flex flex-col gap-1.5 bg-paper border-2 border-line rounded-sk p-2">
+              {CHAPTERS.map((ch) => {
+                const isDone = completedChapters.includes(ch.id);
+                return (
+                  <div
+                    key={ch.id}
+                    className="flex items-center justify-between p-2 rounded-sk-sm bg-surface/80 border border-line/30 gap-2"
+                  >
+                    <div className="flex flex-col gap-0.5 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-hand font-bold text-xs text-ink truncate">
+                          {ch.title}
+                        </span>
+                        <span className="text-[10px] font-mono text-muted shrink-0">
+                          ~{ch.estimatedSeconds}s
+                        </span>
+                        {isDone && (
+                          <span className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded-sk-sm bg-brand-green/15 text-brand-green border border-brand-green/30 text-[9px] font-hand font-bold shrink-0">
+                            <Check className="w-2.5 h-2.5" />
+                            Done
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] font-sans text-muted truncate">
+                        {ch.description}
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        useOnboardingStore.getState().startChapter(ch.id);
+                      }}
+                      className={cn(
+                        "px-2.5 py-1 rounded-sk font-hand font-bold text-xs border transition-all cursor-pointer shrink-0 active:translate-x-[1px] active:translate-y-[1px]",
+                        isDone
+                          ? "bg-paper text-ink border-line/40 hover:border-line"
+                          : "bg-brand-blue text-on-accent border-line shadow-hard-sm hover:brightness-105",
+                      )}
+                    >
+                      {isDone ? "Replay" : "Start"}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
 
