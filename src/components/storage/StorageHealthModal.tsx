@@ -224,7 +224,7 @@ export const StorageHealthModal: React.FC<StorageHealthModalProps> = ({
                   <span>Thumbs: {formatBytes(summary.thumbnailBytes)}</span>
                 </div>
                 <div className="text-[10px] font-sans text-brand-green font-medium mt-1">
-                  IndexedDB 100% on-device
+                  IndexedDB on-device
                 </div>
               </div>
 

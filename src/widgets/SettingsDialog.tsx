@@ -425,7 +425,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     <strong>Bypasses download protection:</strong> Sites like Pinterest, Instagram, and Twitter block external tools from saving photos unless granted access.
                   </li>
                   <li>
-                    <strong>100% on-device & private:</strong> PaperTab only downloads the specific image you right-click. It never reads your browsing history, cookies, or passwords.
+                    <strong>On-device & private:</strong> PaperTab only downloads the specific image you right-click. It never reads your browsing history, cookies, or passwords.
                   </li>
                 </ul>
                 <p className="font-sans text-[10px] text-muted italic">

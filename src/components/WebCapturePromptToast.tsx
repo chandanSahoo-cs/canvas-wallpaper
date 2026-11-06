@@ -126,7 +126,7 @@ export const WebCapturePromptToast: React.FC = () => {
 
           <div className="flex items-center gap-1.5 text-[10px] font-sans text-muted bg-paper p-1.5 rounded-sk border border-line/20">
             <Shield className="w-3 h-3 text-brand-blue shrink-0" />
-            <span>100% on-device & private. Never sends data to servers.</span>
+            <span>On-device & private. Only fetches images you explicitly save.</span>
           </div>
 
           {/* Action buttons */}

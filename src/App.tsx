@@ -87,7 +87,6 @@ export const App: React.FC = () => {
     (async () => {
       try {
         await loadScenesFromStorage();
-        useResurfaceStore.getState().syncFromScenes(useSceneStore.getState().scenes);
       } catch (err) {
         console.warn("loadScenesFromStorage error:", err);
       }

@@ -329,7 +329,6 @@ export async function restoreBackup(
   });
 
   await useSceneStore.getState().loadScenesFromStorage();
-  await useResurfaceStore.getState().syncFromScenes(useSceneStore.getState().scenes);
 
   return {
     scenesRestored,
