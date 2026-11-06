@@ -22,37 +22,45 @@ export default defineBackground(() => {
     chrome.tabs.create({});
   });
 
-  // 2. Register Context Menus on install/update (MV3 Requirement)
-  chrome.runtime.onInstalled.addListener(() => {
+  function registerContextMenus() {
+    if (typeof chrome === "undefined" || !chrome.contextMenus) return;
     chrome.contextMenus.removeAll(() => {
       chrome.contextMenus.create({
         id: "papertab-save-image",
         title: "Save image to PaperTab",
         contexts: ["image"],
       });
-
       chrome.contextMenus.create({
         id: "papertab-save-link",
         title: "Save link to PaperTab",
         contexts: ["link"],
       });
-
       chrome.contextMenus.create({
         id: "papertab-save-selection",
         title: "Save selection to PaperTab",
         contexts: ["selection"],
       });
-
       chrome.contextMenus.create({
         id: "papertab-save-page",
         title: "Save page to PaperTab",
         contexts: ["page"],
       });
     });
+  }
 
-    // Initialize badge count on startup
+  chrome.runtime.onInstalled.addListener(() => {
+    registerContextMenus();
     updateBadgeCount().catch(() => {});
   });
+
+  chrome.runtime.onStartup.addListener(() => {
+    registerContextMenus();
+    updateBadgeCount().catch(() => {});
+  });
+
+  // Run immediately on background script execution so reloaded extensions register menus
+  registerContextMenus();
+  updateBadgeCount().catch(() => {});
 
   // 3. Handle Context Menu Actions
   chrome.contextMenus.onClicked.addListener(async (info, tab) => {

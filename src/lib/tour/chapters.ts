@@ -36,7 +36,7 @@ export const CHAPTERS: ChapterInfo[] = [
     id: "wallpaper",
     title: "Wallpaper & Widgets",
     badge: "Desktop",
-    description: "Customize background patterns, clock, search bar, and new-tab resurfacing.",
+    description: "Customize background patterns, clock, search bar, and interface theme.",
     estimatedSeconds: 45,
   },
   {
@@ -342,13 +342,13 @@ export const TOUR_STEPS: TourStepConfig[] = [
     },
   },
   {
-    id: "wallpaper-resurface",
+    id: "wallpaper-theme",
     chapterId: "wallpaper",
-    targetSelector: '[data-tour="resurface-settings"]',
-    badge: "Resurfacing",
-    title: "New Tab Resurfacing",
+    targetSelector: '[data-tour="theme-section"]',
+    badge: "Appearance",
+    title: "Interface Theme",
     description:
-      "Pick what your new tab shows: Current board, Shuffle boards, Random item, or Daily pick. Items display full-screen with source captions.",
+      "Choose your preferred theme: follow your system preferences, or lock into clean light or dark mode anytime.",
     placement: "bottom",
     targetMode: "wallpaper",
     onEnter: () => {

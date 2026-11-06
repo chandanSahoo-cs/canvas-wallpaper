@@ -14,7 +14,6 @@ import {
   RestoreProgress,
   RestoreSummary,
 } from "./types";
-import { useResurfaceStore } from "../resurface/store";
 
 export type RestoreProgressCallback = (progress: RestoreProgress) => void;
 
