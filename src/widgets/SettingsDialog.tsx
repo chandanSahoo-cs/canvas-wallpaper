@@ -407,7 +407,7 @@ export const SettingsDialog: React.FC<SettingsDialogProps> = ({
                     </span>
                   </div>
                   <div className="text-xs font-sans text-muted">
-                    Save images directly from protected websites (Pinterest, Instagram, Twitter). Saved 100% locally to your Inbox.
+                    Allow saving images directly from any site. Items are saved locally to your Inbox.
                   </div>
                 </div>
               </div>

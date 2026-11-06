@@ -5,6 +5,7 @@ import {
   BurstRateLimiter,
   FETCH_TIMEOUT_MS,
   isImageContentTypeAllowed,
+  readBodyWithCap,
   MAX_IMAGE_FETCH_BYTES,
   sanitizePlainText,
   sanitizeTitle,
@@ -86,39 +87,35 @@ export default defineBackground(() => {
           let imageSaved = false;
 
           // Attempt to fetch the image with credentials omitted, 15s timeout, 25MB cap
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
           try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-
             const res = await fetch(srcUrl, {
               credentials: "omit",
               signal: controller.signal,
             });
-            clearTimeout(timeoutId);
 
             if (res.ok) {
               const contentType = res.headers.get("content-type");
-              const contentLength = res.headers.get("content-length");
 
               // Content-type check: image/* only, strictly reject svg
               if (isImageContentTypeAllowed(contentType)) {
-                // Size cap check
-                if (!contentLength || parseInt(contentLength, 10) <= MAX_IMAGE_FETCH_BYTES) {
-                  const blob = await res.blob();
-                  if (blob.size <= MAX_IMAGE_FETCH_BYTES && isImageContentTypeAllowed(blob.type)) {
-                    const asset = await ingestImage(blob, source);
-                    await addInboxItem({
-                      kind: "image",
-                      assetId: asset.id,
-                      source,
-                    });
-                    imageSaved = true;
-                  }
+                const blob = await readBodyWithCap(res, MAX_IMAGE_FETCH_BYTES);
+                if (blob && blob.size <= MAX_IMAGE_FETCH_BYTES && isImageContentTypeAllowed(blob.type)) {
+                  const asset = await ingestImage(blob, source);
+                  await addInboxItem({
+                    kind: "image",
+                    assetId: asset.id,
+                    source,
+                  });
+                  imageSaved = true;
                 }
               }
             }
           } catch (fetchErr) {
             console.warn("Direct image fetch blocked or failed:", fetchErr);
+          } finally {
+            clearTimeout(timeoutId);
           }
 
           // If direct image fetch was blocked (CORS / host permissions / network):

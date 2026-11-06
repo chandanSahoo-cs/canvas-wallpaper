@@ -7,28 +7,52 @@ import {
   INBOX_TICK_KEY,
 } from "./types";
 
-export async function getInboxItems(): Promise<InboxItem[]> {
-  try {
-    if (typeof chrome !== "undefined" && chrome.storage?.local) {
-      return new Promise((resolve) => {
-        chrome.storage.local.get([INBOX_STORAGE_KEY], (res) => {
-          const items = res?.[INBOX_STORAGE_KEY];
-          resolve(Array.isArray(items) ? items : []);
-        });
-      });
-    }
+let fallbackChain: Promise<any> = Promise.resolve();
 
-    if (typeof localStorage !== "undefined") {
-      const raw = localStorage.getItem(INBOX_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        return Array.isArray(parsed) ? parsed : [];
-      }
+export async function withInboxLock<T>(fn: () => Promise<T>): Promise<T> {
+  if (typeof navigator !== "undefined" && navigator.locks?.request) {
+    return navigator.locks.request("papertab-inbox", fn);
+  }
+  const next = fallbackChain.catch(() => {}).then(fn);
+  fallbackChain = next.catch(() => {});
+  return next;
+}
+
+export async function getInboxItemsOrThrow(): Promise<InboxItem[]> {
+  if (typeof chrome !== "undefined" && chrome.storage?.local) {
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.get([INBOX_STORAGE_KEY], (res) => {
+        if (chrome.runtime?.lastError) {
+          return reject(
+            new Error(
+              chrome.runtime.lastError.message ||
+                String(chrome.runtime.lastError),
+            ),
+          );
+        }
+        const items = res?.[INBOX_STORAGE_KEY];
+        resolve(Array.isArray(items) ? items : []);
+      });
+    });
+  }
+
+  if (typeof localStorage !== "undefined") {
+    const raw = localStorage.getItem(INBOX_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed : [];
     }
-  } catch (err) {
-    console.warn("Failed to load inbox items:", err);
   }
   return [];
+}
+
+export async function getInboxItems(): Promise<InboxItem[]> {
+  try {
+    return await getInboxItemsOrThrow();
+  } catch (err) {
+    console.warn("Failed to load inbox items:", err);
+    return [];
+  }
 }
 
 export async function updateBadgeCount(unreadCount?: number): Promise<void> {
@@ -53,13 +77,23 @@ export async function updateBadgeCount(unreadCount?: number): Promise<void> {
 export async function saveInboxItems(items: InboxItem[]): Promise<void> {
   try {
     if (typeof chrome !== "undefined" && chrome.storage?.local) {
-      await new Promise<void>((resolve) => {
+      await new Promise<void>((resolve, reject) => {
         chrome.storage.local.set(
           {
             [INBOX_STORAGE_KEY]: items,
             [INBOX_TICK_KEY]: Date.now(),
           },
-          () => resolve(),
+          () => {
+            if (chrome.runtime?.lastError) {
+              return reject(
+                new Error(
+                  chrome.runtime.lastError.message ||
+                    String(chrome.runtime.lastError),
+                ),
+              );
+            }
+            resolve();
+          },
         );
       });
     } else if (typeof localStorage !== "undefined") {
@@ -81,6 +115,7 @@ export async function saveInboxItems(items: InboxItem[]): Promise<void> {
     }
   } catch (err) {
     console.warn("Failed to save inbox items:", err);
+    throw err;
   }
 }
 
@@ -88,33 +123,37 @@ export async function addInboxItem(
   partial: Omit<InboxItem, "id" | "createdAt" | "state"> &
     Partial<Pick<InboxItem, "id" | "createdAt" | "state">>,
 ): Promise<InboxItem> {
-  const current = await getInboxItems();
-  const newItem: InboxItem = {
-    id: partial.id || newId(),
-    createdAt: partial.createdAt || Date.now(),
-    state: partial.state || "new",
-    kind: partial.kind,
-    assetId: partial.assetId,
-    url: partial.url,
-    title: partial.title,
-    text: partial.text,
-    faviconUrl: partial.faviconUrl,
-    source: partial.source || { savedAt: Date.now() },
-    fallbackReason: partial.fallbackReason,
-  };
+  return withInboxLock(async () => {
+    const current = await getInboxItems();
+    const newItem: InboxItem = {
+      id: partial.id || newId(),
+      createdAt: partial.createdAt || Date.now(),
+      state: partial.state || "new",
+      kind: partial.kind,
+      assetId: partial.assetId,
+      url: partial.url,
+      title: partial.title,
+      text: partial.text,
+      faviconUrl: partial.faviconUrl,
+      source: partial.source || { savedAt: Date.now() },
+      fallbackReason: partial.fallbackReason,
+    };
 
-  const updated = [newItem, ...current];
-  await saveInboxItems(updated);
-  return newItem;
+    const updated = [newItem, ...current];
+    await saveInboxItems(updated);
+    return newItem;
+  });
 }
 
 export async function updateInboxItemState(
   id: string,
   state: InboxItemState,
 ): Promise<void> {
-  const current = await getInboxItems();
-  const updated = current.map((it) => (it.id === id ? { ...it, state } : it));
-  await saveInboxItems(updated);
+  return withInboxLock(async () => {
+    const current = await getInboxItems();
+    const updated = current.map((it) => (it.id === id ? { ...it, state } : it));
+    await saveInboxItems(updated);
+  });
 }
 
 export async function dismissInboxItem(id: string): Promise<void> {
@@ -126,15 +165,19 @@ export async function undoDismissInboxItem(id: string): Promise<void> {
 }
 
 export async function deleteInboxItem(id: string): Promise<void> {
-  const current = await getInboxItems();
-  const updated = current.filter((it) => it.id !== id);
-  await saveInboxItems(updated);
+  return withInboxLock(async () => {
+    const current = await getInboxItems();
+    const updated = current.filter((it) => it.id !== id);
+    await saveInboxItems(updated);
+  });
 }
 
 export async function clearAllDismissed(): Promise<void> {
-  const current = await getInboxItems();
-  const updated = current.filter((it) => it.state !== "dismissed");
-  await saveInboxItems(updated);
+  return withInboxLock(async () => {
+    const current = await getInboxItems();
+    const updated = current.filter((it) => it.state !== "dismissed");
+    await saveInboxItems(updated);
+  });
 }
 
 export async function getInboxCaptureHint(): Promise<boolean> {

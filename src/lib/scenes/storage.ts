@@ -35,8 +35,13 @@ export interface StoredSceneRecord {
 
 export async function getStorageItems<T>(keys: string[]): Promise<Record<string, T>> {
   if (typeof chrome !== "undefined" && chrome.storage?.local) {
-    return new Promise((resolve) => {
-      chrome.storage.local.get(keys, (res) => resolve((res as Record<string, T>) || {}));
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.get(keys, (res) => {
+        if (chrome.runtime?.lastError) {
+          return reject(new Error(chrome.runtime.lastError.message || String(chrome.runtime.lastError)));
+        }
+        resolve((res as Record<string, T>) || {});
+      });
     });
   }
   const result: Record<string, T> = {};
@@ -53,8 +58,13 @@ export async function getStorageItems<T>(keys: string[]): Promise<Record<string,
 
 export async function setStorageItems(items: Record<string, any>): Promise<void> {
   if (typeof chrome !== "undefined" && chrome.storage?.local) {
-    return new Promise((resolve) => {
-      chrome.storage.local.set(items, () => resolve());
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.set(items, () => {
+        if (chrome.runtime?.lastError) {
+          return reject(new Error(chrome.runtime.lastError.message || String(chrome.runtime.lastError)));
+        }
+        resolve();
+      });
     });
   }
   for (const [k, v] of Object.entries(items)) {
@@ -66,8 +76,13 @@ export async function setStorageItems(items: Record<string, any>): Promise<void>
 
 export async function removeStorageItems(keys: string[]): Promise<void> {
   if (typeof chrome !== "undefined" && chrome.storage?.local) {
-    return new Promise((resolve) => {
-      chrome.storage.local.remove(keys, () => resolve());
+    return new Promise((resolve, reject) => {
+      chrome.storage.local.remove(keys, () => {
+        if (chrome.runtime?.lastError) {
+          return reject(new Error(chrome.runtime.lastError.message || String(chrome.runtime.lastError)));
+        }
+        resolve();
+      });
     });
   }
   for (const k of keys) {

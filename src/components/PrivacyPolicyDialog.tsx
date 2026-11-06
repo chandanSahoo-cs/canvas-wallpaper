@@ -58,7 +58,7 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
                 Privacy Policy
               </h2>
               <p className="text-xs font-sans text-muted mt-0.5">
-                100% Local-First • No Tracking • No Telemetry
+                Local-First • No Tracking • No Telemetry
               </p>
             </div>
           </div>
@@ -77,20 +77,10 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
           <div className="p-3.5 rounded-sk bg-paper border-2 border-line space-y-1.5">
             <div className="flex items-center gap-2 text-ink font-hand font-bold text-xs">
               <Database className="w-4 h-4 text-brand-blue" />
-              <span>Zero Personal Data Collected & Local-Only Assets</span>
+              <span>Local Storage & On-Device Assets</span>
             </div>
             <p className="leading-relaxed font-sans text-muted">
-              PaperTab does not collect, track, store, or sell any personal data,
-              browsing history, or analytics. Everything you draw, sketch, or
-              configure is saved strictly on your local device via{" "}
-              <code className="px-1 py-0.5 bg-surface border border-line/40 rounded-sk-sm text-[11px] font-mono text-ink">
-                chrome.storage.local
-              </code>{" "}
-              (for scene indices and widget layouts) and local browser{" "}
-              <code className="px-1 py-0.5 bg-surface border border-line/40 rounded-sk-sm text-[11px] font-mono text-ink">
-                IndexedDB
-              </code>{" "}
-              (for high-resolution images, thumbnails, and visual assets). Assets are stored exclusively on your device, never uploaded to any remote server or cloud, and PaperTab has zero telemetry or network egress.
+              PaperTab has no accounts, no analytics or telemetry, and no PaperTab servers; boards, images and notes are stored on your device and are never uploaded to PaperTab or anyone else. Everything you draw, sketch, or configure is saved on your local device via <code className="px-1 py-0.5 bg-surface border border-line/40 rounded-sk-sm text-[11px] font-mono text-ink">chrome.storage.local</code> (for board indices, inbox items, and widget layouts) and local browser <code className="px-1 py-0.5 bg-surface border border-line/40 rounded-sk-sm text-[11px] font-mono text-ink">IndexedDB</code> (for high-resolution images, thumbnails, and visual assets).
             </p>
             <p className="text-[11px] font-sans text-muted">
               No tracking cookies or advertising identifiers are used.
@@ -101,36 +91,21 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
           <div className="p-3.5 rounded-sk bg-paper border-2 border-line space-y-1.5">
             <div className="flex items-center gap-2 text-ink font-hand font-bold text-xs">
               <Globe className="w-4 h-4 text-brand-blue" />
-              <span>Network Requests</span>
+              <span>Outbound Network Requests</span>
             </div>
             <p className="leading-relaxed font-sans text-muted">
-              PaperTab operates entirely offline within your browser. The only
-              outbound web requests made are direct user-initiated actions:
+              PaperTab has no proprietary servers and does not receive your data.
+              The extension makes only specific outbound requests, listed honestly:
             </p>
-            <ul className="list-disc list-inside space-y-0.5 text-muted font-sans pl-1">
+            <ul className="list-disc list-inside space-y-1 text-muted font-sans pl-1">
               <li>
-                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
-                  storage
-                </code>{" "}
-                — save wallpapers, boards, Inbox items, and widget layouts locally
+                <strong className="text-ink">Quick Links favicons:</strong> fetched from Google&apos;s favicon service (<code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">https://www.google.com/s2/favicons</code>), which reveals the linked site&apos;s domain to Google.
               </li>
               <li>
-                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
-                  unlimitedStorage
-                </code>{" "}
-                — prevent browser evicting your canvas drawings and IndexedDB assets
+                <strong className="text-ink">Search engine queries:</strong> submitting a search sends your query directly to your chosen search engine.
               </li>
               <li>
-                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
-                  contextMenus
-                </code>{" "}
-                — right-click menu items to save images, selected text, links, or pages directly to PaperTab
-              </li>
-              <li>
-                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
-                  optional_host_permissions (https://*/*)
-                </code>{" "}
-                — requested only at runtime if you choose to enable saving images from any website. All items remain strictly on your device; no analytics or telemetry ever leave your machine.
+                <strong className="text-ink">Web saves &amp; link previews:</strong> when you save an image, link, selection, or page (or resolve link previews), the extension fetches it directly from the original site. This uses optional host permissions requested only on opt-in.
               </li>
             </ul>
           </div>
@@ -139,23 +114,33 @@ export const PrivacyPolicyDialog: React.FC<PrivacyPolicyDialogProps> = ({
           <div className="p-3.5 rounded-sk bg-paper border-2 border-line space-y-1.5">
             <div className="flex items-center gap-2 text-ink font-hand font-bold text-xs">
               <KeyRound className="w-4 h-4 text-brand-blue" />
-              <span>Minimal Permissions</span>
+              <span>Extension Permissions</span>
             </div>
             <p className="leading-relaxed font-sans text-muted">
-              The extension requests only the minimum permissions required:
+              The extension requests only necessary permissions:
             </p>
             <ul className="list-disc list-inside space-y-0.5 text-muted font-sans pl-1">
               <li>
                 <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
                   storage
                 </code>{" "}
-                — save wallpapers, scenes, and widget layout locally
-              </li>
-              <li>
+                &amp;{" "}
                 <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
                   unlimitedStorage
                 </code>{" "}
-                — prevent browser evicting your canvas drawings and IndexedDB assets
+                — save wallpapers, scenes, and visual assets locally without quota limitations
+              </li>
+              <li>
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
+                  contextMenus
+                </code>{" "}
+                — right-click menu items to save images, selected text, links, or pages to PaperTab
+              </li>
+              <li>
+                <code className="px-1 py-0.2 rounded-sk-sm bg-surface border border-line/30 font-mono text-[10px]">
+                  optional_host_permissions (https://*/*)
+                </code>{" "}
+                — requested only on opt-in if you enable saving images from any website; can be revoked in Settings at any time
               </li>
             </ul>
           </div>

@@ -230,7 +230,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({ onOpenShortcuts }) => {
           )}
         </button>
         <ExportMenu />
-        <StressTestButton />
+        {import.meta.env.DEV && <StressTestButton />}
 
         {/* Keyboard Shortcuts */}
         {onOpenShortcuts && (

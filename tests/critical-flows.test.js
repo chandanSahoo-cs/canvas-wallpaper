@@ -1380,6 +1380,545 @@ assert(MAX_MEGAPIXELS === 100, 'MAX_MEGAPIXELS limit is 100');
   assert(Array.isArray(auditReport.missingDomAnchors), "auditTour provides missingDomAnchors array");
   assert(Array.isArray(auditReport.clippedOrOverflowingPopovers), "auditTour provides clippedOrOverflowingPopovers array");
 
+  // --- SECTION 18: Data-Loss & Integrity Audit Regressions ---
+  console.log('\n--- SECTION 18: Data-Loss & Integrity Audit Regressions ---');
+
+  // Ground Rule 5: Install a global.chrome mock with storage.local.get/set/remove (callbacks)
+  // and runtime.lastError, backed by an in-memory object.
+  // Add failure injection with TWO separate flags: one that fails every operation,
+  // and one that fails READS ONLY.
+  let chromeStorageMem = {};
+  let failAllChromeOps = false;
+  let failReadsOnly = false;
+  let chromeOpDelayMs = 0;
+
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  global.chrome = {
+    action: {
+      setBadgeText: () => {},
+      setBadgeBackgroundColor: () => {},
+      setBadgeTextColor: () => {},
+    },
+    runtime: {
+      lastError: null,
+      sendMessage: (_msg, cb) => cb?.(),
+    },
+    storage: {
+      local: {
+        get: (keys, callback) => {
+          const run = () => {
+            if (failAllChromeOps || failReadsOnly) {
+              global.chrome.runtime.lastError = { message: "Simulated chrome.storage read failure" };
+              try {
+                callback({});
+              } finally {
+                global.chrome.runtime.lastError = null;
+              }
+              return;
+            }
+            global.chrome.runtime.lastError = null;
+            let result = {};
+            if (typeof keys === "string") {
+              result[keys] = chromeStorageMem[keys];
+            } else if (Array.isArray(keys)) {
+              for (const k of keys) {
+                if (k in chromeStorageMem) {
+                  result[k] = chromeStorageMem[k];
+                }
+              }
+            } else if (keys && typeof keys === "object") {
+              for (const [k, defaultVal] of Object.entries(keys)) {
+                result[k] = k in chromeStorageMem ? chromeStorageMem[k] : defaultVal;
+              }
+            } else {
+              result = { ...chromeStorageMem };
+            }
+            callback(result);
+          };
+          if (chromeOpDelayMs > 0) {
+            setTimeout(run, chromeOpDelayMs);
+          } else {
+            run();
+          }
+        },
+        set: (items, callback) => {
+          const run = () => {
+            if (failAllChromeOps) {
+              global.chrome.runtime.lastError = { message: "Simulated chrome.storage write failure" };
+              try {
+                callback?.();
+              } finally {
+                global.chrome.runtime.lastError = null;
+              }
+              return;
+            }
+            global.chrome.runtime.lastError = null;
+            Object.assign(chromeStorageMem, items);
+            callback?.();
+          };
+          if (chromeOpDelayMs > 0) {
+            setTimeout(run, chromeOpDelayMs);
+          } else {
+            run();
+          }
+        },
+        remove: (keys, callback) => {
+          const run = () => {
+            if (failAllChromeOps) {
+              global.chrome.runtime.lastError = { message: "Simulated chrome.storage remove failure" };
+              try {
+                callback?.();
+              } finally {
+                global.chrome.runtime.lastError = null;
+              }
+              return;
+            }
+            global.chrome.runtime.lastError = null;
+            const keyArr = typeof keys === "string" ? [keys] : Array.isArray(keys) ? keys : [];
+            for (const k of keyArr) {
+              delete chromeStorageMem[k];
+            }
+            callback?.();
+          };
+          if (chromeOpDelayMs > 0) {
+            setTimeout(run, chromeOpDelayMs);
+          } else {
+            run();
+          }
+        },
+      },
+    },
+  };
+
+  const {
+    getStorageItems,
+    setStorageItems,
+    removeStorageItems,
+  } = jiti('../src/lib/scenes/storage.ts');
+
+  const { restoreBackup } = jiti('../src/lib/backup/import.ts');
+
+  let collectReferencedAssetIds;
+  try {
+    ({ collectReferencedAssetIds } = jiti('../src/lib/assets/references.ts'));
+  } catch (e) {}
+
+  let remapSceneAssetIds, remapInboxAssetIds;
+  try {
+    ({ remapSceneAssetIds, remapInboxAssetIds } = jiti('../src/lib/backup/remap.ts'));
+  } catch (e) {}
+
+  let readBodyWithCap;
+  try {
+    ({ readBodyWithCap } = jiti('../src/lib/inbox/validation.ts'));
+  } catch (e) {}
+
+  let getInboxItemsOrThrow;
+  try {
+    ({ getInboxItemsOrThrow } = jiti('../src/lib/inbox/storage.ts'));
+  } catch (e) {}
+
+  // --- Fix 1: Referenced assets collection ---
+  assert(typeof collectReferencedAssetIds === "function", "Fix 1: collectReferencedAssetIds is exported");
+  if (typeof collectReferencedAssetIds === "function") {
+    const dummyScenes = [
+      {
+        id: "s1",
+        name: "S1",
+        background: { type: "image", imageAssetId: "bg-asset-1" },
+        elements: [
+          { id: "e1", type: "image", assetId: "img-asset-2" },
+          { id: "e2", type: "link", previewAssetId: "link-preview-3", faviconAssetId: "link-fav-4" },
+          { id: "e3", type: "rectangle", x: 0, y: 0, width: 10, height: 10 },
+        ],
+      },
+      {
+        id: "s2",
+        name: "S2",
+        background: { type: "color", color: "#fff" },
+        elements: [
+          { id: "e4", type: "link", url: "https://example.com" },
+        ],
+      },
+    ];
+    const dummyInbox = [
+      { id: "i1", kind: "image", assetId: "inbox-asset-5" },
+      { id: "i2", kind: "text", text: "hello" },
+    ];
+    const ids = collectReferencedAssetIds(dummyScenes, dummyInbox);
+    assert(ids instanceof Set, "Fix 1: collectReferencedAssetIds returns a Set");
+    assert(ids && ids.size === 5, `Fix 1: collector includes all 5 reference kinds and nothing else (expected 5, got ${ids?.size})`);
+    assert(ids && ids.has("bg-asset-1"), "Fix 1: includes background imageAssetId");
+    assert(ids && ids.has("img-asset-2"), "Fix 1: includes image element assetId");
+    assert(ids && ids.has("link-preview-3"), "Fix 1: includes link previewAssetId");
+    assert(ids && ids.has("link-fav-4"), "Fix 1: includes link faviconAssetId");
+    assert(ids && ids.has("inbox-asset-5"), "Fix 1: includes inbox item assetId");
+  }
+
+  // --- Fix 2: Storage errors and failed read protection ---
+  failAllChromeOps = true;
+  let getStorageThrew = false;
+  try {
+    await getStorageItems(["test-key"]);
+  } catch (err) {
+    getStorageThrew = true;
+  }
+  assert(getStorageThrew, "Fix 2: getStorageItems rejects when chrome.runtime.lastError is set");
+
+  let setStorageThrew = false;
+  try {
+    await setStorageItems({ "test-key": 123 });
+  } catch (err) {
+    setStorageThrew = true;
+  }
+  assert(setStorageThrew, "Fix 2: setStorageItems rejects when chrome.runtime.lastError is set");
+
+  let removeStorageThrew = false;
+  try {
+    await removeStorageItems(["test-key"]);
+  } catch (err) {
+    removeStorageThrew = true;
+  }
+  assert(removeStorageThrew, "Fix 2: removeStorageItems rejects when chrome.runtime.lastError is set");
+  failAllChromeOps = false;
+
+  // Reads-only failure: loadStatus becomes "error", storage untouched, save is blocked
+  chromeStorageMem = {
+    [SCENE_INDEX_KEY]: {
+      schemaVersion: 3,
+      activeId: "board-protected",
+      order: ["board-protected"],
+      items: {
+        "board-protected": { id: "board-protected", name: "Protected Board", createdAt: 1000 },
+      },
+    },
+    [`${SCENE_KEY_PREFIX}board-protected`]: {
+      id: "board-protected",
+      name: "Protected Board",
+      elements: [{ id: "prot-el", type: "rectangle", x: 5, y: 5, width: 20, height: 20 }],
+      background: { type: "color", color: "#ffffff" },
+      createdAt: 1000,
+    },
+  };
+
+  failReadsOnly = true;
+  await useSceneStore.getState().loadScenesFromStorage();
+  assert(useSceneStore.getState().loadStatus === "error", "Fix 2: loadStatus is 'error' after read failure");
+  assert(chromeStorageMem[SCENE_INDEX_KEY]?.activeId === "board-protected", "Fix 2: scenes_index in storage untouched after read failure");
+
+  await useSceneStore.getState().saveScenesToStorage();
+  assert(chromeStorageMem[SCENE_INDEX_KEY]?.order?.[0] === "board-protected", "Fix 2: scenes_index untouched after save in error status");
+  failReadsOnly = false;
+
+  // Clean load -> ok
+  await useSceneStore.getState().loadScenesFromStorage();
+  await sleep(80);
+  assert(useSceneStore.getState().loadStatus === "ok", "Fix 2: clean load sets loadStatus to 'ok'");
+
+  // Seed schemaVersion: 99 -> boards still loaded, scenes_index_prev_v99 exists
+  chromeStorageMem = {
+    [SCENE_INDEX_KEY]: {
+      schemaVersion: 99,
+      activeId: "board-v99",
+      order: ["board-v99"],
+      items: {
+        "board-v99": { id: "board-v99", name: "V99 Board", createdAt: 2000 },
+      },
+    },
+    [`${SCENE_KEY_PREFIX}board-v99`]: {
+      id: "board-v99",
+      name: "V99 Board",
+      elements: [{ id: "v99-el", type: "rectangle", x: 1, y: 1, width: 10, height: 10 }],
+      background: { type: "color", color: "#eeeeee" },
+      createdAt: 2000,
+    },
+  };
+  await useSceneStore.getState().loadScenesFromStorage();
+  await sleep(80);
+  assert("scenes_index_prev_v99" in chromeStorageMem, "Fix 2: scenes_index_prev_v99 was created");
+  assert(useSceneStore.getState().scenes.some((s) => s.id === "board-v99"), "Fix 2: boards still loaded when schemaVersion is 99");
+
+  // --- Fix 3: Active board and dirty scenes persistence ---
+  chromeStorageMem = {
+    [SCENE_INDEX_KEY]: {
+      schemaVersion: 3,
+      activeId: "board-A",
+      order: ["board-A", "board-B"],
+      items: {
+        "board-A": { id: "board-A", name: "Board A", createdAt: 1000 },
+        "board-B": { id: "board-B", name: "Board B", createdAt: 2000 },
+      },
+    },
+    [`${SCENE_KEY_PREFIX}board-A`]: {
+      id: "board-A",
+      name: "Board A",
+      elements: [{ id: "orig-A", type: "rectangle", x: 10, y: 10, width: 20, height: 20 }],
+      background: { type: "color", color: "#fff" },
+      createdAt: 1000,
+    },
+    [`${SCENE_KEY_PREFIX}board-B`]: {
+      id: "board-B",
+      name: "Board B",
+      elements: [{ id: "orig-B", type: "rectangle", x: 30, y: 30, width: 20, height: 20 }],
+      background: { type: "color", color: "#fff" },
+      createdAt: 2000,
+    },
+  };
+
+  await useSceneStore.getState().loadScenesFromStorage();
+  await sleep(80);
+
+  // Edit board A in useAppStore, then immediately switch to B
+  useAppStore.getState().setElements([
+    { id: "orig-A", type: "rectangle", x: 10, y: 10, width: 20, height: 20 },
+    { id: "edited-A-element", type: "text", text: "New text in board A" },
+  ]);
+  useSceneStore.getState().switchScene("board-B");
+  await sleep(100);
+
+  const savedBoardA = chromeStorageMem[`${SCENE_KEY_PREFIX}board-A`];
+  assert(savedBoardA && savedBoardA.elements.some((e) => e.id === "edited-A-element"), "Fix 3: scene:A in storage contains the edit after switchScene");
+  assert(chromeStorageMem[SCENE_INDEX_KEY]?.activeId === "board-B", "Fix 3: index activeId is board-B");
+
+  // saveScenesToStorage({ all: true }) writes every board key
+  delete chromeStorageMem[`${SCENE_KEY_PREFIX}board-A`];
+  delete chromeStorageMem[`${SCENE_KEY_PREFIX}board-B`];
+  await useSceneStore.getState().saveScenesToStorage({ all: true });
+  assert(`${SCENE_KEY_PREFIX}board-A` in chromeStorageMem, "Fix 3: saveScenesToStorage({ all: true }) writes board A key");
+  assert(`${SCENE_KEY_PREFIX}board-B` in chromeStorageMem, "Fix 3: saveScenesToStorage({ all: true }) writes board B key");
+
+  // --- Fix 4: Backup restore & remap helpers ---
+  assert(typeof remapSceneAssetIds === "function", "Fix 4: remapSceneAssetIds is exported");
+  assert(typeof remapInboxAssetIds === "function", "Fix 4: remapInboxAssetIds is exported");
+
+  if (typeof remapSceneAssetIds === "function" && typeof remapInboxAssetIds === "function") {
+    const sceneToRemap = {
+      id: "sc-remap",
+      name: "Remap Test",
+      background: { type: "image", imageAssetId: "old-bg" },
+      elements: [
+        { id: "el-img", type: "image", assetId: "old-img" },
+        { id: "el-link", type: "link", previewAssetId: "old-prev", faviconAssetId: "old-fav" },
+        { id: "el-rect", type: "rectangle", x: 0, y: 0, width: 10, height: 10 },
+      ],
+      createdAt: 1000,
+    };
+    const map = new Map([
+      ["old-bg", "new-bg"],
+      ["old-img", "new-img"],
+      ["old-prev", "new-prev"],
+      ["old-fav", "new-fav"],
+    ]);
+
+    const remapped = remapSceneAssetIds(sceneToRemap, map);
+    assert(remapped.background.imageAssetId === "new-bg", "Fix 4 remap: background imageAssetId remapped");
+    assert(remapped.elements[0].assetId === "new-img", "Fix 4 remap: image element assetId remapped");
+    assert(remapped.elements[1].previewAssetId === "new-prev", "Fix 4 remap: link previewAssetId remapped");
+    assert(remapped.elements[1].faviconAssetId === "new-fav", "Fix 4 remap: link faviconAssetId remapped");
+
+    // Unmapped IDs left untouched
+    const partialMap = new Map([["old-bg", "new-bg"]]);
+    const partiallyRemapped = remapSceneAssetIds(sceneToRemap, partialMap);
+    assert(partiallyRemapped.elements[0].assetId === "old-img", "Fix 4 remap: unmapped image assetId untouched");
+
+    // Empty map returns input object unchanged
+    const emptyMap = new Map();
+    const unchangedScene = remapSceneAssetIds(sceneToRemap, emptyMap);
+    assert(unchangedScene === sceneToRemap, "Fix 4 remap: empty map returns input scene unchanged");
+
+    const inboxItemsToRemap = [
+      { id: "i1", kind: "image", assetId: "old-img-inbox" },
+      { id: "i2", kind: "text", text: "no asset" },
+    ];
+    const inboxMap = new Map([["old-img-inbox", "new-img-inbox"]]);
+    const remappedInbox = remapInboxAssetIds(inboxItemsToRemap, inboxMap);
+    assert(remappedInbox[0].assetId === "new-img-inbox", "Fix 4 remap: inbox item assetId remapped");
+    assert(remappedInbox[1].assetId === undefined, "Fix 4 remap: inbox item without assetId untouched");
+    assert(remapInboxAssetIds(inboxItemsToRemap, emptyMap) === inboxItemsToRemap, "Fix 4 remap: empty map returns input inbox unchanged");
+  }
+
+  // Backup restore integration tests (scenes-only backups built with ZipWriter)
+  chromeStorageMem = {
+    [SCENE_INDEX_KEY]: {
+      schemaVersion: 3,
+      activeId: "stale-old-board",
+      order: ["stale-old-board"],
+      items: {
+        "stale-old-board": { id: "stale-old-board", name: "Stale Board", createdAt: 500 },
+      },
+    },
+    [`${SCENE_KEY_PREFIX}stale-old-board`]: {
+      id: "stale-old-board",
+      name: "Stale Board",
+      elements: [{ id: "stale-el", type: "rectangle", x: 1, y: 1, width: 1, height: 1 }],
+      background: { type: "color", color: "#000" },
+      createdAt: 500,
+    },
+  };
+  await useSceneStore.getState().loadScenesFromStorage();
+  await sleep(80);
+
+  const restoreZip = new ZipWriter();
+  restoreZip.addFile("manifest.json", JSON.stringify({
+    schemaVersion: 3,
+    appVersion: "1.0.0",
+    exportedAt: Date.now(),
+    counts: { scenes: 2, assets: 0, inbox: 0 },
+  }));
+  const rScene1 = {
+    id: "restored-board-1",
+    name: "Restored Board 1",
+    elements: [{ id: "r1-el", type: "text", text: "Active restored content" }],
+    background: { type: "color", color: "#111" },
+    createdAt: 1000,
+  };
+  const rScene2 = {
+    id: "restored-board-2",
+    name: "Restored Board 2",
+    elements: [{ id: "r2-el", type: "rectangle", x: 20, y: 20, width: 40, height: 40 }],
+    background: { type: "color", color: "#222" },
+    createdAt: 2000,
+  };
+  restoreZip.addFile("scenes/restored-board-1.json", JSON.stringify(rScene1));
+  restoreZip.addFile("scenes/restored-board-2.json", JSON.stringify(rScene2));
+  restoreZip.addFile("library.json", JSON.stringify({ tags: {}, inbox: [], assetMeta: [] }));
+
+  const backupBytes = restoreZip.toUint8Array();
+  const backupInspection = await inspectBackupZip(backupBytes);
+
+  await restoreBackup(backupInspection, "replace");
+
+  assert(`${SCENE_KEY_PREFIX}restored-board-1` in chromeStorageMem, "Fix 4: restored board 1 persisted");
+  assert(`${SCENE_KEY_PREFIX}restored-board-2` in chromeStorageMem, "Fix 4: restored board 2 persisted");
+  assert(chromeStorageMem[`${SCENE_KEY_PREFIX}restored-board-2`]?.elements?.length === 1, "Fix 4: restored board 2 contents persisted");
+  assert(!(`${SCENE_KEY_PREFIX}stale-old-board` in chromeStorageMem), "Fix 4: stale board removed in replace mode");
+  assert(JSON.stringify(chromeStorageMem[SCENE_INDEX_KEY]?.order) === JSON.stringify(["restored-board-1", "restored-board-2"]), "Fix 4: index order correct");
+  assert(useAppStore.getState().elements.some((e) => e.id === "r1-el"), "Fix 4: useAppStore elements match restored active board");
+
+  // Empty replace-backup throws and leaves storage untouched
+  const emptyZip = new ZipWriter();
+  emptyZip.addFile("manifest.json", JSON.stringify({
+    schemaVersion: 3,
+    appVersion: "1.0.0",
+    exportedAt: Date.now(),
+    counts: { scenes: 0, assets: 0, inbox: 0 },
+  }));
+  emptyZip.addFile("library.json", JSON.stringify({ tags: {}, inbox: [], assetMeta: [] }));
+  const emptyInspection = await inspectBackupZip(emptyZip.toUint8Array());
+
+  const storageBeforeEmpty = JSON.stringify(chromeStorageMem);
+  let emptyRestoreThrew = false;
+  try {
+    await restoreBackup(emptyInspection, "replace");
+  } catch (err) {
+    emptyRestoreThrew = true;
+  }
+  assert(emptyRestoreThrew, "Fix 4: empty replace-backup throws error");
+  assert(JSON.stringify(chromeStorageMem) === storageBeforeEmpty, "Fix 4: empty replace-backup leaves storage untouched");
+
+  // Merge refused while loadStatus is "error"
+  useSceneStore.setState({ loadStatus: "error" });
+  const storageBeforeMerge = JSON.stringify(chromeStorageMem);
+  let mergeErrorThrew = false;
+  try {
+    await restoreBackup(backupInspection, "merge");
+  } catch (err) {
+    mergeErrorThrew = true;
+  }
+  assert(mergeErrorThrew, "Fix 4: merge refused while loadStatus is 'error'");
+  assert(JSON.stringify(chromeStorageMem) === storageBeforeMerge, "Fix 4: merge refused writes nothing to storage");
+
+  // --- Fix 5: Inbox concurrency and getInboxItemsOrThrow ---
+  assert(typeof getInboxItemsOrThrow === "function", "Fix 5: getInboxItemsOrThrow is exported");
+  if (typeof getInboxItemsOrThrow === "function") {
+    failReadsOnly = true;
+    let getInboxThrew = false;
+    try {
+      await getInboxItemsOrThrow();
+    } catch (err) {
+      getInboxThrew = true;
+    }
+    assert(getInboxThrew, "Fix 5: getInboxItemsOrThrow rejects when chrome.runtime.lastError is set");
+    failReadsOnly = false;
+  }
+
+  chromeStorageMem[INBOX_STORAGE_KEY] = [];
+  chromeOpDelayMs = 15;
+  const promises = [];
+  for (let i = 0; i < 10; i++) {
+    promises.push(addInboxItem({
+      id: `item-${i}`,
+      kind: "text",
+      text: `Item ${i}`,
+    }));
+  }
+  await Promise.all(promises);
+  chromeOpDelayMs = 0;
+
+  const storedInbox = chromeStorageMem[INBOX_STORAGE_KEY] || [];
+  assert(storedInbox.length === 10, `Fix 5: 10 concurrent addInboxItem calls all stored (got ${storedInbox.length})`);
+
+  // --- Fix 6: readBodyWithCap ---
+  assert(typeof readBodyWithCap === "function", "Fix 6: readBodyWithCap is exported");
+  if (typeof readBodyWithCap === "function") {
+    const chunk1024 = new Uint8Array(1024);
+    let chunksSent = 0;
+    const stream1 = new ReadableStream({
+      pull(controller) {
+        if (chunksSent < 5) {
+          controller.enqueue(chunk1024);
+          chunksSent++;
+        } else {
+          controller.close();
+        }
+      },
+    });
+    const res1 = new Response(stream1, { headers: { "content-type": "image/png" } });
+    const capResult1 = await readBodyWithCap(res1, 2048);
+    assert(capResult1 === null, "Fix 6: oversize body with no Content-Length returns null");
+
+    const stream2 = new ReadableStream({
+      start(controller) {
+        controller.enqueue(new Uint8Array(500));
+        controller.close();
+      },
+    });
+    const res2 = new Response(stream2, { headers: { "content-type": "image/webp" } });
+    const capResult2 = await readBodyWithCap(res2, 2048);
+    assert(capResult2 instanceof Blob, "Fix 6: body under cap returns a Blob");
+    assert(capResult2 && capResult2.size === 500, "Fix 6: returned Blob has correct size");
+    assert(capResult2 && capResult2.type === "image/webp", "Fix 6: returned Blob has correct content-type");
+
+    const res3 = new Response("small payload", {
+      headers: { "content-type": "image/png", "content-length": "99999999" },
+    });
+    const capResult3 = await readBodyWithCap(res3, 1000);
+    assert(capResult3 === null, "Fix 6: declared Content-Length exceeding cap returns null early");
+  }
+
+  // --- Fix 7: Vite env types & Toolbar DEV guard ---
+  const viteEnvContent = fs.existsSync(path.resolve(__dirname, "../src/vite-env.d.ts"))
+    ? fs.readFileSync(path.resolve(__dirname, "../src/vite-env.d.ts"), "utf8")
+    : "";
+  assert(viteEnvContent.includes('/// <reference types="vite/client" />'), "Fix 7: src/vite-env.d.ts references vite/client");
+
+  const toolbarContent = fs.readFileSync(path.resolve(__dirname, "../src/components/Toolbar.tsx"), "utf8");
+  assert(toolbarContent.includes("import.meta.env.DEV && <StressTestButton") || toolbarContent.includes("import.meta.env.DEV && (\n          <StressTestButton"), "Fix 7: Toolbar renders StressTestButton only when import.meta.env.DEV");
+
+  // --- Task 8: Privacy wording static audit ---
+  const readmeContent = fs.readFileSync(path.resolve(__dirname, "../README.md"), "utf8");
+  const privacyContent = fs.readFileSync(path.resolve(__dirname, "../PRIVACY.md"), "utf8");
+  const dialogContent = fs.readFileSync(path.resolve(__dirname, "../src/components/PrivacyPolicyDialog.tsx"), "utf8");
+  const egressRegex = /\b(?:zero|no)\s+(?:\w+\s+){0,2}network\s+egress\b/i;
+
+  assert(!egressRegex.test(readmeContent), "Task 8: README.md does not claim zero/no network egress");
+  assert(!egressRegex.test(privacyContent), "Task 8: PRIVACY.md does not claim zero/no network egress");
+  assert(!egressRegex.test(dialogContent), "Task 8: PrivacyPolicyDialog.tsx does not claim zero/no network egress");
+
+  // Ground Rule 5: Delete global.chrome at the end of the section
+  delete global.chrome;
+
   console.log(`\nResults: ${passed} passed, ${failed} failed.`);
 
   if (failed > 0) {

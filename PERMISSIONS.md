@@ -2,7 +2,7 @@
 
 This document details the exact justifications for all Chrome Extension (Manifest V3) permissions requested by PaperTab, suitable for Chrome Web Store review and user audits.
 
-PaperTab is a **100% local-first** new-tab extension. It has no external backend, no telemetry, no analytics, and does not sell or transmit user data. All captured content and drawings remain exclusively on the user's local machine.
+PaperTab is a **local-first** new-tab extension. It has no external backend, no telemetry, no analytics, and does not sell or transmit user data. All captured content and drawings remain on the user's local machine.
 
 ---
 

@@ -24,7 +24,7 @@ PaperTab brings an Excalidraw-inspired sketching canvas directly to your New Tab
 - **Multi-Scene Persistence**: Discrete per-scene storage (`scene:<id>` + `scenes_index`) supporting up to 100 scenes. Debounced auto-saving and instant-paint zero-flash preview cache.
 - **Keyboard Shortcuts & Modal**: Press `?` anytime to view the complete shortcuts cheatsheet. Full support for `Ctrl+C`, `Ctrl+V`, `Ctrl+X`, `Ctrl+Z`, `Ctrl+Y`, `Ctrl+D`, nudge with arrow keys, and quick tool keys (`V`, `R`, `D`, `O`, `A`, `L`, `P`, `T`, `E`).
 - **Export & Import**: Export artwork as high-resolution PNG or vector SVG (always rendering full original resolution, bypassing LOD), or backup/restore entire scenes as self-contained `.canvaswallpaper` bundles.
-- **100% Local-First & Private**: No tracking, no user accounts, no telemetry, and zero network egress. Your drawings, scenes, and visual assets are stored strictly in local IndexedDB and local extension storage on your device.
+- **Local-First & Private**: No tracking, no user accounts, no telemetry, and no PaperTab servers. Your drawings, boards, notes, and visual assets are stored on your device in local extension storage and IndexedDB. See [PRIVACY.md](PRIVACY.md) and [docs/NETWORK-REQUESTS.md](docs/NETWORK-REQUESTS.md) for complete details on outbound requests (such as Quick Links favicons and search queries).
 
 For design guidelines and UI token specifications, see [DESIGN.md](DESIGN.md).
 
