@@ -29,7 +29,10 @@ export interface Scene {
   createdAt: number;
 }
 
+export type SceneLoadStatus = "idle" | "ok" | "degraded" | "error";
+
 export interface SceneState {
+  loadStatus: SceneLoadStatus;
   scenes: Scene[];
   activeSceneId: string;
   createScene: (
@@ -41,7 +44,7 @@ export interface SceneState {
   switchScene: (id: string) => void;
   deleteScene: (id: string) => void;
   renameScene: (id: string, name: string) => void;
-  saveScenesToStorage: () => Promise<void>;
+  saveScenesToStorage: (options?: { all?: boolean }) => Promise<void>;
   loadScenesFromStorage: (options?: { isCrossTabSync?: boolean }) => Promise<void>;
   resetAllScenes: () => Promise<void>;
 }
@@ -56,10 +59,12 @@ const tabSessionId =
 let lastLocalSaveTime = 0;
 let isHydrating = false;
 let syncTimeout: any = null;
+const dirtySceneIds = new Set<string>();
 
 export const useSceneStore = create<SceneState>((set, get) => ({
   scenes: [createDefaultScene()],
   activeSceneId: "default",
+  loadStatus: "idle",
 
   createScene: (name, initialElements, initialBackground) => {
     if (get().scenes.length >= MAX_SCENES) {
@@ -159,6 +164,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
     const targetScene = updatedScenes.find((s) => s.id === id);
     if (!targetScene) return;
 
+    dirtySceneIds.add(activeSceneId);
     set({ scenes: updatedScenes, activeSceneId: id });
     appStore.resetHistory();
     appStore.setElements(targetScene.elements);
@@ -167,6 +173,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
   },
 
   deleteScene: (id) => {
+    dirtySceneIds.delete(id);
     const { scenes, activeSceneId } = get();
     if (scenes.length <= 1) return; // Retain at least one scene
 
@@ -199,12 +206,16 @@ export const useSceneStore = create<SceneState>((set, get) => ({
    * Writes the scenes index and only the active scene's data.
    * Other scenes are untouched.
    */
-  saveScenesToStorage: async () => {
-    const { scenes, activeSceneId } = get();
+  saveScenesToStorage: async (options?: { all?: boolean }) => {
+    const { scenes, activeSceneId, loadStatus } = get();
+    if (loadStatus !== "ok" && loadStatus !== "degraded") {
+      return;
+    }
     lastLocalSaveTime = Date.now();
 
     try {
       const activeScene = scenes.find((s) => s.id === activeSceneId) || scenes[0];
+      if (!activeScene) return;
 
       // Instant-paint synchronous cache
       writeInstantPreviewCache(activeScene);
@@ -229,11 +240,34 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         _updatedAt: Date.now(),
       };
 
-      // Atomic write of index + active scene only
-      await setStorageItems({
+      const idsToSave = options?.all
+        ? scenes.map((s) => s.id)
+        : Array.from(new Set([activeScene.id, ...dirtySceneIds])).filter((id) =>
+            scenes.some((s) => s.id === id),
+          );
+
+      const itemsToSet: Record<string, any> = {
         [SCENE_INDEX_KEY]: index,
-        [SCENE_KEY_PREFIX + activeScene.id]: activeScene,
-      });
+      };
+      for (const id of idsToSave) {
+        const sc = scenes.find((s) => s.id === id);
+        if (sc) {
+          itemsToSet[SCENE_KEY_PREFIX + id] = sc;
+        }
+      }
+
+      for (const id of idsToSave) {
+        dirtySceneIds.delete(id);
+      }
+
+      try {
+        await setStorageItems(itemsToSet);
+      } catch (err) {
+        for (const id of idsToSave) {
+          dirtySceneIds.add(id);
+        }
+        throw err;
+      }
     } catch (err) {
       console.error("Scenes save error:", err);
     }
@@ -252,32 +286,66 @@ export const useSceneStore = create<SceneState>((set, get) => ({
         );
       };
 
-      const storage = await getStorageItems<any>([
-        SCENE_INDEX_KEY,
-        "wallpaperScenes",
-      ]);
+      let storage: Record<string, any>;
+      try {
+        storage = await getStorageItems<any>([
+          SCENE_INDEX_KEY,
+          "wallpaperScenes",
+        ]);
+      } catch (readErr) {
+        console.error("Scenes load error during storage get:", readErr);
+        set({ loadStatus: "error" });
+        isHydrating = false;
+        return;
+      }
 
       const index = storage[SCENE_INDEX_KEY] as ScenesIndex | undefined;
 
       // Schema mismatch or first run: perform one-time local reset
-      if (!index || index.schemaVersion !== SCHEMA_VERSION || !Array.isArray(index.order)) {
+      if (!index) {
         console.info("Initializing scene storage with schema v" + SCHEMA_VERSION);
         const defaultScene = createDefaultScene();
-        set({ scenes: [defaultScene], activeSceneId: defaultScene.id });
+        set({ scenes: [defaultScene], activeSceneId: defaultScene.id, loadStatus: "ok" });
         useAppStore.getState().setElements(defaultScene.elements);
         useAppStore.getState().setBackground(defaultScene.background);
         await get().saveScenesToStorage();
         return;
       }
 
+      if (!Array.isArray(index.order)) {
+        console.error("Corrupted scene index: order is not an array");
+        set({ loadStatus: "error" });
+        isHydrating = false;
+        return;
+      }
+
+      if (index.schemaVersion !== SCHEMA_VERSION) {
+        try {
+          await setStorageItems({
+            [`scenes_index_prev_v${index.schemaVersion}`]: index,
+          });
+        } catch (copyErr) {
+          console.warn("Failed to copy previous schema index:", copyErr);
+        }
+      }
+
       // Fetch all scenes by their discrete keys
       const sceneKeys = index.order.map((id) => SCENE_KEY_PREFIX + id);
-      const sceneRecords = await getStorageItems<any>(sceneKeys);
+      let sceneRecords: Record<string, any>;
+      try {
+        sceneRecords = await getStorageItems<any>(sceneKeys);
+      } catch (scenesReadErr) {
+        console.error("Scenes load error during scenes fetch:", scenesReadErr);
+        set({ loadStatus: "error" });
+        isHydrating = false;
+        return;
+      }
 
+      let hasMissingScene = false;
       const loadedScenes: Scene[] = [];
       for (const id of index.order) {
         const raw = sceneRecords[SCENE_KEY_PREFIX + id];
-        const indexMeta = index.items[id];
+        const indexMeta = index.items?.[id];
         if (raw && typeof raw === "object") {
           loadedScenes.push({
             id: raw.id || id,
@@ -286,16 +354,20 @@ export const useSceneStore = create<SceneState>((set, get) => ({
             background: raw.background || createDefaultScene().background,
             createdAt: raw.createdAt || indexMeta?.createdAt || Date.now(),
           });
-        } else if (indexMeta) {
+        } else {
+          hasMissingScene = true;
           loadedScenes.push({
             id,
-            name: indexMeta.name || "Wallpaper",
+            name: indexMeta?.name || "Wallpaper",
             elements: [],
             background: createDefaultScene().background,
-            createdAt: indexMeta.createdAt || Date.now(),
+            createdAt: indexMeta?.createdAt || Date.now(),
           });
         }
       }
+
+      const finalStatus: SceneLoadStatus = hasMissingScene ? "degraded" : "ok";
+      set({ loadStatus: finalStatus });
 
       const scenes = loadedScenes.length > 0 ? loadedScenes : [createDefaultScene()];
       const activeId = scenes.some((s) => s.id === index.activeId)
@@ -354,6 +426,7 @@ export const useSceneStore = create<SceneState>((set, get) => ({
       }, 50);
     } catch (err) {
       console.error("Scenes load error:", err);
+      set({ loadStatus: "error" });
       isHydrating = false;
     }
   },
@@ -362,6 +435,8 @@ export const useSceneStore = create<SceneState>((set, get) => ({
    * Resets all scenes to initial default (scenes only; does not delete assets).
    */
   resetAllScenes: async () => {
+    dirtySceneIds.clear();
+    set({ loadStatus: "ok" });
     const { scenes } = get();
     const keysToRemove = [
       SCENE_INDEX_KEY,
@@ -408,6 +483,7 @@ useAppStore.subscribe((state, prevState) => {
 
   if (elementsChanged || bgChanged) {
     const sceneState = useSceneStore.getState();
+    dirtySceneIds.add(sceneState.activeSceneId);
     const updatedScenes = sceneState.scenes.map((s) =>
       s.id === sceneState.activeSceneId
         ? { ...s, elements: state.elements, background: state.background }

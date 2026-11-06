@@ -57,7 +57,7 @@ export const TOUR_STEPS: TourStepConfig[] = [
     badge: "PaperTab",
     title: "Welcome to PaperTab",
     description:
-      "PaperTab turns your new tab into an aesthetic sketchbook and creative idea dump. It is 100% local-first, private, and lightning fast.",
+      "PaperTab turns your new tab into an aesthetic sketchbook and creative idea dump. It is local-first, private, and lightning fast.",
     placement: "center",
     targetMode: "wallpaper",
   },

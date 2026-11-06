@@ -105,3 +105,56 @@ export class BurstRateLimiter {
     this.timestamps = [];
   }
 }
+
+/**
+ * Streams response body up to maxBytes.
+ * Rejects early if declared Content-Length exceeds maxBytes.
+ * Cancels stream reader and returns null if streamed bytes exceed maxBytes.
+ * Preserves the response Content-Type header on the returned Blob.
+ */
+export async function readBodyWithCap(
+  res: Response,
+  maxBytes: number,
+): Promise<Blob | null> {
+  const clHeader = res.headers.get("content-length");
+  if (clHeader) {
+    const cl = parseInt(clHeader, 10);
+    if (!isNaN(cl) && cl > maxBytes) {
+      return null;
+    }
+  }
+
+  const contentType = res.headers.get("content-type") || "";
+
+  if (!res.body) {
+    return new Blob([], { type: contentType });
+  }
+
+  const reader = res.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let totalBytes = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) {
+        totalBytes += value.byteLength;
+        if (totalBytes > maxBytes) {
+          try {
+            await reader.cancel();
+          } catch {}
+          return null;
+        }
+        chunks.push(value);
+      }
+    }
+  } catch (err) {
+    try {
+      await reader.cancel();
+    } catch {}
+    throw err;
+  }
+
+  return new Blob(chunks as BlobPart[], { type: contentType });
+}

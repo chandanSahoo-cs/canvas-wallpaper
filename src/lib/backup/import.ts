@@ -4,7 +4,8 @@ import { createOrUpdateTag } from "../search/tags";
 import { getInboxItems, saveInboxItems } from "../inbox/storage";
 import { InboxItem } from "../inbox/types";
 import { Scene, useSceneStore } from "../../store/useSceneStore";
-import { SCHEMA_VERSION } from "../scenes/storage";
+import { SCHEMA_VERSION, SCENE_KEY_PREFIX, removeStorageItems } from "../scenes/storage";
+import { remapSceneAssetIds, remapInboxAssetIds } from "./remap";
 import { ZipReader } from "./zipReader";
 import {
   BackupInspection,
@@ -88,6 +89,30 @@ export async function restoreBackup(
   const { entries, assetCount } = inspection;
   const decoder = new TextDecoder();
 
+  // a. Guard: merge mode requires loadStatus "ok"/"degraded", else throw a clear error.
+  //    Replace mode must refuse (throw) if the backup contains zero readable boards.
+  const currentLoadStatus = useSceneStore.getState().loadStatus;
+  if (mode === "merge" && currentLoadStatus !== "ok" && currentLoadStatus !== "degraded") {
+    throw new Error("Cannot merge backup: board storage is in error state.");
+  }
+
+  if (mode === "replace") {
+    let readableBoards = 0;
+    for (const [path, data] of entries.entries()) {
+      if (path.startsWith("scenes/") && path.endsWith(".json")) {
+        try {
+          const sc = JSON.parse(decoder.decode(data));
+          if (sc && sc.id && Array.isArray(sc.elements)) {
+            readableBoards++;
+          }
+        } catch {}
+      }
+    }
+    if (readableBoards === 0) {
+      throw new Error("Backup archive contains zero readable boards. Restore aborted.");
+    }
+  }
+
   onProgress?.({
     phase: "reading",
     current: 0,
@@ -96,20 +121,7 @@ export async function restoreBackup(
     message: "Initializing backup restoration...",
   });
 
-  // 1. Wipe existing if replace mode
-  if (mode === "replace") {
-    onProgress?.({
-      phase: "reading",
-      current: 5,
-      total: 100,
-      percentage: 10,
-      message: "Clearing existing workspace for replace...",
-    });
-    await useSceneStore.getState().resetAllScenes();
-    await saveInboxItems([]);
-  }
-
-  // 2. Ingest original assets
+  // b. Ingest assets (additive only; nothing existing is touched yet) -> hash -> new asset id
   let assetsImported = 0;
   let assetsDeduped = 0;
   let processedAssets = 0;
@@ -152,7 +164,9 @@ export async function restoreBackup(
     }
   }
 
-  // 3. Restore library.json (tags, notes, palettes, inbox)
+  // c. Parse library.json: tags (await each, ignore failures), per-asset metadata,
+  //    and build idMap (old id -> new id via assetMeta id/hash and the hash map).
+  //    Remap backup inbox items.
   onProgress?.({
     phase: "library",
     current: 75,
@@ -161,22 +175,38 @@ export async function restoreBackup(
     message: "Restoring tags, notes, and metadata...",
   });
 
-  let inboxRestored = 0;
+  const idMap = new Map<string, string>();
+  let backupInbox: InboxItem[] = [];
+
   const libraryDataRaw = entries.get("library.json");
   if (libraryDataRaw) {
     try {
       const lib = JSON.parse(decoder.decode(libraryDataRaw));
-      // Restore tags
-      if (lib.tags && typeof lib.tags === "object") {
-        for (const [name, meta] of Object.entries<any>(lib.tags)) {
-          createOrUpdateTag(name, meta?.color);
+
+      // Build idMap from assetMeta
+      if (Array.isArray(lib.assetMeta)) {
+        for (const meta of lib.assetMeta) {
+          if (meta.id && meta.hash && hashToAssetIdMap.has(meta.hash)) {
+            idMap.set(meta.id, hashToAssetIdMap.get(meta.hash)!);
+          }
         }
       }
+
+      // Restore tags (await each, ignore failures)
+      if (lib.tags && typeof lib.tags === "object") {
+        for (const [name, meta] of Object.entries<any>(lib.tags)) {
+          try {
+            await createOrUpdateTag(name, meta?.color);
+          } catch (tagErr) {
+            console.warn(`Failed to restore tag ${name}:`, tagErr);
+          }
+        }
+      }
+
       // Restore asset metadata extensions
       if (Array.isArray(lib.assetMeta)) {
         for (const meta of lib.assetMeta) {
           if (meta.hash && hashToAssetIdMap.has(meta.hash)) {
-            const resolvedId = hashToAssetIdMap.get(meta.hash)!;
             const asset = await getAssetByHash(meta.hash);
             if (asset) {
               const updated = {
@@ -190,24 +220,17 @@ export async function restoreBackup(
           }
         }
       }
-      // Restore inbox items
+
+      // Remap backup inbox items
       if (Array.isArray(lib.inbox)) {
-        const currentInbox = mode === "replace" ? [] : await getInboxItems();
-        const combined = [...currentInbox];
-        for (const item of lib.inbox as InboxItem[]) {
-          if (!combined.some((it) => it.id === item.id)) {
-            combined.push(item);
-            inboxRestored++;
-          }
-        }
-        await saveInboxItems(combined);
+        backupInbox = remapInboxAssetIds(lib.inbox as InboxItem[], idMap);
       }
     } catch (err) {
       console.warn("Failed to parse library.json during restore:", err);
     }
   }
 
-  // 4. Restore scenes
+  // d. Parse scenes, remap them, handle merge-mode id collisions as today
   onProgress?.({
     phase: "scenes",
     current: 85,
@@ -216,26 +239,23 @@ export async function restoreBackup(
     message: "Restoring boards and drawings...",
   });
 
-  let scenesRestored = 0;
-  const currentScenes = mode === "replace" ? [] : [...useSceneStore.getState().scenes];
+  const currentScenes = useSceneStore.getState().scenes;
   const newScenes: Scene[] = [];
 
   for (const [path, data] of entries.entries()) {
     if (path.startsWith("scenes/") && path.endsWith(".json")) {
       try {
-        const scene: Scene = JSON.parse(decoder.decode(data));
-        if (scene && scene.id && Array.isArray(scene.elements)) {
-          // Check for collision if merge mode
-          let targetScene = scene;
-          if (mode === "merge" && currentScenes.some((s) => s.id === scene.id)) {
+        const rawScene: Scene = JSON.parse(decoder.decode(data));
+        if (rawScene && rawScene.id && Array.isArray(rawScene.elements)) {
+          let targetScene = remapSceneAssetIds(rawScene, idMap);
+          if (mode === "merge" && currentScenes.some((s) => s.id === targetScene.id)) {
             targetScene = {
-              ...scene,
-              id: `${scene.id}-${Date.now().toString(36).slice(-4)}`,
-              name: `${scene.name} (Imported)`,
+              ...targetScene,
+              id: `${targetScene.id}-${Date.now().toString(36).slice(-4)}`,
+              name: `${targetScene.name} (Imported)`,
             };
           }
           newScenes.push(targetScene);
-          scenesRestored++;
         }
       } catch (err) {
         console.warn(`Failed to parse scene ${path}:`, err);
@@ -243,17 +263,64 @@ export async function restoreBackup(
     }
   }
 
-  const finalScenes = [...currentScenes, ...newScenes];
-  if (finalScenes.length > 0) {
-    const activeId = finalScenes[0].id;
-    useSceneStore.setState({
-      scenes: finalScenes,
-      activeSceneId: activeId,
-    });
-    await useSceneStore.getState().saveScenesToStorage();
+  if (mode === "replace" && newScenes.length === 0) {
+    throw new Error("Backup archive contains zero readable boards. Restore aborted.");
   }
 
-  // 5. Finalize and sync resurface index
+  // e. Apply: set scenes + active id (replace -> first restored board; merge -> keep the current active board);
+  //    in replace mode set loadStatus: "ok". Call saveScenesToStorage({ all: true }).
+  //    Replace: then remove scene:<id> keys of boards not in the backup and overwrite the inbox.
+  //    Merge: add backup inbox items whose ids are not present and count only those actually added.
+  let scenesRestored = newScenes.length;
+  let inboxRestored = 0;
+
+  if (mode === "replace") {
+    const previousScenes = useSceneStore.getState().scenes;
+    const activeId = newScenes[0].id;
+
+    useSceneStore.setState({
+      scenes: newScenes,
+      activeSceneId: activeId,
+      loadStatus: "ok",
+    });
+
+    await useSceneStore.getState().saveScenesToStorage({ all: true });
+
+    // Remove scene:<id> keys of boards not in the backup
+    const newSceneIds = new Set(newScenes.map((s) => s.id));
+    const staleKeys = previousScenes
+      .filter((s) => !newSceneIds.has(s.id))
+      .map((s) => SCENE_KEY_PREFIX + s.id);
+    if (staleKeys.length > 0) {
+      await removeStorageItems(staleKeys).catch(() => {});
+    }
+
+    // Overwrite the inbox
+    await saveInboxItems(backupInbox);
+    inboxRestored = backupInbox.length;
+  } else {
+    // Merge mode
+    const currentActiveId = useSceneStore.getState().activeSceneId;
+    const combinedScenes = [...currentScenes, ...newScenes];
+
+    useSceneStore.setState({
+      scenes: combinedScenes,
+      activeSceneId: currentActiveId,
+    });
+
+    await useSceneStore.getState().saveScenesToStorage({ all: true });
+
+    // Add backup inbox items whose ids are not present
+    const currentInbox = await getInboxItems();
+    const currentInboxIds = new Set(currentInbox.map((it) => it.id));
+    const toAdd = backupInbox.filter((it) => !currentInboxIds.has(it.id));
+    if (toAdd.length > 0) {
+      await saveInboxItems([...currentInbox, ...toAdd]);
+    }
+    inboxRestored = toAdd.length;
+  }
+
+  // f. await loadScenesFromStorage() so the canvas shows the restored active board
   onProgress?.({
     phase: "finalizing",
     current: 100,
@@ -262,6 +329,7 @@ export async function restoreBackup(
     message: "Rebuilding indexes and finalizing...",
   });
 
+  await useSceneStore.getState().loadScenesFromStorage();
   await useResurfaceStore.getState().syncFromScenes(useSceneStore.getState().scenes);
 
   return {

@@ -327,7 +327,7 @@ export const OnboardingTour: React.FC = () => {
             id="welcome-modal-desc"
             className="text-xs font-sans text-muted leading-relaxed mb-4"
           >
-            Your aesthetic new-tab wallpaper, sketching canvas, and scalable idea-dumping ground. 100% local-first and private.
+            Your aesthetic new-tab wallpaper, sketching canvas, and scalable idea-dumping ground. Local-first and private.
           </p>
 
           {/* 3 Quick Highlight Cards */}

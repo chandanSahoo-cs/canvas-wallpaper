@@ -1,5 +1,8 @@
 import { requestStoragePersistence, runAssetGarbageCollection, backfillManager } from "./lib/assets";
 import { BackfillProgressIndicator } from "./components/ui/BackfillProgressIndicator";
+import { StorageErrorBanner } from "./components/ui/StorageErrorBanner";
+import { collectReferencedAssetIds } from "./lib/assets/references";
+import { getInboxItemsOrThrow } from "./lib/inbox/storage";
 import { ImageElement } from "./elements/types";
 import React, { useEffect, useRef, useState } from "react";
 import { useCanvas } from "./canvas/useCanvas";
@@ -93,29 +96,44 @@ export const App: React.FC = () => {
 
   // Initialize storage
   useEffect(() => {
-    loadScenesFromStorage().then(() => {
-      useResurfaceStore.getState().syncFromScenes(useSceneStore.getState().scenes);
-    });
-    useWidgetStore.getState().loadFromStorage();
-    requestStoragePersistence();
+    let isCancelled = false;
 
-    // Startup garbage collection: collect all referenced asset IDs across all scenes
-    setTimeout(async () => {
-      const allScenes = useSceneStore.getState().scenes;
-      const referenced = new Set<string>();
-      for (const s of allScenes) {
-        if (s.background?.type === "image" && s.background.imageAssetId) {
-          referenced.add(s.background.imageAssetId);
-        }
-        for (const el of s.elements) {
-          if (el.type === "image" && (el as ImageElement).assetId) {
-            referenced.add((el as ImageElement).assetId);
-          }
-        }
+    (async () => {
+      try {
+        await loadScenesFromStorage();
+        useResurfaceStore.getState().syncFromScenes(useSceneStore.getState().scenes);
+      } catch (err) {
+        console.warn("loadScenesFromStorage error:", err);
       }
-      await runAssetGarbageCollection(referenced);
-      await backfillManager.scanAndStart();
-    }, 2000);
+
+      useWidgetStore.getState().loadFromStorage();
+      requestStoragePersistence();
+
+      // Startup garbage collection: collect all referenced asset IDs across all scenes and inbox
+      setTimeout(async () => {
+        if (isCancelled) return;
+        try {
+          const loadStatus = useSceneStore.getState().loadStatus;
+          if (loadStatus !== "ok") {
+            console.warn(`Startup GC skipped: scene loadStatus is '${loadStatus}'`);
+            return;
+          }
+
+          const inboxItems = await getInboxItemsOrThrow();
+          const allScenes = useSceneStore.getState().scenes;
+          const referenced = collectReferencedAssetIds(allScenes, inboxItems);
+
+          await runAssetGarbageCollection(referenced);
+          await backfillManager.scanAndStart();
+        } catch (gcErr) {
+          console.warn("Startup GC skipped due to error reading references:", gcErr);
+        }
+      }, 2000);
+    })();
+
+    return () => {
+      isCancelled = true;
+    };
   }, [loadScenesFromStorage]);
 
   return (
@@ -272,6 +290,7 @@ export const App: React.FC = () => {
       <BackupNudgeBanner onOpenBackup={() => setIsBackupOpen(true)} />
 
       {/* Idle Metadata Backfill Progress */} 
+      <StorageErrorBanner />
       <BackfillProgressIndicator />
     </div>
   );

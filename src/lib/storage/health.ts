@@ -2,6 +2,7 @@ import { getAllAssets, getAsset, saveAsset, deleteAsset } from "../assets/db";
 import { ImageElement } from "../../elements/types";
 import { Scene, useSceneStore } from "../../store/useSceneStore";
 import { getInboxItems } from "../inbox/storage";
+import { collectReferencedAssetIds } from "../assets/references";
 
 export const LAST_BACKUP_KEY = "papertab_last_backup_at";
 export const BACKUP_NUDGE_DISMISSED_KEY = "papertab_backup_nudge_dismissed_at";
@@ -141,10 +142,11 @@ export async function getStorageHealthSummary(): Promise<StorageHealthSummary> {
   }
 
   // 4. Orphan detection
+  const referencedSet = collectReferencedAssetIds(scenes, inbox);
   const orphanAssetIds: string[] = [];
   let orphanBytes = 0;
   for (const a of assets) {
-    if (!assetUsageMap.has(a.id)) {
+    if (!assetUsageMap.has(a.id) && !referencedSet.has(a.id)) {
       orphanAssetIds.push(a.id);
       orphanBytes += a.bytes || a.blob.size || 0;
     }

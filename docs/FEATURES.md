@@ -203,7 +203,7 @@ Below is an exhaustive inventory of every user-facing feature implemented in Pap
 | **Appearance Theme** | Settings dialog ("Appearance Theme") | — | Both | `storage` | Select `System`, `Light`, or `Dark` theme for Chrome UI chrome, dialogs, popovers, and text (operates independently from wallpaper canvas colors). |
 | **Keyboard Shortcuts Cheatsheet**| WallpaperDock (Keyboard icon) / Toolbar / `?` key | `?` | Both | None | Full modal cheatsheet displaying shortcuts organized into 4 categories: Drawing Tools, Edit & Clipboard, Navigation & View, Layers & Groups. |
 | **Feature Walkthrough Tour** | Settings ("Feature Walkthrough") / Shortcuts modal footer | — | Both | `storage` | Step-by-step interactive onboarding tour guiding the user through PaperTab. |
-| **Privacy Policy Dialog** | Settings dialog / Shortcuts modal footer | — | Both | None | Displays PaperTab's 100% local-first privacy commitment: no tracking, no analytics, no external servers. |
+| **Privacy Policy Dialog** | Settings dialog / Shortcuts modal footer | — | Both | None | Displays PaperTab's local-first privacy commitment: no tracking, no analytics, no PaperTab servers. |
 
 ---
 

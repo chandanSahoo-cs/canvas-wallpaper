@@ -1,7 +1,7 @@
 import { hasHostPermission } from "../permissions";
 import { ALLOWED_IMAGE_MIME_TYPES, ingestImage } from "../assets";
 import { FETCH_TIMEOUT_MS, MAX_IMAGE_FETCH_BYTES } from "./types";
-import { isImageContentTypeAllowed, validateHttpUrl } from "./validation";
+import { isImageContentTypeAllowed, validateHttpUrl, readBodyWithCap } from "./validation";
 import { LinkElement } from "../../elements/types";
 import { useAppStore } from "../../store/useAppStore";
 
@@ -89,14 +89,10 @@ export async function resolveOpenGraphMetadata(
 
           if (imgRes.ok) {
             const imgContentType = imgRes.headers.get("content-type") || "";
-            const contentLength = parseInt(imgRes.headers.get("content-length") || "0", 10);
-
-            if (
-              isImageContentTypeAllowed(imgContentType) &&
-              (!contentLength || contentLength <= MAX_IMAGE_FETCH_BYTES)
-            ) {
-              const blob = await imgRes.blob();
+            if (isImageContentTypeAllowed(imgContentType)) {
+              const blob = await readBodyWithCap(imgRes, MAX_IMAGE_FETCH_BYTES);
               if (
+                blob &&
                 ALLOWED_IMAGE_MIME_TYPES.has(blob.type) &&
                 blob.size <= MAX_IMAGE_FETCH_BYTES
               ) {
@@ -133,8 +129,8 @@ export async function resolveOpenGraphMetadata(
           if (favRes.ok) {
             const favContentType = favRes.headers.get("content-type") || "";
             if (isImageContentTypeAllowed(favContentType)) {
-              const blob = await favRes.blob();
-              if (ALLOWED_IMAGE_MIME_TYPES.has(blob.type) && blob.size < 512 * 1024) {
+              const blob = await readBodyWithCap(favRes, 512 * 1024);
+              if (blob && ALLOWED_IMAGE_MIME_TYPES.has(blob.type) && blob.size <= 512 * 1024) {
                 const asset = await ingestImage(blob, {
                   url: resolvedFavUrl,
                   title: "Favicon",

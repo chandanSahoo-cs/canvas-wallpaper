@@ -112,6 +112,6 @@ Right-click any web content to verify the 4 registered menus:
    - `chrome.permissions.request()` requires a direct user gesture originating from an extension page. It cannot be invoked programmatically from a background service worker context-menu click.
    - The user must explicitly opt in via the Settings dialog toggle button.
 
-4. **Zero-Telemetry Local Privacy**:
-   - All captured items, images, thumbnails, notes, and links are stored 100% on-device in `chrome.storage.local` and IndexedDB.
-   - Zero analytics, zero external API dependencies, and zero remote telemetry calls are made.
+4. **Local-First Privacy**:
+   - All captured items, images, thumbnails, notes, and links are stored on-device in `chrome.storage.local` and IndexedDB.
+   - No tracking, analytics, or remote telemetry calls are made. External requests are limited to user-directed web saves and favicons (see [docs/NETWORK-REQUESTS.md](NETWORK-REQUESTS.md)).
